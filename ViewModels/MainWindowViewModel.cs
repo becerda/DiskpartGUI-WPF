@@ -10,7 +10,19 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// The ItemSorce for the list view
         /// </summary>
-        public List<Volume> Volumes { get; set; }
+        private List<Volume> volumes;
+
+        public List<Volume> Volumes
+        {
+            get
+            {
+                return volumes;
+            }
+            set
+            {
+                volumes = value;
+            }
+        }
 
         /// <summary>
         /// Initializes a new MainWindowViewModel
@@ -19,7 +31,8 @@ namespace DiskpartGUI.ViewModels
         {
             DiskpartProcess dpp = new DiskpartProcess();
 
-            Volumes = dpp.GetVolumes();
+            dpp.GetVolumes(ref volumes);
+            dpp.GetReadOnlyState(ref volumes);
         }
 
     }

@@ -13,7 +13,8 @@ namespace DiskpartGUI.Processes
         Error,
         ErrorVolumeNotMounted,
         ErrorInvalidVolume,
-        ErrorVolumeMounted
+        ErrorVolumeMounted,
+        ErrorParse
     }
 
     class ProcessRunner

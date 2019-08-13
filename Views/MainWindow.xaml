@@ -63,7 +63,7 @@
                             <GridViewColumn x:Name="GridViewColumnLetter" Header="Letter" DisplayMemberBinding="{Binding DriveLetter}" Width="50"/>
                             <GridViewColumn x:Name="GridViewColumnLabel" Header="Label" DisplayMemberBinding="{Binding Label}" Width="105"/>
                             <GridViewColumn x:Name="GridViewColumnSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="105"/>
-                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnly}" Width="100"/>
+                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding IsReadOnly}" Width="100"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
