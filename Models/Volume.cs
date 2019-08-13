@@ -7,6 +7,7 @@ namespace DiskpartGUI.Models
     /// </summary>
     enum FileSystem
     {
+        None,
         NTFS,
         FAT32,
         exFAT,
@@ -14,25 +15,91 @@ namespace DiskpartGUI.Models
         UDF
     }
 
+    static class FileSystemExtension
+    {
+        /// <summary>
+        /// Parses a string into a FileSystem enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The FileSystem enum</returns>
+        public static FileSystem Parse(string s)
+        {
+            if (s == "NTFS")
+                return FileSystem.NTFS;
+            if (s == "FAT32")
+                return FileSystem.FAT32;
+            if (s == "exFAT")
+                return FileSystem.exFAT;
+            if (s == "CDFS")
+                return FileSystem.CDFS;
+            if (s == "UDF")
+                return FileSystem.UDF;
+            return FileSystem.None;
+        }
+        
+    }
+
     /// <summary>
     /// The volume type
     /// </summary>
     enum VolumeType
     {
+        None,
         Partition,
         Removable,
         DVDROM,
         Simple
     }
 
+    static class VolumeTypeExtension
+    {
+        /// <summary>
+        /// Parses a string into a VolumeType enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The VolumeType enum</returns>
+        public static VolumeType Parse(string s)
+        {
+            if (s == "Partition")
+                return VolumeType.Partition;
+            if (s == "Removable")
+                return VolumeType.Removable;
+            if (s == "DVD-ROM")
+                return VolumeType.DVDROM;
+            if (s == "Simple")
+                return VolumeType.Simple;
+            return VolumeType.None;
+        }
+    }
+
     /// <summary>
     /// The prefix of the size of a volume
     /// </summary>
-    enum VolumeSizePrefix
+    enum VolumeSizePostfix
     {
+        None,
         KB,
         MB,
         GB
+    }
+
+    static class VolumeSizePostfixExtension
+    {
+        /// <summary>
+        /// Parses a string to a VolumeSizePostfix enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The VolumeSizePostfix enum</returns>
+        public static VolumeSizePostfix Parse(string s)
+        {
+            if (s == "K")
+                return VolumeSizePostfix.KB;
+            if (s == "M")
+                return VolumeSizePostfix.MB;
+            if (s == "G")
+                return VolumeSizePostfix.GB;
+            return VolumeSizePostfix.None;
+        }
     }
 
     /// <summary>
@@ -45,6 +112,23 @@ namespace DiskpartGUI.Models
         NoMedia
     }
 
+    static class VolumeStatusExtension
+    {
+        /// <summary>
+        /// Parses a string to a VolumeStatus enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The VolumeStatus enum</returns>
+        public static VolumeStatus Parse(string s)
+        {
+            if (s == "Healthy")
+                return VolumeStatus.Healthy;
+            if (s == "No Media")
+                return VolumeStatus.NoMedia;
+            return VolumeStatus.Blank;
+        }
+    }
+
     class Volume : BaseModel
     {
         private int number;
@@ -53,7 +137,7 @@ namespace DiskpartGUI.Models
         private FileSystem filesystem;
         private VolumeType type;
         private int size;
-        private VolumeSizePrefix prefix;
+        private VolumeSizePostfix postfix;
         private VolumeStatus status;
         private string info;
         private bool read;
@@ -168,16 +252,16 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The prefix to a volumes size
         /// </summary>
-        public VolumeSizePrefix VolumeSizePrefix
+        public VolumeSizePostfix SizePostfix
         {
             get
             {
-                return prefix;
+                return postfix;
             }
             set
             {
-                prefix = value;
-                NotifyPropertyChanged(nameof(VolumeSizePrefix));
+                postfix = value;
+                NotifyPropertyChanged(nameof(SizePostfix));
             }
         }
 
@@ -188,7 +272,7 @@ namespace DiskpartGUI.Models
         {
             get
             {
-                return "" + Size + " " + VolumeSizePrefix;
+                return "" + Size + " " + SizePostfix;
             }
         }
 
@@ -238,6 +322,24 @@ namespace DiskpartGUI.Models
                 read = value;
                 NotifyPropertyChanged(nameof(IsReadOnly));
             }
+        }
+
+        /// <summary>
+        /// Is the volume mounted?
+        /// </summary>
+        /// <returns>Whether the volume is mounted</returns>
+        public bool IsMounted()
+        {
+            return Letter != ' ';
+        }
+
+        /// <summary>
+        /// Is the volume valid for operations?
+        /// </summary>
+        /// <returns>Whether the volume is valid</returns>
+        public bool IsValid()
+        {
+            return IsMounted() && VolumeType == VolumeType.Removable && this != null;
         }
     }
 }

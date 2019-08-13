@@ -1,41 +1,38 @@
 ﻿using DiskpartGUI.Models;
+using DiskpartGUI.Processes;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace DiskpartGUI.ViewModels
 {
     class MainWindowViewModel
     {
+        /// <summary>
+        /// The ItemSorce for the list view
+        /// </summary>
+        private List<Volume> volumes;
 
-        public List<Volume> Volumes { get; set; }
+        public List<Volume> Volumes
+        {
+            get
+            {
+                return volumes;
+            }
+            set
+            {
+                volumes = value;
+            }
+        }
 
+        /// <summary>
+        /// Initializes a new MainWindowViewModel
+        /// </summary>
         public MainWindowViewModel()
         {
-            Volumes = new List<Volume>()
-            {
-                new Volume
-                    {
-                        Number = 0,
-                        Letter = 'A',
-                        Label = "New Volume",
-                        FileSystem = FileSystem.FAT32,
-                        VolumeType = VolumeType.Removable,
-                        Size = 45,
-                        VolumeSizePrefix = VolumeSizePrefix.GB,
-                        Status = VolumeStatus.Healthy
-                    },
+            DiskpartProcess dpp = new DiskpartProcess();
 
-                new Volume
-                    {
-                        Number = 1,
-                        Letter = 'B',
-                        Label = "Test",
-                        FileSystem = FileSystem.FAT32,
-                        VolumeType = VolumeType.Removable,
-                        Size = 45,
-                        VolumeSizePrefix = VolumeSizePrefix.GB,
-                        Status = VolumeStatus.Healthy
-                    },
-            };
+            dpp.GetVolumes(ref volumes);
+            dpp.GetReadOnlyState(ref volumes);
         }
 
     }
