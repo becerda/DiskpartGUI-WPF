@@ -112,6 +112,15 @@ namespace DiskpartGUI.Models
         NoMedia
     }
 
+    /// <summary>
+    /// The mount state of a volume
+    /// </summary>
+    enum MountState
+    {
+        Mounted,
+        Unmounted
+    }
+
     static class VolumeStatusExtension
     {
         /// <summary>
@@ -140,7 +149,8 @@ namespace DiskpartGUI.Models
         private VolumeSizePostfix postfix;
         private VolumeStatus status;
         private string info;
-        private bool read;
+        private bool read_only;
+        private MountState mounted;
 
         /// <summary>
         /// The number a volume is assigned
@@ -315,12 +325,25 @@ namespace DiskpartGUI.Models
         {
             get
             {
-                return read;
+                return read_only;
             }
             set
             {
-                read = value;
+                read_only = value;
                 NotifyPropertyChanged(nameof(IsReadOnly));
+            }
+        }
+
+        public MountState MountedState
+        {
+            get
+            {
+                return mounted;
+            }
+            set
+            {
+                mounted = value;
+                NotifyPropertyChanged(nameof(MountedState));
             }
         }
 
@@ -330,7 +353,7 @@ namespace DiskpartGUI.Models
         /// <returns>Whether the volume is mounted</returns>
         public bool IsMounted()
         {
-            return Letter != ' ';
+            return MountedState == MountState.Mounted;
         }
 
         /// <summary>
