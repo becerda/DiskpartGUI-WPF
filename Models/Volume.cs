@@ -112,15 +112,6 @@ namespace DiskpartGUI.Models
         NoMedia
     }
 
-    /// <summary>
-    /// The mount state of a volume
-    /// </summary>
-    enum MountState
-    {
-        Mounted,
-        Unmounted
-    }
-
     static class VolumeStatusExtension
     {
         /// <summary>
@@ -135,6 +126,30 @@ namespace DiskpartGUI.Models
             if (s == "No Media")
                 return VolumeStatus.NoMedia;
             return VolumeStatus.Blank;
+        }
+    }
+
+    /// <summary>
+    /// The mount state of a volume
+    /// </summary>
+    enum MountState
+    {
+        Mounted,
+        Unmounted
+    }
+
+    static class MountStateExtension
+    {
+        /// <summary>
+        /// Parses a string to a MountState enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The MountState enum</returns>
+        public static MountState Parse(string s)
+        {
+            if (s == "Offline")
+                return MountState.Unmounted;
+            return MountState.Mounted;
         }
     }
 
@@ -334,7 +349,7 @@ namespace DiskpartGUI.Models
             }
         }
 
-        public MountState MountedState
+        public MountState MountState
         {
             get
             {
@@ -343,7 +358,7 @@ namespace DiskpartGUI.Models
             set
             {
                 mounted = value;
-                NotifyPropertyChanged(nameof(MountedState));
+                NotifyPropertyChanged(nameof(MountState));
             }
         }
 
@@ -353,7 +368,16 @@ namespace DiskpartGUI.Models
         /// <returns>Whether the volume is mounted</returns>
         public bool IsMounted()
         {
-            return MountedState == MountState.Mounted;
+            return MountState == MountState.Mounted;
+        }
+
+        /// <summary>
+        /// Is the volume a Removable device?
+        /// </summary>
+        /// <returns>Whether the volume is removable</returns>
+        public bool IsRemovable()
+        {
+            return VolumeType == VolumeType.Removable;
         }
 
         /// <summary>
@@ -363,6 +387,15 @@ namespace DiskpartGUI.Models
         public bool IsValid()
         {
             return IsMounted() && VolumeType == VolumeType.Removable && this != null;
+        }
+
+        /// <summary>
+        /// Gets a string representation of a Volume
+        /// </summary>
+        /// <returns>The DriveLetter and Label</returns>
+        public override string ToString()
+        {
+            return DriveLetter + " " + Label;
         }
     }
 }

@@ -108,7 +108,8 @@ namespace DiskpartGUI.Processes
                         Size = Int32.Parse(gc["volsize"].Value),
                         SizePostfix = VolumeSizePostfixExtension.Parse(gc["volgk"].Value),
                         Status = VolumeStatusExtension.Parse(gc["volstat"].Value),
-                        Info = gc["volinfo"].Value
+                        Info = gc["volinfo"].Value,
+                        MountState = MountStateExtension.Parse(gc["volinfo"].Value)
                     };
                     volumes.Add(v);
                 }
@@ -190,7 +191,7 @@ namespace DiskpartGUI.Processes
         {
             if (v.IsValid())
             {
-                AddScriptCommand("SELECT " + v.Number);
+                AddScriptCommand("SELECT VOLUME " + v.Number);
                 AddScriptCommand("REMOVE ALL DISMOUNT");
                 WriteScript();
                 if (Run() == ProcessExitCode.Ok)
@@ -226,7 +227,7 @@ namespace DiskpartGUI.Processes
         {
             if (!v.IsMounted())
             {
-                AddScriptCommand("SELECT " + v.Number);
+                AddScriptCommand("SELECT VOLUME " + v.Number);
                 AddScriptCommand("ASSIGN");
                 WriteScript();
                 if (Run() == ProcessExitCode.Ok)

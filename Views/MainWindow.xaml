@@ -42,16 +42,19 @@
                 </Grid.RowDefinitions>
                 
                 <!-- Volume Label -->
-                <Label Content="Volume:" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0"/>
+                <Label Content="Selected Volume:" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0"/>
+                
+                <!-- Selected Volume Label -->
+                <Label Content="{Binding SelectedVolumeInfo}" Margin="10,0,0,0" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
                 
                 <!-- Refresh Button -->
                 <Button Name="ButtonRefresh" Content="Refresh" Margin="0,0,10,0" Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Width="100" Command="{Binding Refresh}"/>
+                        Width="100" Command="{Binding RefreshCommand}"/>
                 
                 <!-- List View Of Volumes -->
                 <ListView Name="ListViewVolumes" Margin="10,5,10,10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" 
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"
-                          Width="540" Height="200" ItemsSource="{Binding Volumes}" SelectedItem="{Binding SelectedVolume, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
+                          Width="540" Height="200" ItemsSource="{Binding Volumes, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedVolume, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -64,7 +67,7 @@
                             <GridViewColumn x:Name="GridViewColumnLabel" Header="Label" DisplayMemberBinding="{Binding Label}" Width="105"/>
                             <GridViewColumn x:Name="GridViewColumnSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="105"/>
                             <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding IsReadOnly}" Width="100"/>
-                            <GridViewColumn x:Name="GridViewColumnMounted" Header="Mounted" DisplayMemberBinding="{Binding MountedState}" Width="100"/>
+                            <GridViewColumn x:Name="GridViewColumnMounted" Header="Mounted" DisplayMemberBinding="{Binding MountState}" Width="100"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
