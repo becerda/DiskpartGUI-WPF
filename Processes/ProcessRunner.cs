@@ -14,15 +14,22 @@ namespace DiskpartGUI.Processes
         ErrorVolumeNotMounted,
         ErrorInvalidVolume,
         ErrorVolumeMounted,
-        ErrorParse
+        ErrorParse,
+        ErrorNullVolumes,
+        ErrorTestOutput
     }
 
-    class ProcessRunner
+    abstract class ProcessRunner
     {
         /// <summary>
-        /// The process to run
+        /// Information about the process to run
         /// </summary>
-        public Process Process { get; set; }
+        protected ProcessStartInfo Info { get; set; }
+
+        /// <summary>
+        /// The name of the process
+        /// </summary>
+        public string Name { get; set; }
 
         /// <summary>
         /// the standard output of the process
@@ -45,15 +52,17 @@ namespace DiskpartGUI.Processes
         /// <param name="processname">The process to run</param>
         public ProcessRunner(string processname)
         {
-            Process = new Process();
-            Process.StartInfo.FileName = processname;
-            Process.StartInfo.RedirectStandardInput = true;
-            Process.StartInfo.RedirectStandardOutput = true;
-            Process.StartInfo.RedirectStandardError = true;
-            Process.StartInfo.CreateNoWindow = true;
-            Process.StartInfo.UseShellExecute = false;
-            Process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            Process.StartInfo.Arguments = @"/C ";
+            Name = processname;
+            Info = new ProcessStartInfo
+            {
+                FileName = Name,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Hidden
+            };
         }
 
         /// <summary>
@@ -72,16 +81,13 @@ namespace DiskpartGUI.Processes
         /// <param name="argument">The arguments to add</param>
         public void AddArgument(string argument)
         {
-            Process.StartInfo.Arguments += @argument + " ";
+            Info.Arguments += argument + " ";
         }
 
         /// <summary>
         /// Clears the arguments from the process
         /// </summary>
-        public void ClearArguments()
-        {
-            Process.StartInfo.Arguments = @"/C";
-        }
+        public abstract void ClearArguments();
 
         /// <summary>
         /// Runns the process
@@ -89,15 +95,19 @@ namespace DiskpartGUI.Processes
         /// <returns>The exit code of the process</returns>
         public ProcessExitCode Run()
         {
-            Process.StartInfo.Arguments.TrimEnd(' ');
-            if (Process.Start())
+            Info.Arguments.TrimEnd(' ');
+            Process process = new Process();
+            process.StartInfo = Info;
+            if (process.Start())
             {
-                StdOutput = Process.StandardOutput.ReadToEnd();
-                StdError = Process.StandardError.ReadToEnd();
-                Process.WaitForExit();
+                StdOutput = process.StandardOutput.ReadToEnd();
+                StdError = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                ClearArguments();
                 return ProcessExitCode.Ok;
+                
             }
-
+            ClearArguments();
             return ProcessExitCode.Error;
         }
 

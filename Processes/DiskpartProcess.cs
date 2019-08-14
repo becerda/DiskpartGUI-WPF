@@ -27,7 +27,6 @@ namespace DiskpartGUI.Processes
         public DiskpartProcess() : base("diskpart")
         {
             script = new List<string>();
-            AddArgument("/s");
         }
 
         /// <summary>
@@ -46,11 +45,14 @@ namespace DiskpartGUI.Processes
         {
             try
             {
-                if (file == String.Empty)
-                    file = Path.GetTempPath() + Guid.NewGuid() + ".txt";
+                if (!File.Exists(file))
+                {
+                    file = Path.GetTempPath() + "diskpart_script.txt";
+                }   
 
                 File.WriteAllLines(file, script);
 
+                AddArgument("/s");
                 AddArgument(file);
                 script.Clear();
             }
@@ -73,7 +75,12 @@ namespace DiskpartGUI.Processes
             {
                 return ParseVolumes(ref volumes);
             }
-            return ProcessExitCode.Error;
+            else
+            {
+                ExitCode = ProcessExitCode.Error;
+                StdError = "GetVolumes - Run Failed";
+            }
+            return ExitCode;
         }
 
         /// <summary>
@@ -101,13 +108,19 @@ namespace DiskpartGUI.Processes
                         Size = Int32.Parse(gc["volsize"].Value),
                         SizePostfix = VolumeSizePostfixExtension.Parse(gc["volgk"].Value),
                         Status = VolumeStatusExtension.Parse(gc["volstat"].Value),
-                        Info = gc["volinfo"].Value
+                        Info = gc["volinfo"].Value,
+                        MountState = MountStateExtension.Parse(gc["volinfo"].Value)
                     };
                     volumes.Add(v);
                 }
-                return ProcessExitCode.Ok;
+                ExitCode = ProcessExitCode.Ok;
             }
-            return ProcessExitCode.ErrorParse;
+            else
+            {
+                ExitCode = ProcessExitCode.ErrorParse;
+                StdError = "ParseVolumes - No Matches Found";
+            }
+            return ExitCode;
         }
 
         /// <summary>
@@ -119,15 +132,20 @@ namespace DiskpartGUI.Processes
         {
             foreach (Volume v in volumes)
             {
-                AddScriptCommand("select disk " + v.Number);
-                AddScriptCommand("attribute disk ");
+                AddScriptCommand("SELECT DISK " + v.Number);
+                AddScriptCommand("ATTRIBUTE DISK");
             }
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
             {
                 return ParseAttributes(ref volumes);
             }
-            return ProcessExitCode.Error;
+            else
+            {
+                ExitCode = ProcessExitCode.Error;
+                StdError = "GetReadOnlyState - Run Failed";
+            }
+            return ExitCode;
         }
 
         /// <summary>
@@ -137,18 +155,31 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseAttributes(ref List<Volume> volumes)
         {
-            Regex rx = new Regex("Read-only  : (?<set>Yes|No)");
-            MatchCollection matches = rx.Matches(StdOutput);
-            int i = 0;
-            if (matches.Count > 0)
+            if (volumes != null)
             {
-                foreach (Match match in matches)
+                Regex rx = new Regex("Read-only  : (?<set>Yes|No)");
+                MatchCollection matches = rx.Matches(StdOutput);
+                int i = 0;
+                if (matches.Count > 0)
                 {
-                    volumes[i].IsReadOnly = match.Groups["set"].Value == "Yes" ? true : false;
+                    foreach (Match match in matches)
+                    {
+                        volumes[i].IsReadOnly = match.Groups["set"].Value == "Yes" ? true : false;
+                    }
+                    ExitCode = ProcessExitCode.Ok;
                 }
-                return ProcessExitCode.Ok;
+                else
+                {
+                    ExitCode = ProcessExitCode.ErrorParse;
+                    StdError = "ParseAttributes - No Matches Found";
+                }
             }
-            return ProcessExitCode.ErrorParse;
+            else
+            {
+                ExitCode = ProcessExitCode.ErrorNullVolumes;
+                StdError = "ParseAttributes - Null Volumes";
+            }
+            return ExitCode;
         }
 
         /// <summary>
@@ -160,17 +191,31 @@ namespace DiskpartGUI.Processes
         {
             if (v.IsValid())
             {
-                AddScriptCommand("SELECT " + v.Number);
+                AddScriptCommand("SELECT VOLUME " + v.Number);
                 AddScriptCommand("REMOVE ALL DISMOUNT");
                 WriteScript();
                 if (Run() == ProcessExitCode.Ok)
                 {
                     if (TestOutput(@"DiskPart successfully dismounted and offlined the volume."))
-                        return ProcessExitCode.Ok;
-                    return ProcessExitCode.Error;
+                        ExitCode = ProcessExitCode.Ok;
+                    else
+                    {
+                        ExitCode = ProcessExitCode.ErrorTestOutput;
+                        StdError = "EjectVolume - Test Output Failed";
+                    }
+                }
+                else
+                {
+                    ExitCode = ProcessExitCode.Error;
+                    StdError = "EjectVolume - Run Failed";
                 }
             }
-            return ProcessExitCode.ErrorInvalidVolume;
+            else
+            {
+                ExitCode = ProcessExitCode.ErrorInvalidVolume;
+                StdError = "EjectVolume - Invalid Volume";
+            }
+            return ExitCode;
         }
 
         /// <summary>
@@ -182,17 +227,31 @@ namespace DiskpartGUI.Processes
         {
             if (!v.IsMounted())
             {
-                AddScriptCommand("SELECT " + v.Number);
+                AddScriptCommand("SELECT VOLUME " + v.Number);
                 AddScriptCommand("ASSIGN");
                 WriteScript();
                 if (Run() == ProcessExitCode.Ok)
                 {
                     if (TestOutput("DiskPart successfully assigned the drive letter or mount point."))
-                        return ProcessExitCode.Ok;
-                    return ProcessExitCode.Error;
+                        ExitCode = ProcessExitCode.Ok;
+                    else
+                    {
+                        ExitCode = ProcessExitCode.ErrorTestOutput;
+                        StdError = "AssignVolumeLetter - Test Output Failed";
+                    }
+                }
+                else
+                {
+                    ExitCode = ProcessExitCode.Error;
+                    StdError = "AssignVolumeLetter - Run Failed";
                 }
             }
-            return ProcessExitCode.ErrorVolumeMounted;
+            else
+            {
+                ExitCode = ProcessExitCode.ErrorVolumeMounted;
+                StdError = "AssignVolumeLetter - Volume Not Mounted";
+            }
+            return ExitCode;
         }
     }
 }
