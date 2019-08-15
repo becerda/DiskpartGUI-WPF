@@ -4,7 +4,6 @@ namespace DiskpartGUI.Models
 {
     class BaseModel : INotifyPropertyChanged
     {
-
         /// <summary>
         /// Propery changed event
         /// </summary>
