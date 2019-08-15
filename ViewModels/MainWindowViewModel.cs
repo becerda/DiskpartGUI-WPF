@@ -110,6 +110,11 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand RenameCommand { get; private set; }
 
         /// <summary>
+        /// BitLock command for ButtonBitLock
+        /// </summary>
+        public RelayCommand BitLockCommand { get; private set; }
+
+        /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
         public DiskpartProcess DiskpartProcess
@@ -130,6 +135,7 @@ namespace DiskpartGUI.ViewModels
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable);
             RefreshCommand = new RelayCommand(Refresh);
             RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid);
+            BitLockCommand = new RelayCommand(LaunchBitLock);
 
             Refresh();
         }
@@ -176,18 +182,6 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Checks SelectedVolume.IsRemovalbe
-        /// </summary>
-        /// <param name="o"></param>
-        /// <returns></returns>
-        public bool IsSelectedVolumeRemovable(object o)
-        {
-            if (SelectedVolume == null)
-                return false;
-            return SelectedVolume.IsRemovable();
-        }
-
-        /// <summary>
         /// Refreshes Volumes
         /// </summary>
         public void Refresh()
@@ -210,6 +204,26 @@ namespace DiskpartGUI.ViewModels
             window.DataContext = rwvm;
             window.ShowDialog();
             Refresh();
+        }
+
+        /// <summary>
+        /// Launches BitLock Window
+        /// </summary>
+        public void LaunchBitLock()
+        {
+            BitLockProcess.LaunchBitLock();
+        }
+
+        /// <summary>
+        /// Checks SelectedVolume.IsRemovalbe
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public bool IsSelectedVolumeRemovable(object o)
+        {
+            if (SelectedVolume == null)
+                return false;
+            return SelectedVolume.IsRemovable();
         }
 
         /// <summary>

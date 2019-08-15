@@ -86,7 +86,7 @@
 
                 <!-- BitLock Button -->
                 <Button Name="ButtonBitlock" Content="BitLock" Margin="5,0,5,10" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding BitLock}"/>
+                        Width="100" Command="{Binding BitLockCommand}"/>
 
                 <!-- BitLock Button -->
                 <Button Name="ButtonReadOnly" Content="Set Read-Only" Margin="5,0,10,10" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
