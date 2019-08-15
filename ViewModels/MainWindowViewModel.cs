@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace DiskpartGUI.ViewModels
 {
-    class MainWindowViewModel : BaseViewModel
+    class MainWindowViewModel : ClosablePropertyChangedViewModel
     {
         private string embstate;
         private Volume selected;
@@ -37,7 +37,7 @@ namespace DiskpartGUI.ViewModels
                 OnPropertyChanged(nameof(Volumes));
             }
         }
-        
+
         /// <summary>
         /// The Eject/Mount button content state
         /// </summary>
@@ -97,14 +97,17 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Eject command for ButtonEject
         /// </summary>
-        public CommandEject EjectCommand { get; set; }
+        public RelayCommand ChangeMountStateCommand { get; private set; }
 
         /// <summary>
         /// Refresh command for ButtonRefresh
         /// </summary>
-        public CommandRefresh RefreshCommand { get; set; }
+        public RelayCommand RefreshCommand { get; private set; }
 
-        public CommandRename RenameCommand { get; set; }
+        /// <summary>
+        /// Rename command for ButtonRename
+        /// </summary>
+        public RelayCommand RenameCommand { get; private set; }
 
         /// <summary>
         /// Reference to a DiskpartProces
@@ -124,11 +127,22 @@ namespace DiskpartGUI.ViewModels
         {
             EjectMountButtonContent = "Eject";
 
-            EjectCommand = new CommandEject(this);
-            RefreshCommand = new CommandRefresh(this);
-            RenameCommand = new CommandRename(this);
+            ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable);
+            RefreshCommand = new RelayCommand(Refresh);
+            RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid);
 
             Refresh();
+        }
+
+        /// <summary>
+        /// Calls appropriate method to change the mount state of a volume
+        /// </summary>
+        public void ChangeMountState()
+        {
+            if (SelectedVolume.IsMounted())
+                EjectVolume();
+            else
+                MountVolume();
         }
 
         /// <summary>
@@ -162,6 +176,18 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
+        /// Checks SelectedVolume.IsRemovalbe
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public bool IsSelectedVolumeRemovable(object o)
+        {
+            if (SelectedVolume == null)
+                return false;
+            return SelectedVolume.IsRemovable();
+        }
+
+        /// <summary>
         /// Refreshes Volumes
         /// </summary>
         public void Refresh()
@@ -169,11 +195,14 @@ namespace DiskpartGUI.ViewModels
             if (DiskpartProcess.GetVolumes(ref volumes) != ProcessExitCode.Ok)
                 ShowError("Refresh - GetVolumes");
             else
-                if(DiskpartProcess.GetReadOnlyState(ref volumes) != ProcessExitCode.Ok)
-                    ShowError("Refresh - GetReadOnlyState");
+                if (DiskpartProcess.GetReadOnlyState(ref volumes) != ProcessExitCode.Ok)
+                ShowError("Refresh - GetReadOnlyState");
             OnPropertyChanged(nameof(Volumes));
         }
 
+        /// <summary>
+        /// Renames SelectedVolume
+        /// </summary>
         public void RenameVolume()
         {
             RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selected);
@@ -181,6 +210,18 @@ namespace DiskpartGUI.ViewModels
             window.DataContext = rwvm;
             window.ShowDialog();
             Refresh();
+        }
+
+        /// <summary>
+        /// Checks SelectedVolume.IsValid
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        public bool IsSelectedVolumeValid(object o)
+        {
+            if (SelectedVolume == null)
+                return false;
+            return SelectedVolume.IsValid();
         }
 
         /// <summary>
@@ -192,20 +233,5 @@ namespace DiskpartGUI.ViewModels
             MessageHelper.ShowError(callingfrom, DiskpartProcess.ExitCode, DiskpartProcess.StdError, DiskpartProcess.StdOutput);
         }
 
-        /// <summary>
-        /// Cancel method, intentionally left blank
-        /// </summary>
-        public override void Cancel()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Apply method, intentionally left blank
-        /// </summary>
-        public override void Apply()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

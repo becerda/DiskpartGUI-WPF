@@ -74,7 +74,7 @@
 
                 <!-- Eject Button -->
                 <Button Name="ButtonEject" Content="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,10" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding EjectCommand}" CommandParameter="{Binding ElementName=ListViewVolumes, Path=SelectedItem}"/>
+                        Width="100" Command="{Binding ChangeMountStateCommand}"/>
 
                 <!-- Format Button -->
                 <Button Name="ButtonFormat" Content="Format" Margin="5,0,5,10" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
