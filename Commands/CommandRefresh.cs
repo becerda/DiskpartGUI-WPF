@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
 {
-    class CommandRefresh : ICommand
+    class CommandRefresh : BaseCommand
     {
         /// <summary>
         /// Reference to the MainWindowViewModel
@@ -15,18 +15,9 @@ namespace DiskpartGUI.Commands
         /// Initializing a new instance of CommandEject
         /// </summary>
         /// <param name="viewModel">The MainWindowViewModel to bind to</param>
-        public CommandRefresh(MainWindowViewModel viewModel)
+        public CommandRefresh(MainWindowViewModel viewModel) : base(null)
         {
             mwvm = viewModel;
-        }
-
-        /// <summary>
-        /// CanExecuteChange event handler
-        /// </summary>
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
         }
 
         /// <summary>
@@ -34,7 +25,7 @@ namespace DiskpartGUI.Commands
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public bool CanExecute(object parameter)
+        public override bool CanExecute(object parameter)
         {
             return true;
         }
@@ -43,7 +34,7 @@ namespace DiskpartGUI.Commands
         /// Calls MainWindowViewModel.Refresh()
         /// </summary>
         /// <param name="parameter"></param>
-        public void Execute(object parameter)
+        public override void Execute(object parameter)
         {
             mwvm.Refresh();
         }

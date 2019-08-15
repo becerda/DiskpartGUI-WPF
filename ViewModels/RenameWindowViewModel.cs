@@ -1,24 +1,25 @@
 ﻿
 using DiskpartGUI.Commands;
 using DiskpartGUI.Helpers;
-using DiskpartGUI.Interfaces;
 using DiskpartGUI.Models;
 using DiskpartGUI.Processes;
-using System;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace DiskpartGUI.ViewModels
 {
-    class RenameWindowViewModel : INotifyPropertyChanged, IClosable
+    class RenameWindowViewModel : BaseViewModel
     {
+        private readonly int MaxCharLen = 10;
         private string title;
         private string newlabeltext;
         private Volume volume;
         private string textboxtext;
         private bool canapply;
 
+        /// <summary>
+        /// The title of RenameWindow
+        /// </summary>
         public string Title
         {
             get
@@ -32,6 +33,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Label text showing Volume's DriveLetter and Label
+        /// </summary>
         public string NewLabelText
         {
             get
@@ -45,6 +49,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// The text typed in the TextBox
+        /// </summary>
         public string TextBoxText {
             get
             {
@@ -52,8 +59,8 @@ namespace DiskpartGUI.ViewModels
             }
             set
             {
-                if (value.Length > 11)
-                    textboxtext = value.Substring(0, 11);
+                if (value.Length > MaxCharLen)
+                    textboxtext = value.Substring(0, MaxCharLen);
                 else
                     textboxtext = value;
                 UpdateCanApply();
@@ -61,6 +68,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Check for ButtonApply CanExecute
+        /// </summary>
         public bool CanApply
         {
             get
@@ -74,10 +84,10 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
-        public CommandApply ApplyCommand { get; set; }
-
-        public CommandCancel CancelCommand { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance
+        /// </summary>
+        /// <param name="volume"></param>
         public RenameWindowViewModel(ref Volume volume)
         {
             this.volume = volume;
@@ -88,24 +98,14 @@ namespace DiskpartGUI.ViewModels
             CancelCommand = new CommandCancel(this);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler<EventArgs> RequestClose;
-
-        private void OnPropertyChanged(string property)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-        }
-
-        private void RequestWindowClose()
-        {
-            RequestClose?.Invoke(this, new EventArgs());
-        }
-
+        /// <summary>
+        /// Update CanApply when typing in TextBoxLabel
+        /// </summary>
         private void UpdateCanApply()
         {
-            if (TextBoxText.Length > 0 && TextBoxText.Length <= 11)
+            if (TextBoxText.Length > 0 && TextBoxText.Length <= MaxCharLen)
             {
-                Regex r = new Regex("^[a-zA-z0-9 ]*$");
+                Regex r = new Regex("^[a-zA-z0-9 !@#$%^&()_\\-{}]*$");
                 if (r.IsMatch(TextBoxText))
                 {
                     CanApply = true;
@@ -115,7 +115,10 @@ namespace DiskpartGUI.ViewModels
             CanApply = false;
         }
 
-        public void Apply()
+        /// <summary>
+        /// Action taken when ButtonApply is clicked, renaming a Volume
+        /// </summary>
+        public override void Apply()
         {
             if (MessageHelper.ShowConfirm("Are you sure you want to rename " + volume.ToString() + " to " + TextBoxText + "?") == MessageBoxResult.Yes)
             {
@@ -131,7 +134,10 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
-        public void Cancel()
+        /// <summary>
+        /// Action take when ButtonCancel is clicked, closes the window
+        /// </summary>
+        public override void Cancel()
         {
             RequestWindowClose();
         }

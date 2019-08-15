@@ -5,14 +5,11 @@ using DiskpartGUI.Processes;
 using DiskpartGUI.Views;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows;
-using System.Windows.Data;
 
 namespace DiskpartGUI.ViewModels
 {
-    class MainWindowViewModel : INotifyPropertyChanged
+    class MainWindowViewModel : BaseViewModel
     {
         private string embstate;
         private Volume selected;
@@ -121,11 +118,6 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Property changed event handler
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
         /// Initializes a new MainWindowViewModel
         /// </summary>
         public MainWindowViewModel()
@@ -170,15 +162,6 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Notifies the property changed event
-        /// </summary>
-        /// <param name="property"></param>
-        private void OnPropertyChanged(string property)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-        }
-
-        /// <summary>
         /// Refreshes Volumes
         /// </summary>
         public void Refresh()
@@ -197,7 +180,7 @@ namespace DiskpartGUI.ViewModels
             RenameWindow window = new RenameWindow();
             window.DataContext = rwvm;
             window.ShowDialog();
-            OnPropertyChanged(nameof(SelectedVolume));
+            Refresh();
         }
 
         /// <summary>
@@ -209,5 +192,20 @@ namespace DiskpartGUI.ViewModels
             MessageHelper.ShowError(callingfrom, DiskpartProcess.ExitCode, DiskpartProcess.StdError, DiskpartProcess.StdOutput);
         }
 
+        /// <summary>
+        /// Cancel method, intentionally left blank
+        /// </summary>
+        public override void Cancel()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Apply method, intentionally left blank
+        /// </summary>
+        public override void Apply()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -5,22 +5,28 @@ using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
 {
-    class CommandRename : ICommand
+    class CommandRename : BaseCommand
     {
+        /// <summary>
+        /// Reference to the MainWindowViewModel
+        /// </summary>
         private readonly MainWindowViewModel mwvm;
 
-        public CommandRename(MainWindowViewModel viewModel)
+        /// <summary>
+        /// Initializing a new instance of CommandRename
+        /// </summary>
+        /// <param name="viewModel">The MainWindowViewModel to bind to</param>
+        public CommandRename(MainWindowViewModel viewModel) : base(null)
         {
             mwvm = viewModel;
         }
 
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-
-        public bool CanExecute(object parameter)
+        /// <summary>
+        /// Can Execute if Volume.IsValid()
+        /// </summary>
+        /// <param name="parameter">The Volume to check</param>
+        /// <returns></returns>
+        public override bool CanExecute(object parameter)
         {
             Volume v = parameter as Volume;
             if (v == null)
@@ -28,7 +34,11 @@ namespace DiskpartGUI.Commands
             return v.IsValid();
         }
 
-        public void Execute(object parameter)
+        /// <summary>
+        /// Calls MainWindowViewModel.RenameVolume()
+        /// </summary>
+        /// <param name="parameter"></param>
+        public override void Execute(object parameter)
         {
             mwvm.RenameVolume();
         }

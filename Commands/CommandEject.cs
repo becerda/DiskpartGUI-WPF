@@ -5,29 +5,20 @@ using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
 {
-    class CommandEject : ICommand
+    class CommandEject : BaseCommand
     {
         /// <summary>
         /// Reference to the MainWindowViewModel
         /// </summary>
-        private readonly MainWindowViewModel mwvm;
+        private MainWindowViewModel mwvm;
 
         /// <summary>
         /// Initializing a new instance of CommandEject
         /// </summary>
         /// <param name="viewModel">The MainWindowViewModel to bind to</param>
-        public CommandEject(MainWindowViewModel viewModel)
+        public CommandEject(MainWindowViewModel viewModel) : base(null)
         {
             mwvm = viewModel;
-        }
-
-        /// <summary>
-        /// CanExecuteChange event handler
-        /// </summary>
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
         }
 
         /// <summary>
@@ -35,7 +26,7 @@ namespace DiskpartGUI.Commands
         /// </summary>
         /// <param name="parameter">The Volume to check</param>
         /// <returns></returns>
-        public bool CanExecute(object parameter)
+        public override bool CanExecute(object parameter)
         {
             Volume v = parameter as Volume;
             if (v == null)
@@ -47,7 +38,7 @@ namespace DiskpartGUI.Commands
         /// Calls MainWindowViewModel.EjectVolume() or MountVolume()
         /// </summary>
         /// <param name="parameter">The Volume to Mount or Unmount</param>
-        public void Execute(object parameter)
+        public override void Execute(object parameter)
         {
             Volume v = parameter as Volume;
             if (v.IsMounted())
