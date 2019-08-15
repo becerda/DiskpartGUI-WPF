@@ -36,7 +36,7 @@
             </Grid.RowDefinitions>
             
             <!-- Apply Button -->
-            <Button Name="ButtonApply" Content="Apply" Width="100" Height="Auto" Margin="10" Command="{Binding ApplyCommand, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding CanApply}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Button Name="ButtonApply" Content="Apply" Width="100" Height="Auto" Margin="10" Command="{Binding ApplyCommand, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
             <!-- Cancel Button -->
             <Button Name="ButtonCancel" Content="Cancel" Width="100" Height="Auto" Margin="10" Command="{Binding CancelCommand}" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
