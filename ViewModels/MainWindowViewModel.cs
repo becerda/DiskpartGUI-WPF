@@ -1,6 +1,8 @@
 ﻿using DiskpartGUI.Commands;
+using DiskpartGUI.Helpers;
 using DiskpartGUI.Models;
 using DiskpartGUI.Processes;
+using DiskpartGUI.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -105,6 +107,8 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public CommandRefresh RefreshCommand { get; set; }
 
+        public CommandRename RenameCommand { get; set; }
+
         /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
@@ -130,6 +134,7 @@ namespace DiskpartGUI.ViewModels
 
             EjectCommand = new CommandEject(this);
             RefreshCommand = new CommandRefresh(this);
+            RenameCommand = new CommandRename(this);
 
             Refresh();
         }
@@ -186,14 +191,22 @@ namespace DiskpartGUI.ViewModels
             OnPropertyChanged(nameof(Volumes));
         }
 
+        public void RenameVolume()
+        {
+            RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selected);
+            RenameWindow window = new RenameWindow();
+            window.DataContext = rwvm;
+            window.ShowDialog();
+            OnPropertyChanged(nameof(SelectedVolume));
+        }
+
         /// <summary>
         /// Shows a MessageBox with an error
         /// </summary>
         /// <param name="callingfrom">Where the error happend</param>
         private void ShowError(string callingfrom)
         {
-            MessageBox.Show("Error: " + DiskpartProcess.ExitCode + " - " + DiskpartProcess.StdError + 
-                "\n" + DiskpartProcess.StdOutput, callingfrom);
+            MessageHelper.ShowError(callingfrom, DiskpartProcess.ExitCode, DiskpartProcess.StdError, DiskpartProcess.StdOutput);
         }
 
     }

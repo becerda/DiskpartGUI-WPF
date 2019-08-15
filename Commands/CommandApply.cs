@@ -4,20 +4,20 @@ using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
 {
-    class CommandRefresh : ICommand
+    class CommandApply : ICommand
     {
         /// <summary>
         /// Reference to the MainWindowViewModel
         /// </summary>
-        private readonly MainWindowViewModel mwvm;
+        private readonly RenameWindowViewModel rwvm;
 
         /// <summary>
-        /// Initializing a new instance of CommandEject
+        /// Initializing a new instance of CommandApply
         /// </summary>
-        /// <param name="viewModel">The MainWindowViewModel to bind to</param>
-        public CommandRefresh(MainWindowViewModel viewModel)
+        /// <param name="viewModel">The RenameWindowViewModel to bind to</param>
+        public CommandApply(RenameWindowViewModel viewModel)
         {
-            mwvm = viewModel;
+            rwvm = viewModel;
         }
 
         /// <summary>
@@ -30,22 +30,24 @@ namespace DiskpartGUI.Commands
         }
 
         /// <summary>
-        /// Can always execute
+        /// Can Execute determined by passed in parameter
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <returns></returns>
+        /// <param name="parameter">Should be calculated and passed in</param>
+        /// <returns>Whether the command can be executed or not</returns>
         public bool CanExecute(object parameter)
         {
-            return true;
+            if (parameter == null)
+                return false;
+            return (bool)parameter;
         }
 
         /// <summary>
-        /// Calls MainWindowViewModel.Refresh()
+        /// Calls RenaimWindow.Apply()
         /// </summary>
         /// <param name="parameter"></param>
         public void Execute(object parameter)
         {
-            mwvm.Refresh();
+            rwvm.Apply();
         }
     }
 }

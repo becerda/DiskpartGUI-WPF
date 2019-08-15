@@ -4,20 +4,20 @@ using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
 {
-    class CommandRefresh : ICommand
+    class CommandCancel : ICommand
     {
         /// <summary>
         /// Reference to the MainWindowViewModel
         /// </summary>
-        private readonly MainWindowViewModel mwvm;
+        private readonly RenameWindowViewModel rwvm;
 
         /// <summary>
-        /// Initializing a new instance of CommandEject
+        /// Initializing a new instance of CommandCancel
         /// </summary>
-        /// <param name="viewModel">The MainWindowViewModel to bind to</param>
-        public CommandRefresh(MainWindowViewModel viewModel)
+        /// <param name="viewModel">The RenameWindowViewModel to bind to</param>
+        public CommandCancel(RenameWindowViewModel viewModel)
         {
-            mwvm = viewModel;
+            rwvm = viewModel;
         }
 
         /// <summary>
@@ -30,22 +30,22 @@ namespace DiskpartGUI.Commands
         }
 
         /// <summary>
-        /// Can always execute
+        /// Can Execute, should always be able to cancel
         /// </summary>
         /// <param name="parameter"></param>
-        /// <returns></returns>
+        /// <returns>True</returns>
         public bool CanExecute(object parameter)
         {
             return true;
         }
 
         /// <summary>
-        /// Calls MainWindowViewModel.Refresh()
+        /// Calls RenaimWindow.Cancel()
         /// </summary>
         /// <param name="parameter"></param>
         public void Execute(object parameter)
         {
-            mwvm.Refresh();
+            rwvm.Cancel();
         }
     }
 }
