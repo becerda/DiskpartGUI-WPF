@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiskpartGUI.Processes
 {
-    class CMDProcess : ProcessRunner
+    public class CMDProcess : ProcessRunner
     {
         /// <summary>
         /// The name of the cmd process

@@ -7,7 +7,7 @@ namespace DiskpartGUI.Processes
     /// <summary>
     /// Different exit codes a process can have
     /// </summary>
-    enum ProcessExitCode
+    public enum ProcessExitCode
     {
         Ok,
         Error,
@@ -22,7 +22,7 @@ namespace DiskpartGUI.Processes
         ErrorUnitSizeNull
     }
 
-    abstract class ProcessRunner
+    public abstract class ProcessRunner
     {
         private ProcessExitCode exit;
 

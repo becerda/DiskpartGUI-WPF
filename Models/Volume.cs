@@ -7,7 +7,7 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// Common types of File Systems
     /// </summary>
-    enum FileSystem
+    public enum FileSystem
     {
         None,
         NTFS,
@@ -17,7 +17,7 @@ namespace DiskpartGUI.Models
         UDF
     }
 
-    static class FileSystemExtension
+    public static class FileSystemExtension
     {
 
         private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
@@ -45,7 +45,7 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The volume type
     /// </summary>
-    enum VolumeType
+    public enum VolumeType
     {
         None,
         Partition,
@@ -54,13 +54,13 @@ namespace DiskpartGUI.Models
         Simple
     }
 
-    static class VolumeTypeExtension
+    public static class VolumeTypeExtension
     {
         private static readonly Dictionary<string, VolumeType> type = new Dictionary<string, VolumeType>
         {
             {"None", VolumeType.None },
             {"Partition", VolumeType.Partition },
-            {"Removalbe", VolumeType.Removable },
+            {"Removable", VolumeType.Removable },
             {"DVD-ROM", VolumeType.DVDROM },
             {"Simple", VolumeType.Simple }
         };
@@ -79,7 +79,7 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The prefix of the size of a volume
     /// </summary>
-    enum VolumeSizePostfix
+    public enum VolumeSizePostfix
     {
         None,
         KB,
@@ -87,7 +87,7 @@ namespace DiskpartGUI.Models
         GB
     }
 
-    static class VolumeSizePostfixExtension
+    public static class VolumeSizePostfixExtension
     {
         private static readonly Dictionary<string, VolumeSizePostfix> post = new Dictionary<string, VolumeSizePostfix>
         {
@@ -110,14 +110,14 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The status of a volume
     /// </summary>
-    enum VolumeStatus
+    public enum VolumeStatus
     {
         Blank,
         Healthy,
         NoMedia
     }
 
-    static class VolumeStatusExtension
+    public static class VolumeStatusExtension
     {
         private static readonly Dictionary<string, VolumeStatus> status = new Dictionary<string, VolumeStatus>
         {
@@ -140,13 +140,13 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The mount state of a volume
     /// </summary>
-    enum MountState
+    public enum MountState
     {
         Mounted,
         Unmounted
     }
 
-    static class MountStateExtension
+    public static class MountStateExtension
     {
         /// <summary>
         /// Parses a string to a MountState enum
@@ -164,7 +164,7 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The Read-Only flag state of a volume
     /// </summary>
-    enum ReadOnlyState
+    public enum ReadOnlyState
     {
         Set,
         Cleared
@@ -173,7 +173,7 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The Unit Size of a volume
     /// </summary>
-    enum UnitSize
+    public enum UnitSize
     {
         Default,
         _512,
@@ -181,18 +181,18 @@ namespace DiskpartGUI.Models
         _2048,
         _4096,
         _8192,
-        _16k,
-        _32k,
-        _64k,
-        _128k,
-        _256k,
-        _512k,
-        _1024k,
-        _2048k,
-        _4096k,
-        _8192k,
-        _16384k,
-        _32768k
+        _16K,
+        _32K,
+        _64K,
+        _128K,
+        _256K,
+        _512K,
+        _1024K,
+        _2048K,
+        _4096K,
+        _8192K,
+        _16384K,
+        _32768K
     }
 
     static class UnitSizeExtension
@@ -204,18 +204,18 @@ namespace DiskpartGUI.Models
                 { "2048", UnitSize._2048 },
                 { "4096", UnitSize._4096 },
                 { "8192", UnitSize._8192 },
-                { "16k", UnitSize._16k },
-                { "32k", UnitSize._32k },
-                { "64k", UnitSize._64k },
-                { "128k", UnitSize._128k },
-                { "256k", UnitSize._256k },
-                { "512k", UnitSize._512k },
-                { "1024k", UnitSize._1024k },
-                { "2048k", UnitSize._2048k },
-                { "4096k", UnitSize._4096k },
-                { "8192k", UnitSize._8192k },
-                { "16384k", UnitSize._16384k },
-                { "32768k", UnitSize._32768k },
+                { "16K", UnitSize._16K },
+                { "32K", UnitSize._32K },
+                { "64K", UnitSize._64K },
+                { "128K", UnitSize._128K },
+                { "256K", UnitSize._256K },
+                { "512K", UnitSize._512K },
+                { "1024K", UnitSize._1024K },
+                { "2048K", UnitSize._2048K },
+                { "4096K", UnitSize._4096K },
+                { "8192K", UnitSize._8192K },
+                { "16384K", UnitSize._16384K },
+                { "32768K", UnitSize._32768K },
                 { "Default", UnitSize.Default }
             };
 
@@ -240,7 +240,7 @@ namespace DiskpartGUI.Models
         }
     }
 
-    class Volume : BaseModel
+    public class Volume : BaseModel
     {
         private int number;
         private char letter;
