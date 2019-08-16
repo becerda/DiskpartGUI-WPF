@@ -16,7 +16,7 @@ namespace DiskpartGUI.Processes
         CLEAR
     }
 
-    class DiskpartProcess : CMDProcess
+    public class DiskpartProcess : CMDProcess
     {
         /// <summary>
         /// The Diskpart script lines
@@ -331,7 +331,7 @@ namespace DiskpartGUI.Processes
                 WriteScript();
                 if (Run() == ProcessExitCode.Ok)
                 {
-                    return ParseFielSystemInfo(ref fs, ref us);
+                    return ParseFileSystemInfo(ref fs, ref us);
                 }
                 else
                     ExitCode = ProcessExitCode.ErrorRun;
@@ -345,9 +345,9 @@ namespace DiskpartGUI.Processes
         /// <param name="fs">List to store the available file systems</param>
         /// <param name="us">Lists to store the available sizes</param>
         /// <returns>The process exit code</returns>
-        private ProcessExitCode ParseFielSystemInfo(ref List<FileSystem> fs, ref List<List<UnitSize>> us)
+        private ProcessExitCode ParseFileSystemInfo(ref List<FileSystem> fs, ref List<List<UnitSize>> us)
         {
-            CurrentProcess = nameof(ParseFielSystemInfo);
+            CurrentProcess = nameof(ParseFileSystemInfo);
 
             if(fs == null)
             {
@@ -361,17 +361,20 @@ namespace DiskpartGUI.Processes
                 return ExitCode;
             }
 
-            Regex rx = new Regex(@"Type {17}: (?<fs>NTFS|FAT32|exFAT|CDFS|UDF)( \(Default\))?(\n|\r|\r\n)  Allocation Unit Sizes: (?<sizes>[0-9]+K?( \(Default\))?,? ?)*", RegexOptions.Multiline);
+            Regex rx = new Regex(@"Type {17}: (?<fs>NTFS|FAT32|exFAT|CDFS|UDF)( \(Default\))?(\n|\r|\r\n)  Allocation Unit Sizes: (?<sizes>([0-9]+K?( \(Default\))?,? ?)*)", RegexOptions.Multiline);
             MatchCollection matches = rx.Matches(StdOutput);
             if (matches.Count > 0)
             {
+                fs = new List<FileSystem>();
+                us = new List<List<UnitSize>>();
                 int i = 0;
                 foreach (Match match in matches)
                 {
                     string filesys = match.Groups["fs"].Value.Replace("(Default)", string.Empty);
                     fs.Add(FileSystemExtension.Parse(filesys));
                     string sizes = match.Groups["sizes"].Value.Replace("(Default)", string.Empty);
-                    string[] list = match.Groups["sizes"].Value.Split(',');
+                    string[] list = sizes.Split(',');
+                    us.Add(new List<UnitSize>());
                     foreach (string size in list)
                     {
                         us[i].Add(UnitSizeExtension.Parse(size.Trim()));
