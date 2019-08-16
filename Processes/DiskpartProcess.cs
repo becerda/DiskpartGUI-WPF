@@ -81,13 +81,9 @@ namespace DiskpartGUI.Processes
             AddScriptCommand("LIST VOLUME");
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
-            {
                 return ParseVolumes(ref volumes);
-            }
             else
-            {
                 ExitCode = ProcessExitCode.ErrorRun;
-            }
             return ExitCode;
         }
 
@@ -170,9 +166,9 @@ namespace DiskpartGUI.Processes
             {
                 Regex rx = new Regex("Read-only  : (?<set>Yes|No)");
                 MatchCollection matches = rx.Matches(StdOutput);
-                int i = 0;
                 if (matches.Count > 0)
                 {
+                    int i = 0;
                     foreach (Match match in matches)
                     {
                         volumes[i++].ReadOnlyState = match.Groups["set"].Value == "Yes" ? ReadOnlyState.Set : ReadOnlyState.Cleared;
@@ -314,6 +310,81 @@ namespace DiskpartGUI.Processes
                 }
             }
             return ExitCode;
+        }
+
+        /// <summary>
+        /// Gets the FileSystem information for selected volume
+        /// </summary>
+        /// <param name="v">The Volume to get information for</param>
+        /// <param name="fs">List to store the available file systems</param>
+        /// <param name="us">Lists to store the available sizes</param>
+        /// <returns>The process exit code</returns>
+        public ProcessExitCode GetFileSystemInfo(Volume v, ref List<FileSystem> fs, ref List<List<UnitSize>> us)
+        {
+            CurrentProcess = nameof(GetFileSystemInfo);
+            if (!v.IsValid())
+                ExitCode = ProcessExitCode.ErrorInvalidVolume;
+            else
+            {
+                AddScriptCommand("SELECT VOLUME " + v.Number);
+                AddScriptCommand("FILESYSTEM");
+                WriteScript();
+                if (Run() == ProcessExitCode.Ok)
+                {
+                    return ParseFielSystemInfo(ref fs, ref us);
+                }
+                else
+                    ExitCode = ProcessExitCode.ErrorRun;
+            }
+            return ExitCode;
+        }
+
+        /// <summary>
+        /// Parses a string to look for file systems and their sizes
+        /// </summary>
+        /// <param name="fs">List to store the available file systems</param>
+        /// <param name="us">Lists to store the available sizes</param>
+        /// <returns>The process exit code</returns>
+        private ProcessExitCode ParseFielSystemInfo(ref List<FileSystem> fs, ref List<List<UnitSize>> us)
+        {
+            CurrentProcess = nameof(ParseFielSystemInfo);
+
+            if(fs == null)
+            {
+                ExitCode = ProcessExitCode.ErrorFileSystemNull;
+                return ExitCode;
+            }
+
+            if(us == null)
+            {
+                ExitCode = ProcessExitCode.ErrorUnitSizeNull;
+                return ExitCode;
+            }
+
+            Regex rx = new Regex(@"Type {17}: (?<fs>NTFS|FAT32|exFAT|CDFS|UDF)( \(Default\))?(\n|\r|\r\n)  Allocation Unit Sizes: (?<sizes>[0-9]+K?( \(Default\))?,? ?)*", RegexOptions.Multiline);
+            MatchCollection matches = rx.Matches(StdOutput);
+            if (matches.Count > 0)
+            {
+                int i = 0;
+                foreach (Match match in matches)
+                {
+                    string filesys = match.Groups["fs"].Value.Replace("(Default)", string.Empty);
+                    fs.Add(FileSystemExtension.Parse(filesys));
+                    string sizes = match.Groups["sizes"].Value.Replace("(Default)", string.Empty);
+                    string[] list = match.Groups["sizes"].Value.Split(',');
+                    foreach (string size in list)
+                    {
+                        us[i].Add(UnitSizeExtension.Parse(size.Trim()));
+                    }
+                    i++;
+                    ExitCode = ProcessExitCode.Ok;
+                }
+            }
+            else
+                ExitCode = ProcessExitCode.ErrorParse;
+
+            return ExitCode;
+
         }
 
     }
