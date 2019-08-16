@@ -1,0 +1,80 @@
+﻿<Window x:Class="DiskpartGUI.ViewModels.FormatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiskpartGUI.ViewModels"
+        mc:Ignorable="d"
+        Title="{Binding Title}"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- New Label -->
+        <Label Content="New Label: " Margin="5" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
+        <TextBox Text="{Binding NewLabelText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5" Grid.Column="1" Grid.Row="0"/>
+
+        <!-- File System -->
+        <Label Content="File System: " Margin="5" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+        <ComboBox Name="ComboboxFileSystem" SelectedItem="{Binding SelectedFileSystem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FileSystemList}" Margin="5" Grid.Column="1" Grid.Row="1"/>
+
+        <!-- Revision -->
+        <Label Content="Revision: " Margin="5" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
+        <TextBox Text="{Binding RevisionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="ComboBoxRevision" Margin="5" Grid.Column="1" Grid.Row="2"/>
+
+        <!-- Unit Size -->
+        <Label Content="Unit Size: " Margin="5" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
+        <ComboBox Name="ComboBoxUnitSize" ItemsSource="{Binding UnitSizeList}" Margin="5" Grid.Column="1" Grid.Row="3"/>
+
+        <!-- Format Options -->
+        <Label Content="Options: " Margin="5" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <Grid Grid.Column="1" Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Quick -->
+            <CheckBox Name="CheckBoxQuick" Content="Quick Format" Margin="5" IsChecked="True" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left"/>
+
+            <!-- Compress -->
+            <CheckBox Name="CheckBoxCompress" Content="Compress" Margin="5" IsChecked="False" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left"/>
+
+            <!-- Override -->
+            <CheckBox Name="CheckBoxOverride" Content="Override" Margin="5" IsChecked="False" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left"/>
+
+            <!-- Duplicate -->
+            <CheckBox Name="CheckBoxDuplicate" Content="Duplicate" Margin="5" IsChecked="False" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left"/>
+
+        </Grid>
+
+        <!-- Apply Button -->
+        <Button Name="ButtonApply" Content="Apply" Command="{Binding ApplyCommand}" Width="100" Margin="10" Grid.Column="0" Grid.Row="6"/>
+
+        <!-- Cancel Button -->
+        <Button Name="ButtonCamcel" Content="Cancel" Command="{Binding CancelCommand}" Width="100" Margin="10" Grid.Column="1" Grid.Row="6"/>
+
+
+    </Grid>
+</Window>
