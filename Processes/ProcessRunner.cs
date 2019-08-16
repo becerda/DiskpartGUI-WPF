@@ -11,6 +11,7 @@ namespace DiskpartGUI.Processes
     {
         Ok,
         Error,
+        ErrorRun,
         ErrorVolumeNotMounted,
         ErrorInvalidVolume,
         ErrorVolumeMounted,
@@ -21,6 +22,8 @@ namespace DiskpartGUI.Processes
 
     abstract class ProcessRunner
     {
+        private ProcessExitCode exit;
+
         /// <summary>
         /// Information about the process to run
         /// </summary>
@@ -41,10 +44,56 @@ namespace DiskpartGUI.Processes
         /// </summary>
         public string StdError { get; protected set; }
 
+        public string CurrentProcess { get; set; }
+
         /// <summary>
-        /// The exit code of the process
+        /// The exit code of the process, also sets error mesage
         /// </summary>
-        public ProcessExitCode ExitCode { get; set; }
+        public ProcessExitCode ExitCode
+        {
+            get
+            {
+                return exit;
+            }
+            set
+            {
+                exit = value;
+                if (CurrentProcess != null)
+                {
+                    string err = string.Empty;
+                    switch (value)
+                    {
+                        case ProcessExitCode.Error:
+                            err = "General Error";
+                            break;
+                        case ProcessExitCode.ErrorInvalidVolume:
+                            err = "Invalid Volume";
+                            break;
+                        case ProcessExitCode.ErrorNullVolumes:
+                            err = "Volume Is Null";
+                            break;
+                        case ProcessExitCode.ErrorParse:
+                            err = "No Matches Found";
+                            break;
+                        case ProcessExitCode.ErrorRun:
+                            err = "Run Failed";
+                            break;
+                        case ProcessExitCode.ErrorTestOutput:
+                            err = "Test Output Failed";
+                            break;
+                        case ProcessExitCode.ErrorVolumeMounted:
+                            err = "Volume Is Mounted";
+                            break;
+                        case ProcessExitCode.ErrorVolumeNotMounted:
+                            err = "Volume Is Not Mounted";
+                            break;
+                        default:
+                            break;
+                    }
+                    StdError = CurrentProcess + " - " + err;
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes new ProcessRunner with a process
@@ -105,14 +154,14 @@ namespace DiskpartGUI.Processes
                 process.WaitForExit();
                 ClearArguments();
                 return ProcessExitCode.Ok;
-                
+
             }
             ClearArguments();
             return ProcessExitCode.Error;
         }
 
         /// <summary>
-        /// Tests the output of the process against expected input
+        /// Tests the output of the process against expected output
         /// </summary>
         /// <param name="regex">The expected output</param>
         /// <returns></returns>
@@ -121,5 +170,6 @@ namespace DiskpartGUI.Processes
             Match result = Regex.Match(StdOutput, regex);
             return result.Success;
         }
+
     }
 }
