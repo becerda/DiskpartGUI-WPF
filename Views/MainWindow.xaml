@@ -66,7 +66,7 @@
                             <GridViewColumn x:Name="GridViewColumnLetter" Header="Letter" DisplayMemberBinding="{Binding DriveLetter}" Width="50"/>
                             <GridViewColumn x:Name="GridViewColumnLabel" Header="Label" DisplayMemberBinding="{Binding Label}" Width="105"/>
                             <GridViewColumn x:Name="GridViewColumnSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="105"/>
-                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding IsReadOnly}" Width="100"/>
+                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="100"/>
                             <GridViewColumn x:Name="GridViewColumnMounted" Header="Mounted" DisplayMemberBinding="{Binding MountState}" Width="100"/>
                         </GridView>
                     </ListView.View>
@@ -89,8 +89,8 @@
                         Width="100" Command="{Binding BitLockCommand}"/>
 
                 <!-- BitLock Button -->
-                <Button Name="ButtonReadOnly" Content="Set Read-Only" Margin="5,0,10,10" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding ReadOnly}"/>
+                <Button Name="ButtonReadOnly" Content="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,10,10" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Width="100" Command="{Binding ReadOnlyCommand}"/>
             </Grid>
             
         </DockPanel>

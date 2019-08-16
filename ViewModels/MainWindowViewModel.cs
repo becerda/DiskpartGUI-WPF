@@ -12,15 +12,15 @@ namespace DiskpartGUI.ViewModels
     class MainWindowViewModel : ClosablePropertyChangedViewModel
     {
         private string embstate;
+        private string scrostate;
         private Volume selected;
         private string selectedinfo;
+        private List<Volume> volumes;
 
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
         /// </summary>
         private Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
-
-        private List<Volume> volumes;
 
         /// <summary>
         /// The ItemSorce for the list view
@@ -55,6 +55,22 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
+        /// The Set/Clear button content state
+        /// </summary>
+        public string SetClearReadOnlyButtonContent
+        {
+            get
+            {
+                return scrostate;
+            }
+            set
+            {
+                scrostate = value;
+                OnPropertyChanged(nameof(SetClearReadOnlyButtonContent));
+            }
+        }
+
+        /// <summary>
         /// The selected Volume in ListViewVolumes
         /// </summary>
         public Volume SelectedVolume
@@ -73,6 +89,10 @@ namespace DiskpartGUI.ViewModels
                         EjectMountButtonContent = "Eject";
                     else
                         EjectMountButtonContent = "Mount";
+                    if (value.IsReadOnly())
+                        SetClearReadOnlyButtonContent = "Clear Read-Only";
+                    else
+                        SetClearReadOnlyButtonContent = "Set Read-Only";
                 }
                 OnPropertyChanged(nameof(SelectedVolume));
             }
@@ -115,6 +135,11 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand BitLockCommand { get; private set; }
 
         /// <summary>
+        /// Read-Only command for ButtonReadOnly
+        /// </summary>
+        public RelayCommand ReadOnlyCommand { get; private set; }
+
+        /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
         public DiskpartProcess DiskpartProcess
@@ -131,11 +156,13 @@ namespace DiskpartGUI.ViewModels
         public MainWindowViewModel()
         {
             EjectMountButtonContent = "Eject";
+            SetClearReadOnlyButtonContent = "Set Read-Only";
 
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable);
             RefreshCommand = new RelayCommand(Refresh);
             RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid);
             BitLockCommand = new RelayCommand(LaunchBitLock);
+            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid);
 
             Refresh();
         }
@@ -212,6 +239,41 @@ namespace DiskpartGUI.ViewModels
         public void LaunchBitLock()
         {
             BitLockProcess.LaunchBitLock();
+        }
+
+        /// <summary>
+        /// Calls appropriate method to change the read-only state of a volume
+        /// </summary>
+        public void SetReadOnly()
+        {
+            if (SelectedVolume.IsReadOnly())
+                SetReadOnly(ReadOnlyFunction.CLEAR);
+            else
+                SetReadOnly(ReadOnlyFunction.SET);
+
+            Refresh();
+        }
+
+        /// <summary>
+        /// Shows appropriate confirmation dialog then calls DiskpartProcess.SetReadOnly
+        /// </summary>
+        /// <param name="function"></param>
+        private void SetReadOnly(ReadOnlyFunction function)
+        {
+            if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedVolume.Info + "?") == MessageBoxResult.Yes)
+            {
+                if (function == ReadOnlyFunction.SET)
+                {
+                    if (DiskpartProcess.SetReadOnly(SelectedVolume) != ProcessExitCode.Ok)
+                        ShowError(nameof(SetReadOnly));
+                }
+                else
+                {
+                    if (DiskpartProcess.ClearReadOnly(SelectedVolume) != ProcessExitCode.Ok)
+                        ShowError(nameof(SetReadOnly));
+                }
+            }
+
         }
 
         /// <summary>

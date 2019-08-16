@@ -3,12 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DiskpartGUI.Processes
 {
+    /// <summary>
+    /// The function call type of diskpart attributes
+    /// </summary>
+    enum ReadOnlyFunction
+    {
+        SET,
+        CLEAR
+    }
+
     class DiskpartProcess : CMDProcess
     {
         /// <summary>
@@ -48,7 +55,7 @@ namespace DiskpartGUI.Processes
                 if (!File.Exists(file))
                 {
                     file = Path.GetTempPath() + "diskpart_script.txt";
-                }   
+                }
 
                 File.WriteAllLines(file, script);
 
@@ -69,6 +76,8 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetVolumes(ref List<Volume> volumes)
         {
+            CurrentProcess = nameof(GetVolumes);
+
             AddScriptCommand("LIST VOLUME");
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
@@ -77,8 +86,7 @@ namespace DiskpartGUI.Processes
             }
             else
             {
-                ExitCode = ProcessExitCode.Error;
-                StdError = "GetVolumes - Run Failed";
+                ExitCode = ProcessExitCode.ErrorRun;
             }
             return ExitCode;
         }
@@ -90,6 +98,8 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseVolumes(ref List<Volume> volumes)
         {
+            CurrentProcess = nameof(ParseAttributes);
+
             Regex rx = new Regex("Volume (?<volnum>[0-9]){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[1-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?");
             MatchCollection matches = rx.Matches(StdOutput);
             if (matches.Count > 0)
@@ -118,7 +128,6 @@ namespace DiskpartGUI.Processes
             else
             {
                 ExitCode = ProcessExitCode.ErrorParse;
-                StdError = "ParseVolumes - No Matches Found";
             }
             return ExitCode;
         }
@@ -130,6 +139,8 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetReadOnlyState(ref List<Volume> volumes)
         {
+            CurrentProcess = nameof(GetReadOnlyState);
+
             foreach (Volume v in volumes)
             {
                 AddScriptCommand("SELECT DISK " + v.Number);
@@ -142,8 +153,7 @@ namespace DiskpartGUI.Processes
             }
             else
             {
-                ExitCode = ProcessExitCode.Error;
-                StdError = "GetReadOnlyState - Run Failed";
+                ExitCode = ProcessExitCode.ErrorRun;
             }
             return ExitCode;
         }
@@ -155,6 +165,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseAttributes(ref List<Volume> volumes)
         {
+            CurrentProcess = nameof(ParseAttributes);
             if (volumes != null)
             {
                 Regex rx = new Regex("Read-only  : (?<set>Yes|No)");
@@ -164,20 +175,19 @@ namespace DiskpartGUI.Processes
                 {
                     foreach (Match match in matches)
                     {
-                        volumes[i].IsReadOnly = match.Groups["set"].Value == "Yes" ? true : false;
+                        volumes[i++].ReadOnlyState = match.Groups["set"].Value == "Yes" ? ReadOnlyState.Set : ReadOnlyState.Cleared;
+
                     }
                     ExitCode = ProcessExitCode.Ok;
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorParse;
-                    StdError = "ParseAttributes - No Matches Found";
                 }
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorNullVolumes;
-                StdError = "ParseAttributes - Null Volumes";
             }
             return ExitCode;
         }
@@ -189,6 +199,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode EjectVolume(Volume v)
         {
+            CurrentProcess = nameof(EjectVolume);
             if (v.IsValid())
             {
                 AddScriptCommand("SELECT VOLUME " + v.Number);
@@ -201,19 +212,16 @@ namespace DiskpartGUI.Processes
                     else
                     {
                         ExitCode = ProcessExitCode.ErrorTestOutput;
-                        StdError = "EjectVolume - Test Output Failed";
                     }
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.Error;
-                    StdError = "EjectVolume - Run Failed";
                 }
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorInvalidVolume;
-                StdError = "EjectVolume - Invalid Volume";
             }
             return ExitCode;
         }
@@ -225,6 +233,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode AssignVolumeLetter(Volume v)
         {
+            CurrentProcess = nameof(AssignVolumeLetter);
             if (!v.IsMounted())
             {
                 AddScriptCommand("SELECT VOLUME " + v.Number);
@@ -237,21 +246,75 @@ namespace DiskpartGUI.Processes
                     else
                     {
                         ExitCode = ProcessExitCode.ErrorTestOutput;
-                        StdError = "AssignVolumeLetter - Test Output Failed";
                     }
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.Error;
-                    StdError = "AssignVolumeLetter - Run Failed";
                 }
             }
             else
             {
-                ExitCode = ProcessExitCode.ErrorVolumeMounted;
-                StdError = "AssignVolumeLetter - Volume Not Mounted";
+                ExitCode = ProcessExitCode.ErrorVolumeNotMounted;
             }
             return ExitCode;
         }
+
+        /// <summary>
+        /// Calls SetReadOnly to set the flag
+        /// </summary>
+        /// <param name="v">The Volume to set read-only flag</param>
+        /// <returns>The process exit code</returns>
+        public ProcessExitCode SetReadOnly(Volume v)
+        {
+            return SetReadOnly(v, ReadOnlyFunction.SET);
+        }
+
+        /// <summary>
+        /// Calls SetReadOnly to clear the flag
+        /// </summary>
+        /// <param name="v">The Volume to clear read-only flag</param>
+        /// <returns>The process exit code</returns>
+        public ProcessExitCode ClearReadOnly(Volume v)
+        {
+            return SetReadOnly(v, ReadOnlyFunction.CLEAR);
+        }
+
+        /// <summary>
+        /// Sets or Clears the read-only flag of a Volume
+        /// </summary>
+        /// <param name="v">The volume to adjust read-only flag</param>
+        /// <param name="function">The type of adjustment</param>
+        /// <returns></returns>
+        private ProcessExitCode SetReadOnly(Volume v, ReadOnlyFunction function)
+        {
+            CurrentProcess = nameof(SetReadOnly);
+
+            if (!v.IsValid())
+            {
+                ExitCode = ProcessExitCode.ErrorInvalidVolume;
+            }
+            else
+            {
+                AddScriptCommand("SELECT DISK " + v.Number);
+                AddScriptCommand("ATTRIBUTE DISK " + function + " READONLY");
+                WriteScript();
+                if (Run() == ProcessExitCode.Ok)
+                {
+                    if (TestOutput("Disk attributes (set|cleared) successfully."))
+                        ExitCode = ProcessExitCode.Ok;
+                    else
+                    {
+                        ExitCode = ProcessExitCode.ErrorTestOutput;
+                    }
+                }
+                else
+                {
+                    ExitCode = ProcessExitCode.Error;
+                }
+            }
+            return ExitCode;
+        }
+
     }
 }

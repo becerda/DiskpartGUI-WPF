@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-
+﻿
 namespace DiskpartGUI.Models
 {
     /// <summary>
@@ -153,6 +152,15 @@ namespace DiskpartGUI.Models
         }
     }
 
+    /// <summary>
+    /// The Read-Only flag state of a volume
+    /// </summary>
+    enum ReadOnlyState
+    {
+        Set,
+        Cleared
+    }
+
     class Volume : BaseModel
     {
         private int number;
@@ -164,7 +172,7 @@ namespace DiskpartGUI.Models
         private VolumeSizePostfix postfix;
         private VolumeStatus status;
         private string info;
-        private bool read_only;
+        private ReadOnlyState read_only;
         private MountState mounted;
 
         /// <summary>
@@ -336,7 +344,7 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The Read-Only flag of the a volume
         /// </summary>
-        public bool IsReadOnly
+        public ReadOnlyState ReadOnlyState
         {
             get
             {
@@ -345,10 +353,13 @@ namespace DiskpartGUI.Models
             set
             {
                 read_only = value;
-                NotifyPropertyChanged(nameof(IsReadOnly));
+                NotifyPropertyChanged(nameof(ReadOnlyState));
             }
         }
 
+        /// <summary>
+        /// The mount state of a volume
+        /// </summary>
         public MountState MountState
         {
             get
@@ -378,6 +389,15 @@ namespace DiskpartGUI.Models
         public bool IsRemovable()
         {
             return VolumeType == VolumeType.Removable;
+        }
+
+        /// <summary>
+        /// Is the volume's Read-Only flag set?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsReadOnly()
+        {
+            return ReadOnlyState == ReadOnlyState.Set;
         }
 
         /// <summary>
