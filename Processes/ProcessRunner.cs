@@ -17,7 +17,9 @@ namespace DiskpartGUI.Processes
         ErrorVolumeMounted,
         ErrorParse,
         ErrorNullVolumes,
-        ErrorTestOutput
+        ErrorTestOutput,
+        ErrorFileSystemNull,
+        ErrorUnitSizeNull
     }
 
     abstract class ProcessRunner

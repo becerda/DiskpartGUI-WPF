@@ -1,4 +1,7 @@
 ﻿
+using System.Collections;
+using System.Collections.Generic;
+
 namespace DiskpartGUI.Models
 {
     /// <summary>
@@ -16,6 +19,17 @@ namespace DiskpartGUI.Models
 
     static class FileSystemExtension
     {
+
+        private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
+        {
+            {"None", FileSystem.None },
+            {"NTFS", FileSystem.NTFS },
+            {"FAT32", FileSystem.FAT32 },
+            {"exFAT", FileSystem.exFAT },
+            {"CDFS", FileSystem.CDFS },
+            {"UDF", FileSystem.UDF }
+        };
+
         /// <summary>
         /// Parses a string into a FileSystem enum
         /// </summary>
@@ -23,19 +37,9 @@ namespace DiskpartGUI.Models
         /// <returns>The FileSystem enum</returns>
         public static FileSystem Parse(string s)
         {
-            if (s == "NTFS")
-                return FileSystem.NTFS;
-            if (s == "FAT32")
-                return FileSystem.FAT32;
-            if (s == "exFAT")
-                return FileSystem.exFAT;
-            if (s == "CDFS")
-                return FileSystem.CDFS;
-            if (s == "UDF")
-                return FileSystem.UDF;
-            return FileSystem.None;
+            return fs[s];
         }
-        
+
     }
 
     /// <summary>
@@ -52,6 +56,15 @@ namespace DiskpartGUI.Models
 
     static class VolumeTypeExtension
     {
+        private static readonly Dictionary<string, VolumeType> type = new Dictionary<string, VolumeType>
+        {
+            {"None", VolumeType.None },
+            {"Partition", VolumeType.Partition },
+            {"Removalbe", VolumeType.Removable },
+            {"DVD-ROM", VolumeType.DVDROM },
+            {"Simple", VolumeType.Simple }
+        };
+
         /// <summary>
         /// Parses a string into a VolumeType enum
         /// </summary>
@@ -59,15 +72,7 @@ namespace DiskpartGUI.Models
         /// <returns>The VolumeType enum</returns>
         public static VolumeType Parse(string s)
         {
-            if (s == "Partition")
-                return VolumeType.Partition;
-            if (s == "Removable")
-                return VolumeType.Removable;
-            if (s == "DVD-ROM")
-                return VolumeType.DVDROM;
-            if (s == "Simple")
-                return VolumeType.Simple;
-            return VolumeType.None;
+            return type[s];
         }
     }
 
@@ -84,6 +89,13 @@ namespace DiskpartGUI.Models
 
     static class VolumeSizePostfixExtension
     {
+        private static readonly Dictionary<string, VolumeSizePostfix> post = new Dictionary<string, VolumeSizePostfix>
+        {
+            {"None", VolumeSizePostfix.None },
+            {"K", VolumeSizePostfix.KB },
+            {"M", VolumeSizePostfix.MB },
+            {"G", VolumeSizePostfix.GB }
+        };
         /// <summary>
         /// Parses a string to a VolumeSizePostfix enum
         /// </summary>
@@ -91,13 +103,7 @@ namespace DiskpartGUI.Models
         /// <returns>The VolumeSizePostfix enum</returns>
         public static VolumeSizePostfix Parse(string s)
         {
-            if (s == "K")
-                return VolumeSizePostfix.KB;
-            if (s == "M")
-                return VolumeSizePostfix.MB;
-            if (s == "G")
-                return VolumeSizePostfix.GB;
-            return VolumeSizePostfix.None;
+            return post[s];
         }
     }
 
@@ -113,6 +119,13 @@ namespace DiskpartGUI.Models
 
     static class VolumeStatusExtension
     {
+        private static readonly Dictionary<string, VolumeStatus> status = new Dictionary<string, VolumeStatus>
+        {
+            {"Blank", VolumeStatus.Blank },
+            {"Healthy", VolumeStatus.Healthy },
+            {"No Media", VolumeStatus.NoMedia }
+        };
+
         /// <summary>
         /// Parses a string to a VolumeStatus enum
         /// </summary>
@@ -120,11 +133,7 @@ namespace DiskpartGUI.Models
         /// <returns>The VolumeStatus enum</returns>
         public static VolumeStatus Parse(string s)
         {
-            if (s == "Healthy")
-                return VolumeStatus.Healthy;
-            if (s == "No Media")
-                return VolumeStatus.NoMedia;
-            return VolumeStatus.Blank;
+            return status[s];
         }
     }
 
@@ -159,6 +168,76 @@ namespace DiskpartGUI.Models
     {
         Set,
         Cleared
+    }
+
+    /// <summary>
+    /// The Unit Size of a volume
+    /// </summary>
+    enum UnitSize
+    {
+        Default,
+        _512,
+        _1024,
+        _2048,
+        _4096,
+        _8192,
+        _16k,
+        _32k,
+        _64k,
+        _128k,
+        _256k,
+        _512k,
+        _1024k,
+        _2048k,
+        _4096k,
+        _8192k,
+        _16384k,
+        _32768k
+    }
+
+    static class UnitSizeExtension
+    {
+        private static readonly Dictionary<string, UnitSize> sizes = new Dictionary<string, UnitSize>
+            {
+                {"512", UnitSize._512 },
+                { "1024", UnitSize._1024 },
+                { "2048", UnitSize._2048 },
+                { "4096", UnitSize._4096 },
+                { "8192", UnitSize._8192 },
+                { "16k", UnitSize._16k },
+                { "32k", UnitSize._32k },
+                { "64k", UnitSize._64k },
+                { "128k", UnitSize._128k },
+                { "256k", UnitSize._256k },
+                { "512k", UnitSize._512k },
+                { "1024k", UnitSize._1024k },
+                { "2048k", UnitSize._2048k },
+                { "4096k", UnitSize._4096k },
+                { "8192k", UnitSize._8192k },
+                { "16384k", UnitSize._16384k },
+                { "32768k", UnitSize._32768k },
+                { "Default", UnitSize.Default }
+            };
+
+        /// <summary>
+        /// Convert UnitSize enum to string
+        /// </summary>
+        /// <param name="size">The enum to convert</param>
+        /// <returns>The string representation</returns>
+        public static string ToString(UnitSize size)
+        {
+            return size.ToString().Substring(1);
+        }
+
+        /// <summary>
+        /// Convert string to UnitSize enum
+        /// </summary>
+        /// <param name="size">The string to convert</param>
+        /// <returns>The enum representation</returns>
+        public static UnitSize Parse(string size)
+        {
+            return sizes[size];
+        }
     }
 
     class Volume : BaseModel
