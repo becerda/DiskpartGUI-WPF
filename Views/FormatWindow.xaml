@@ -32,15 +32,15 @@
 
         <!-- File System -->
         <Label Content="File System: " Margin="5" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-        <ComboBox Name="ComboboxFileSystem" SelectedItem="{Binding SelectedFileSystem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FileSystemList}" Margin="5" Grid.Column="1" Grid.Row="1"/>
+        <ComboBox Name="ComboboxFileSystem" SelectedItem="{Binding SelectedFileSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FileSystemList}" Margin="5" Grid.Column="1" Grid.Row="1"/>
 
         <!-- Revision -->
         <Label Content="Revision: " Margin="5" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
-        <TextBox Text="{Binding RevisionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="ComboBoxRevision" Margin="5" Grid.Column="1" Grid.Row="2"/>
+        <TextBox Text="{Binding RevisionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding TextBoxRevisionIsEnabled, UpdateSourceTrigger=PropertyChanged}" Name="TextBoxRevision" Margin="5" Grid.Column="1" Grid.Row="2"/>
 
         <!-- Unit Size -->
         <Label Content="Unit Size: " Margin="5" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
-        <ComboBox Name="ComboBoxUnitSize" ItemsSource="{Binding UnitSizeList}" Margin="5" Grid.Column="1" Grid.Row="3"/>
+        <ComboBox Name="ComboBoxUnitSize" ItemsSource="{Binding SelectedUnitSizeList, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedUnitSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ComboBoxUnitSizeIsEnabled, UpdateSourceTrigger=PropertyChanged}" Margin="5" Grid.Column="1" Grid.Row="3"/>
 
         <!-- Format Options -->
         <Label Content="Options: " Margin="5" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center"/>
