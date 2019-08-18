@@ -3,10 +3,8 @@ using DiskpartGUI.Models;
 using DiskpartGUI.Processes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -14,7 +12,7 @@ namespace DiskpartGUI.ViewModels
     {
 
         private string title;
-        private Volume volume;
+        private readonly Volume volume;
         private string newlabeltext;
         private List<FileSystem> filesystemlist;
         private FileSystem fs;
@@ -22,9 +20,15 @@ namespace DiskpartGUI.ViewModels
         private List<string> selectedunitsizelist;
         private string us;
         private string revisiontext;
+        private bool quick;
+        private bool comp;
+        private bool over;
+        private bool dup;
+        private bool applymastercanexecute = true;
         private bool comboboxunitsizeenabled;
         private bool textboxrevisionenabled;
         private Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
+        private FormatArguments fa;
 
         /// <summary>
         /// The title of the window
@@ -141,17 +145,6 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// The diskpart process
-        /// </summary>
-        private DiskpartProcess DiskpartProcess
-        {
-            get
-            {
-                return ldpp.Value;
-            }
-        }
-
-        /// <summary>
         /// The Revision of the file system to be used
         /// </summary>
         public string RevisionText
@@ -167,6 +160,70 @@ namespace DiskpartGUI.ViewModels
                     revisiontext = value;
                     OnPropertyChanged(nameof(RevisionText));
                 }
+            }
+        }
+
+        /// <summary>
+        /// The Quick format option
+        /// </summary>
+        public bool QuickFormat
+        {
+            get
+            {
+                return quick;
+            }
+            set
+            {
+                quick = value;
+                OnPropertyChanged(nameof(QuickFormat));
+            }
+        }
+
+        /// <summary>
+        /// The Compress format option
+        /// </summary>
+        public bool Compress
+        {
+            get
+            {
+                return comp;
+            }
+            set
+            {
+                comp = value;
+                OnPropertyChanged(nameof(Compress));
+            }
+        }
+
+        /// <summary>
+        /// The Override format option
+        /// </summary>
+        public bool Override
+        {
+            get
+            {
+                return over;
+            }
+            set
+            {
+                over = value;
+                OnPropertyChanged(nameof(Override));
+            }
+        }
+
+        /// <summary>
+        /// The Duplicate format option
+        /// </summary>
+        public bool Duplicate
+        {
+            get
+            {
+                return dup;
+            }
+            set
+            {
+                dup = value;
+                OnPropertyChanged(nameof(Duplicate));
             }
         }
 
@@ -203,6 +260,17 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
+        /// The diskpart process
+        /// </summary>
+        private DiskpartProcess DiskpartProcess
+        {
+            get
+            {
+                return ldpp.Value;
+            }
+        }
+
+        /// <summary>
         /// Creates a new instance of FormatWindowViewModel
         /// </summary>
         /// <param name="v">The volume to preform a format on</param>
@@ -212,6 +280,7 @@ namespace DiskpartGUI.ViewModels
             Title = "Format - " + v.ToString();
             filesystemlist = new List<FileSystem>();
             unitsizelist = new Dictionary<FileSystem, List<string>>();
+            QuickFormat = true;
             if (DiskpartProcess.GetFileSystemInfo(volume, ref filesystemlist, ref unitsizelist) != ProcessExitCode.Ok)
             {
                 MessageHelper.ShowFailure("Failed to get volume file information");
@@ -226,7 +295,19 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public override void Apply()
         {
-
+            if (MessageHelper.ShowConfirm("Are you sure you want to format " + volume.ToString() + "?") == MessageBoxResult.Yes)
+            {
+                applymastercanexecute = false;
+                if (DiskpartProcess.Format(volume, fa) == ProcessExitCode.Ok)
+                {
+                    MessageHelper.ShowSuccess("Successfully formated " + volume.DriveLetter + "!");
+                    RequestWindowClose();
+                }
+                else
+                {
+                    MessageHelper.ShowFailure("Failed to format " + volume.DriveLetter + "!");
+                }
+            }
         }
 
         /// <summary>
@@ -236,16 +317,15 @@ namespace DiskpartGUI.ViewModels
         /// <returns></returns>
         public override bool CanApply(object o)
         {
-            if (SelectedFileSystem != FileSystem.Default)
+            if (applymastercanexecute)
             {
-                if (RevisionText != null)
-                {
-                    if (RevisionText == string.Empty)
-                        return true;
-                    if (Regex.Match(RevisionText, @"(^[0-9]\.[0-9][0-9]$)").Success)
-                        return true;
-                }
+                if (RevisionText == null || RevisionText == string.Empty)
+                    return true;
+
+                if (Regex.Match(RevisionText, @"(^[0-9]\.[0-9][0-9]$)").Success)
+                    return true;
             }
+
             return false;
         }
 
@@ -256,6 +336,7 @@ namespace DiskpartGUI.ViewModels
         {
             RequestWindowClose();
         }
+
 
     }
 }

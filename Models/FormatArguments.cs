@@ -65,6 +65,11 @@ namespace DiskpartGUI.Models
         public FormatOption Options { get; private set; }
 
         /// <summary>
+        /// Default Constructor
+        /// </summary>
+        public FormatArguments() { }
+
+        /// <summary>
         /// Initializes new FormatArguments with no Options flags
         /// </summary>
         /// <param name="fs">The FileSystem to use</param>
