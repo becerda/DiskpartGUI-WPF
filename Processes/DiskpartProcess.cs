@@ -349,13 +349,13 @@ namespace DiskpartGUI.Processes
         {
             CurrentProcess = nameof(ParseFileSystemInfo);
 
-            if(fs == null)
+            if (fs == null)
             {
                 ExitCode = ProcessExitCode.ErrorFileSystemNull;
                 return ExitCode;
             }
 
-            if(us == null)
+            if (us == null)
             {
                 ExitCode = ProcessExitCode.ErrorUnitSizeNull;
                 return ExitCode;
@@ -393,6 +393,44 @@ namespace DiskpartGUI.Processes
 
             return ExitCode;
 
+        }
+
+        /// <summary>
+        /// Formats a Volume with given FormatArguments
+        /// </summary>
+        /// <param name="v">The Volume to format</param>
+        /// <param name="fa">The arguments of the format</param>
+        /// <returns></returns>
+        public ProcessExitCode Format(Volume v, FormatArguments fa)
+        {
+            CurrentProcess = nameof(Format);
+
+            if (v == null)
+            {
+                ExitCode = ProcessExitCode.ErrorNullVolumes;
+                return ExitCode;
+            }
+
+            if (!v.IsValid())
+            {
+                ExitCode = ProcessExitCode.ErrorInvalidVolume;
+                return ExitCode;
+            }
+
+            AddScriptCommand("SELECT VOLUME " + v.Number);
+            AddScriptCommand("FORMAT " + fa.GetArguments());
+            WriteScript();
+            if (Run() == ProcessExitCode.Ok)
+            {
+                if (TestOutput("DiskPart successfully formatted the volume"))
+                    ExitCode = ProcessExitCode.Ok;
+                else
+                    ExitCode = ProcessExitCode.ErrorTestOutput;
+            }
+            else
+                ExitCode = ProcessExitCode.ErrorRun;
+
+            return ExitCode;
         }
 
     }
