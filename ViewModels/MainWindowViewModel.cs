@@ -140,6 +140,11 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand ReadOnlyCommand { get; private set; }
 
         /// <summary>
+        /// Format Command for ButtonFormat
+        /// </summary>
+        public RelayCommand FormatCommand { get; private set; }
+
+        /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
         public DiskpartProcess DiskpartProcess
@@ -163,6 +168,7 @@ namespace DiskpartGUI.ViewModels
             RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid);
             BitLockCommand = new RelayCommand(LaunchBitLock);
             ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid);
+            FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid);
 
             Refresh();
         }
@@ -274,6 +280,18 @@ namespace DiskpartGUI.ViewModels
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Formats SelectedVolume 
+        /// </summary>
+        private void FormatVolume()
+        {
+            FormatWindowViewModel fwvm = new FormatWindowViewModel(ref selected);
+            FormatWindow window = new FormatWindow();
+            window.DataContext = fwvm;
+            window.ShowDialog();
+            Refresh();
         }
 
         /// <summary>

@@ -319,7 +319,7 @@ namespace DiskpartGUI.Processes
         /// <param name="fs">List to store the available file systems</param>
         /// <param name="us">Lists to store the available sizes</param>
         /// <returns>The process exit code</returns>
-        public ProcessExitCode GetFileSystemInfo(Volume v, ref List<FileSystem> fs, ref List<List<UnitSize>> us)
+        public ProcessExitCode GetFileSystemInfo(Volume v, ref List<FileSystem> fs, ref Dictionary<FileSystem, List<string>> us)
         {
             CurrentProcess = nameof(GetFileSystemInfo);
             if (!v.IsValid())
@@ -345,7 +345,7 @@ namespace DiskpartGUI.Processes
         /// <param name="fs">List to store the available file systems</param>
         /// <param name="us">Lists to store the available sizes</param>
         /// <returns>The process exit code</returns>
-        private ProcessExitCode ParseFileSystemInfo(ref List<FileSystem> fs, ref List<List<UnitSize>> us)
+        private ProcessExitCode ParseFileSystemInfo(ref List<FileSystem> fs, ref Dictionary<FileSystem, List<string>> us)
         {
             CurrentProcess = nameof(ParseFileSystemInfo);
 
@@ -366,20 +366,25 @@ namespace DiskpartGUI.Processes
             if (matches.Count > 0)
             {
                 fs = new List<FileSystem>();
-                us = new List<List<UnitSize>>();
-                int i = 0;
+                fs.Add(FileSystem.Default);
+                us = new Dictionary<FileSystem, List<string>>();
+                us.Add(FileSystem.Default, new List<string> { "Default" });
+                int i = 1;
                 foreach (Match match in matches)
                 {
                     string filesys = match.Groups["fs"].Value.Replace("(Default)", string.Empty);
                     fs.Add(FileSystemExtension.Parse(filesys));
                     string sizes = match.Groups["sizes"].Value.Replace("(Default)", string.Empty);
                     string[] list = sizes.Split(',');
-                    us.Add(new List<UnitSize>());
+
+                    List<string> temp = new List<string>();
+                    temp.Add("Default");
+
                     foreach (string size in list)
                     {
-                        us[i].Add(UnitSizeExtension.Parse(size.Trim()));
+                        temp.Add(size.Trim());
                     }
-                    i++;
+                    us.Add(fs[i++], temp);
                     ExitCode = ProcessExitCode.Ok;
                 }
             }

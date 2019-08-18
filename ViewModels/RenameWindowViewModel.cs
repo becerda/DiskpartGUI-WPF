@@ -10,7 +10,7 @@ namespace DiskpartGUI.ViewModels
 {
     class RenameWindowViewModel : ApplyCancelViewModel
     {
-        private readonly int MaxCharLen = 10;
+
         private string title;
         private string newlabeltext;
         private Volume volume;
@@ -51,15 +51,16 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// The text typed in the TextBox
         /// </summary>
-        public string TextBoxText {
+        public string TextBoxText
+        {
             get
             {
                 return textboxtext;
             }
             set
             {
-                if (value.Length > MaxCharLen)
-                    textboxtext = value.Substring(0, MaxCharLen);
+                if (value.Length > Volume.Max_Label_Char_Len)
+                    textboxtext = value.Substring(0, Volume.Max_Label_Char_Len);
                 else
                     textboxtext = value;
                 OnPropertyChanged(nameof(TextBoxText));
@@ -102,7 +103,7 @@ namespace DiskpartGUI.ViewModels
             if (TextBoxText == null)
                 return false;
 
-            if (TextBoxText.Length > 0 && TextBoxText.Length <= MaxCharLen)
+            if (TextBoxText.Length > 0 && TextBoxText.Length <= Volume.Max_Label_Char_Len)
             {
                 Regex r = new Regex("^[a-zA-z0-9 !@#$%^&()_\\-{}]*$");
                 if (r.IsMatch(TextBoxText))

@@ -9,7 +9,7 @@ namespace DiskpartGUI.Models
     /// </summary>
     public enum FileSystem
     {
-        None,
+        Default,
         NTFS,
         FAT32,
         exFAT,
@@ -22,7 +22,7 @@ namespace DiskpartGUI.Models
 
         private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
         {
-            {"None", FileSystem.None },
+            {"Default", FileSystem.Default },
             {"NTFS", FileSystem.NTFS },
             {"FAT32", FileSystem.FAT32 },
             {"exFAT", FileSystem.exFAT },
@@ -242,6 +242,11 @@ namespace DiskpartGUI.Models
 
     public class Volume : BaseModel
     {
+        /// <summary>
+        /// The maximum number of characters a label can be
+        /// </summary>
+        public static readonly int Max_Label_Char_Len = 10;
+
         private int number;
         private char letter;
         private string label;
