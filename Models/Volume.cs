@@ -10,6 +10,7 @@ namespace DiskpartGUI.Models
     public enum FileSystem
     {
         Default,
+        Blank,
         NTFS,
         FAT32,
         exFAT,
@@ -23,6 +24,7 @@ namespace DiskpartGUI.Models
         private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
         {
             {"Default", FileSystem.Default },
+            {"", FileSystem.Blank },
             {"NTFS", FileSystem.NTFS },
             {"FAT32", FileSystem.FAT32 },
             {"exFAT", FileSystem.exFAT },

@@ -3,7 +3,9 @@ using DiskpartGUI.Commands;
 using DiskpartGUI.Helpers;
 using DiskpartGUI.Models;
 using DiskpartGUI.Processes;
+using DiskpartGUI.Views;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace DiskpartGUI.ViewModels
@@ -82,11 +84,19 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Action taken when ButtonApply is clicked, renaming a Volume
         /// </summary>
-        public override void Apply()
+        public async override void Apply()
         {
             if (MessageHelper.ShowConfirm("Are you sure you want to rename " + volume.ToString() + " to " + TextBoxText.ToUpper() + "?") == MessageBoxResult.Yes)
             {
-                if (LabelProcess.RenameVolume(ref volume, TextBoxText) == ProcessExitCode.Ok)
+                WaitWindow window = new WaitWindow
+                {
+                    DataContext = new WaitWindowViewModel("Renaming, please wait...")
+                };
+                window.Show();
+                ProcessExitCode result = await CallLabelProcess();
+                window.Close();
+
+                if (result == ProcessExitCode.Ok)
                 {
                     MessageHelper.ShowSuccess("Successfully renamed " + volume.DriveLetter + "!");
                     RequestWindowClose();
@@ -100,15 +110,18 @@ namespace DiskpartGUI.ViewModels
 
         public override bool CanApply(object o)
         {
-            if (TextBoxText == null)
-                return false;
-
-            if (TextBoxText.Length > 0 && TextBoxText.Length <= Volume.Max_Label_Char_Len)
+            if (base.CanApply(o))
             {
-                Regex r = new Regex("^[a-zA-z0-9 !@#$%^&()_\\-{}]*$");
-                if (r.IsMatch(TextBoxText))
+                if (TextBoxText == null)
+                    return false;
+
+                if (TextBoxText.Length > 0 && TextBoxText.Length <= Volume.Max_Label_Char_Len)
                 {
-                    return true;
+                    Regex r = new Regex("^[a-zA-z0-9 !@#$%^&()_\\-{}]*$");
+                    if (r.IsMatch(TextBoxText))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -120,6 +133,13 @@ namespace DiskpartGUI.ViewModels
         public override void Cancel()
         {
             RequestWindowClose();
+        }
+
+        private async Task<ProcessExitCode> CallLabelProcess()
+        {
+            var rename = Task.Run(() => LabelProcess.RenameVolume(ref volume, TextBoxText));
+            ProcessExitCode result = await rename;
+            return result;
         }
 
     }
