@@ -90,7 +90,7 @@ namespace DiskpartGUI.ViewModels
             {
                 WaitWindow window = new WaitWindow
                 {
-                    DataContext = new WaitWindowViewModel("Renaming, please wait...")
+                    DataContext = new WaitWindowViewModel("Renaming")
                 };
                 window.Show();
                 ProcessExitCode result = await CallLabelProcess();

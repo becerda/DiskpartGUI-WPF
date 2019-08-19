@@ -5,6 +5,7 @@ using DiskpartGUI.Processes;
 using DiskpartGUI.Views;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace DiskpartGUI.ViewModels
@@ -16,6 +17,9 @@ namespace DiskpartGUI.ViewModels
         private Volume selected;
         private string selectedinfo;
         private List<Volume> volumes;
+
+        private bool masterbuttonsenabled = true;
+
 
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
@@ -217,13 +221,15 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Refreshes Volumes
         /// </summary>
-        public void Refresh()
+        public async void Refresh()
         {
-            if (DiskpartProcess.GetVolumes(ref volumes) != ProcessExitCode.Ok)
-                ShowError("Refresh - GetVolumes");
-            else
-                if (DiskpartProcess.GetReadOnlyState(ref volumes) != ProcessExitCode.Ok)
-                ShowError("Refresh - GetReadOnlyState");
+            masterbuttonsenabled = false;
+            WaitWindow window = new WaitWindow { DataContext = new WaitWindowViewModel("Refreshing") };
+            window.Show();
+            await CallRefresh();
+            masterbuttonsenabled = true;
+            window.Close();
+
             OnPropertyChanged(nameof(Volumes));
         }
 
@@ -301,6 +307,9 @@ namespace DiskpartGUI.ViewModels
         /// <returns></returns>
         public bool IsSelectedVolumeRemovable(object o)
         {
+            if (masterbuttonsenabled == false)
+                return false;
+
             if (SelectedVolume == null)
                 return false;
             return SelectedVolume.IsRemovable();
@@ -313,6 +322,9 @@ namespace DiskpartGUI.ViewModels
         /// <returns></returns>
         public bool IsSelectedVolumeValid(object o)
         {
+            if (masterbuttonsenabled == false)
+                return false;
+
             if (SelectedVolume == null)
                 return false;
             return SelectedVolume.IsValid();
@@ -326,6 +338,25 @@ namespace DiskpartGUI.ViewModels
         {
             MessageHelper.ShowError(callingfrom, DiskpartProcess.ExitCode, DiskpartProcess.StdError, DiskpartProcess.StdOutput);
         }
+
+        private async Task CallRefresh()
+        {
+            var task = Task.Run(() => DiskpartProcess.GetVolumes(ref volumes));
+            ProcessExitCode result = await task;
+            if (result != ProcessExitCode.Ok)
+                ShowError("Refresh - GetVolumes");
+            else
+            {
+                task = Task.Run(() => DiskpartProcess.GetReadOnlyState(ref volumes));
+                result = await task;
+                if (result != ProcessExitCode.Ok)
+                {
+                    ShowError("Refresh - GetReadOnlyState");
+                }
+            }
+        }
+
+
 
     }
 }
