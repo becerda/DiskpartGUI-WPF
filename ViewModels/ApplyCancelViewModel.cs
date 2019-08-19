@@ -9,6 +9,8 @@ namespace DiskpartGUI.ViewModels
 {
     abstract class ApplyCancelViewModel : ClosablePropertyChangedViewModel
     {
+        protected bool applymasterenabled = true;
+
         /// <summary>
         /// The RelayCommand for Apply to be used with bindings
         /// </summary>
@@ -38,7 +40,10 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
-        public abstract bool CanApply(object o);
+        public virtual bool CanApply(object o)
+        {
+            return applymasterenabled;
+        }
 
         /// <summary>
         /// Cancel method to be called

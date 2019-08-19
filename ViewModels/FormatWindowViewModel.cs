@@ -1,9 +1,11 @@
 ﻿using DiskpartGUI.Helpers;
 using DiskpartGUI.Models;
 using DiskpartGUI.Processes;
+using DiskpartGUI.Views;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace DiskpartGUI.ViewModels
@@ -24,7 +26,6 @@ namespace DiskpartGUI.ViewModels
         private bool comp;
         private bool over;
         private bool dup;
-        private bool applymastercanexecute = true;
         private bool comboboxunitsizeenabled;
         private bool textboxrevisionenabled;
         private Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
@@ -291,14 +292,21 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Not Implemented Yet. Runs the format process on the passed in volume
+        /// Runs the format process on the passed in volume
         /// </summary>
-        public override void Apply()
+        public async override void Apply()
         {
             if (MessageHelper.ShowConfirm("Are you sure you want to format " + volume.ToString() + "?") == MessageBoxResult.Yes)
             {
-                applymastercanexecute = false;
-                if (DiskpartProcess.Format(volume, fa) == ProcessExitCode.Ok)
+                applymasterenabled = false;
+                WaitWindow window = new WaitWindow();
+                WaitWindowViewModel wwvm = new WaitWindowViewModel("Formating, please wait...");
+                window.DataContext = wwvm;
+                window.Show();
+                ProcessExitCode result = await CallFormatProcess();
+                window.Close();
+
+                if (result == ProcessExitCode.Ok)
                 {
                     MessageHelper.ShowSuccess("Successfully formated " + volume.DriveLetter + "!");
                     RequestWindowClose();
@@ -313,11 +321,11 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Can the Apply button be pressed?
         /// </summary>
-        /// <param name="o"></param>
+        /// <param name="o">Not used</param>
         /// <returns></returns>
         public override bool CanApply(object o)
         {
-            if (applymastercanexecute)
+            if (base.CanApply(o))
             {
                 if (RevisionText == null || RevisionText == string.Empty)
                     return true;
@@ -337,6 +345,17 @@ namespace DiskpartGUI.ViewModels
             RequestWindowClose();
         }
 
+        /// <summary>
+        /// Async task to format in background
+        /// </summary>
+        /// <returns>The ProcessExitCode of Format</returns>
+        private async Task<ProcessExitCode> CallFormatProcess()
+        {
+            fa = new FormatArguments(SelectedFileSystem, RevisionText, NewLabelText, UnitSizeExtension.Parse(SelectedUnitSize), QuickFormat, Compress, Override, Duplicate);
+            var format = Task.Run(() => DiskpartProcess.Format(volume, fa));
+            ProcessExitCode result = await format;
+            return result;
+        }
 
     }
 }

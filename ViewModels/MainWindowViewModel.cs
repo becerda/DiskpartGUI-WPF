@@ -20,7 +20,7 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
         /// </summary>
-        private Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
+        private readonly Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
 
         /// <summary>
         /// The ItemSorce for the list view
