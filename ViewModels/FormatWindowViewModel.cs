@@ -300,7 +300,7 @@ namespace DiskpartGUI.ViewModels
             {
                 applymasterenabled = false;
                 WaitWindow window = new WaitWindow();
-                WaitWindowViewModel wwvm = new WaitWindowViewModel("Formating, please wait...");
+                WaitWindowViewModel wwvm = new WaitWindowViewModel("Formating");
                 window.DataContext = wwvm;
                 window.Show();
                 ProcessExitCode result = await CallFormatProcess();

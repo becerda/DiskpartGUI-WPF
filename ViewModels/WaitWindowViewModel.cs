@@ -8,23 +8,26 @@ namespace DiskpartGUI.ViewModels
 {
     class WaitWindowViewModel
     {
-        private string message;
+        private string action;
 
-        public string Message
+        /// <summary>
+        /// The action this window is waiting for
+        /// </summary>
+        public string Action
         {
             get
             {
-                return message;
+                return action;
             }
             private set
             {
-                message = value;
+                action = value;
             }
         }
 
-        public WaitWindowViewModel(string message)
+        public WaitWindowViewModel(string action)
         {
-            Message = message;
+            Action = action + ", please wait...";
         }
 
     }
