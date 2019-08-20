@@ -113,7 +113,7 @@ namespace DiskpartGUI.ViewModels
             }
             set
             {
-                selectedinfo = value;
+                selectedinfo = "Selected Volume: " +  value;
                 OnPropertyChanged(nameof(SelectedVolumeInfo));
             }
         }
@@ -166,6 +166,7 @@ namespace DiskpartGUI.ViewModels
         {
             EjectMountButtonContent = "Eject";
             SetClearReadOnlyButtonContent = "Set Read-Only";
+            SelectedVolumeInfo = "";
 
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable);
             RefreshCommand = new RelayCommand(Refresh);
@@ -230,6 +231,7 @@ namespace DiskpartGUI.ViewModels
             masterbuttonsenabled = true;
             window.Close();
 
+            SelectedVolumeInfo = "";
             OnPropertyChanged(nameof(Volumes));
         }
 
