@@ -7,9 +7,23 @@ using System.Threading.Tasks;
 
 namespace DiskpartGUI.ViewModels
 {
+    /// <summary>
+    /// The Exit Status a window can have
+    /// </summary>
+    public enum ExitStatus
+    {
+        Applied,
+        Canceled
+    }
+
     abstract class ApplyCancelViewModel : ClosablePropertyChangedViewModel
     {
         protected bool applymasterenabled = true;
+
+        /// <summary>
+        /// The ExitStatus of a window
+        /// </summary>
+        public ExitStatus ExitStatus { get; protected set; }
 
         /// <summary>
         /// The RelayCommand for Apply to be used with bindings
@@ -48,6 +62,10 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// Cancel method to be called
         /// </summary>
-        public abstract void Cancel();
+        public virtual void Cancel()
+        {
+            ExitStatus = ExitStatus.Canceled;
+            RequestWindowClose();
+        }
     }
 }

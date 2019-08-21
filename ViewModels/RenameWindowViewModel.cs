@@ -99,6 +99,7 @@ namespace DiskpartGUI.ViewModels
                 if (result == ProcessExitCode.Ok)
                 {
                     MessageHelper.ShowSuccess("Successfully renamed " + volume.DriveLetter + "!");
+                    ExitStatus = ExitStatus.Applied;
                     RequestWindowClose();
                 }
                 else
@@ -108,6 +109,11 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Is the Apply button enabled?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
         public override bool CanApply(object o)
         {
             if (base.CanApply(o))
@@ -128,13 +134,9 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Action take when ButtonCancel is clicked, closes the window
+        /// Async Task to call LabelProcess.RenameVolume
         /// </summary>
-        public override void Cancel()
-        {
-            RequestWindowClose();
-        }
-
+        /// <returns></returns>
         private async Task<ProcessExitCode> CallLabelProcess()
         {
             var rename = Task.Run(() => LabelProcess.RenameVolume(ref volume, TextBoxText));

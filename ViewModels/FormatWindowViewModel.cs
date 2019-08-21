@@ -309,6 +309,7 @@ namespace DiskpartGUI.ViewModels
                 if (result == ProcessExitCode.Ok)
                 {
                     MessageHelper.ShowSuccess("Successfully formated " + volume.DriveLetter + "!");
+                    ExitStatus = ExitStatus.Applied;
                     RequestWindowClose();
                 }
                 else
@@ -335,14 +336,6 @@ namespace DiskpartGUI.ViewModels
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Closes the format window
-        /// </summary>
-        public override void Cancel()
-        {
-            RequestWindowClose();
         }
 
         /// <summary>
