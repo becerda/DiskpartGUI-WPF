@@ -53,6 +53,17 @@
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
                         </Style>
                     </ListView.Resources>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <MenuItem Command="{Binding RenameCommand}" Header="Rename"/>
+                            <MenuItem Command="{Binding FormatCommand}" Header="Format"/>
+                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Separator/>
+                            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock"/>
+                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn x:Name="GridViewColumnNumber" Header="#" DisplayMemberBinding="{Binding Number}" Width="25"/>
