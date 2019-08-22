@@ -13,7 +13,8 @@ namespace DiskpartGUI.ViewModels
     public enum ExitStatus
     {
         Applied,
-        Canceled
+        Canceled,
+        Closed
     }
 
     abstract class ApplyCancelViewModel : ClosablePropertyChangedViewModel
@@ -42,6 +43,7 @@ namespace DiskpartGUI.ViewModels
         {
             ApplyCommand = new RelayCommand(Apply, CanApply);
             CancelCommand = new RelayCommand(Cancel);
+            ExitStatus = ExitStatus.Closed;
         }
 
         /// <summary>
