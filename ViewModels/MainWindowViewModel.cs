@@ -183,10 +183,12 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public void ChangeMountState()
         {
+            masterbuttonsenabled = false;
             if (SelectedVolume.IsMounted())
                 EjectVolume();
             else
                 MountVolume();
+            masterbuttonsenabled = true;
         }
 
         /// <summary>
@@ -244,7 +246,8 @@ namespace DiskpartGUI.ViewModels
             RenameWindow window = new RenameWindow();
             window.DataContext = rwvm;
             window.ShowDialog();
-            Refresh();
+            if(rwvm.ExitStatus == ExitStatus.Applied)
+                Refresh();
         }
 
         /// <summary>
@@ -260,10 +263,12 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public void SetReadOnly()
         {
+            masterbuttonsenabled = false;
             if (SelectedVolume.IsReadOnly())
                 SetReadOnly(ReadOnlyFunction.CLEAR);
             else
                 SetReadOnly(ReadOnlyFunction.SET);
+            masterbuttonsenabled = true;
 
             Refresh();
         }
@@ -299,7 +304,8 @@ namespace DiskpartGUI.ViewModels
             FormatWindow window = new FormatWindow();
             window.DataContext = fwvm;
             window.ShowDialog();
-            Refresh();
+            if(fwvm.ExitStatus == ExitStatus.Applied)
+                Refresh();
         }
 
         /// <summary>
@@ -341,6 +347,10 @@ namespace DiskpartGUI.ViewModels
             MessageHelper.ShowError(callingfrom, DiskpartProcess.ExitCode, DiskpartProcess.StdError, DiskpartProcess.StdOutput);
         }
 
+        /// <summary>
+        /// AsyncTask to call Refresh method
+        /// </summary>
+        /// <returns></returns>
         private async Task CallRefresh()
         {
             var task = Task.Run(() => DiskpartProcess.GetVolumes(ref volumes));
@@ -357,8 +367,6 @@ namespace DiskpartGUI.ViewModels
                 }
             }
         }
-
-
 
     }
 }
