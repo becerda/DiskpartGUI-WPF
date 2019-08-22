@@ -70,7 +70,7 @@
                             <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+E"/>
                             <MenuItem Command="{Binding RenameCommand}" Header="Rename" InputGestureText="F2"/>
                             <MenuItem Command="{Binding FormatCommand}" Header="Format" InputGestureText="CTRL+F"/>
-                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+O"/>
+                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+SHIFT+R"/>
                             <Separator/>
                             <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="CTRL+B"/>
                             <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="CTRL+R"/>
