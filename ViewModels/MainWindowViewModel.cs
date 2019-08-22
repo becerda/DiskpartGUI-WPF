@@ -264,22 +264,13 @@ namespace DiskpartGUI.ViewModels
         public void SetReadOnly()
         {
             masterbuttonsenabled = false;
+            ReadOnlyFunction function;
             if (SelectedVolume.IsReadOnly())
-                SetReadOnly(ReadOnlyFunction.CLEAR);
+                function = ReadOnlyFunction.CLEAR;
             else
-                SetReadOnly(ReadOnlyFunction.SET);
-            masterbuttonsenabled = true;
+                function = ReadOnlyFunction.SET;
 
-            Refresh();
-        }
-
-        /// <summary>
-        /// Shows appropriate confirmation dialog then calls DiskpartProcess.SetReadOnly
-        /// </summary>
-        /// <param name="function"></param>
-        private void SetReadOnly(ReadOnlyFunction function)
-        {
-            if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedVolume.Info + "?") == MessageBoxResult.Yes)
+            if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedVolume.ToString() + "?") == MessageBoxResult.Yes)
             {
                 if (function == ReadOnlyFunction.SET)
                 {
@@ -291,8 +282,9 @@ namespace DiskpartGUI.ViewModels
                     if (DiskpartProcess.ClearReadOnly(SelectedVolume) != ProcessExitCode.Ok)
                         ShowError(nameof(SetReadOnly));
                 }
+                Refresh();
             }
-
+            masterbuttonsenabled = true;
         }
 
         /// <summary>
