@@ -1,4 +1,5 @@
-﻿using DiskpartGUI.ViewModels;
+﻿using DiskpartGUI.Interfaces;
+using DiskpartGUI.ViewModels;
 using System;
 using System.Windows;
 
@@ -18,6 +19,11 @@ namespace DiskpartGUI.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             DataContext = new MainWindowViewModel();
+
+            if (DataContext is IClosable)
+            {
+                (DataContext as IClosable).RequestClose += (_, __) => this.Close();
+            }
         }
     }
 }

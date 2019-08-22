@@ -9,6 +9,8 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize">
+
+    <!-- Window Hot Keys -->
     <Window.InputBindings>
         <KeyBinding Command="{Binding ChangeMountStateCommand}" Gesture="CTRL+E"/>
         <KeyBinding Command="{Binding RenameCommand}" Gesture="F2"/>
@@ -16,14 +18,16 @@
         <KeyBinding Command="{Binding ReadOnlyCommand}" Gesture="CTRL+SHIFT+R"/>
         <KeyBinding Command="{Binding BitLockCommand}" Gesture="CTRL+B"/>
         <KeyBinding Command="{Binding RefreshCommand}" Gesture="CTRL+R"/>
+        <KeyBinding Command="{Binding CloseWindowCommand}" Gesture="CTRL+Q"/>
     </Window.InputBindings>
+
     <Grid>
         <DockPanel VerticalAlignment="Top">
 
             <!-- Window Menu Bar -->
             <Menu DockPanel.Dock="Top" VerticalAlignment="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Name="MenuItemExit" Header="_Exit" InputGestureText="CTRL+Q"/>
+                    <MenuItem Name="MenuItemExit" Header="_Exit" InputGestureText="CTRL+Q" Command="{Binding CloseWindowCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_View">
                     <MenuItem Name="MenuItemShowAllVolumes" Header="_Show All Volumes"/>
