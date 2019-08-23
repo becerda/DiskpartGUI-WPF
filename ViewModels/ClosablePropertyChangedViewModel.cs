@@ -1,11 +1,7 @@
 ﻿using DiskpartGUI.Commands;
 using DiskpartGUI.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace DiskpartGUI.ViewModels
@@ -25,7 +21,7 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// The RelayCommand to close a window
         /// </summary>
-        public RelayCommand CloseWindowCommand { get; private set; }
+        public RelayCommand CloseWindowCommand { get; protected set; }
 
         /// <summary>
         /// Constructor assigning CloseCommand

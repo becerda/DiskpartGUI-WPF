@@ -10,6 +10,10 @@ namespace DiskpartGUI.Views
         public MainWindow() : base(new MainWindowViewModel())
         {
             InitializeComponent();
+            Closing += (s, e) =>
+            {
+                Properties.Settings.Default.Save();
+            };
         }
     }
 }

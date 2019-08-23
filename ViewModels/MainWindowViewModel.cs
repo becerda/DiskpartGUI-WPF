@@ -20,7 +20,6 @@ namespace DiskpartGUI.ViewModels
         private List<Volume> volumes;
         private bool masterbuttonsenabled = true;
 
-
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
         /// </summary>
@@ -113,8 +112,24 @@ namespace DiskpartGUI.ViewModels
             }
             set
             {
-                selectedinfo = "Selected Volume: " +  value;
+                selectedinfo = "Selected Volume: " + value;
                 OnPropertyChanged(nameof(SelectedVolumeInfo));
+            }
+        }
+
+        /// <summary>
+        /// The option to show all volumes
+        /// </summary>
+        public bool ShowAllVolumes
+        {
+            get
+            {
+                return Properties.Settings.Default.ShowAllVolumes;
+            }
+            set
+            {
+                Properties.Settings.Default.ShowAllVolumes = value;
+                OnPropertyChanged(nameof(ShowAllVolumes));
             }
         }
 
@@ -149,6 +164,11 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand FormatCommand { get; private set; }
 
         /// <summary>
+        /// Show All Volumes Command for View menu
+        /// </summary>
+        public RelayCommand ShowAllVolumesCommand { get; private set; }
+
+        /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
         public DiskpartProcess DiskpartProcess
@@ -167,13 +187,16 @@ namespace DiskpartGUI.ViewModels
             EjectMountButtonContent = "Eject";
             SetClearReadOnlyButtonContent = "Set Read-Only";
             SelectedVolumeInfo = "";
+            ShowAllVolumes = Properties.Settings.Default.ShowAllVolumes;
 
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable, Key.E, ModifierKeys.Control);
             RefreshCommand = new RelayCommand(Refresh, Key.R, ModifierKeys.Control);
             RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid, Key.F2);
             BitLockCommand = new RelayCommand(LaunchBitLock, Key.B, ModifierKeys.Control);
-            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid, Key.R, ModifierKeys.Control|ModifierKeys.Shift);
+            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid, Key.R, ModifierKeys.Control | ModifierKeys.Shift);
             FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid, Key.F, ModifierKeys.Control);
+            CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Q, ModifierKeys.Control);
+            ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
 
             Refresh();
         }
@@ -233,6 +256,9 @@ namespace DiskpartGUI.ViewModels
             masterbuttonsenabled = true;
             window.Close();
 
+            if (!ShowAllVolumes)
+                FilterRemovableVolumes();
+
             SelectedVolumeInfo = "";
             OnPropertyChanged(nameof(Volumes));
         }
@@ -245,7 +271,7 @@ namespace DiskpartGUI.ViewModels
             RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selected);
             RenameWindow window = new RenameWindow(rwvm);
             window.ShowDialog();
-            if(rwvm.ExitStatus == ExitStatus.Applied)
+            if (rwvm.ExitStatus == ExitStatus.Applied)
                 Refresh();
         }
 
@@ -294,8 +320,31 @@ namespace DiskpartGUI.ViewModels
             FormatWindowViewModel fwvm = new FormatWindowViewModel(ref selected);
             FormatWindow window = new FormatWindow(fwvm);
             window.ShowDialog();
-            if(fwvm.ExitStatus == ExitStatus.Applied)
+            if (fwvm.ExitStatus == ExitStatus.Applied)
                 Refresh();
+        }
+
+        /// <summary>
+        /// Toggles the filter for showing all volumes
+        /// </summary>
+        private void ToggleShowAllVolumes()
+        {
+            ShowAllVolumes = !ShowAllVolumes;
+            Refresh();
+        }
+
+        /// <summary>
+        /// Filters out the non-removable volumes
+        /// </summary>
+        private void FilterRemovableVolumes()
+        {
+            Volume[] temp = new Volume[Volumes.Count];
+            Volumes.CopyTo(temp);
+            foreach (Volume v in temp)
+            {
+                if (!v.IsRemovable())
+                    Volumes.Remove(v);
+            }
         }
 
         /// <summary>
