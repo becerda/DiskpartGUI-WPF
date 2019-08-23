@@ -1,23 +1,14 @@
-﻿using DiskpartGUI.Interfaces;
-using System.Windows;
-
-namespace DiskpartGUI.ViewModels
+﻿
+namespace DiskpartGUI.Views
 {
     /// <summary>
     /// Interaction logic for FormatWindow.xaml
     /// </summary>
-    public partial class FormatWindow : Window
+    public partial class FormatWindow : BaseClosableWindow
     {
-        public FormatWindow()
+        public FormatWindow(object dataContext) : base(dataContext)
         {
             InitializeComponent();
-            Loaded += (s, e) =>
-            {
-                if (DataContext is IClosable)
-                {
-                    (DataContext as IClosable).RequestClose += (_, __) => this.Close();
-                }
-            };
         }
     }
 }
