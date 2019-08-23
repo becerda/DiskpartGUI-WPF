@@ -1,23 +1,14 @@
-﻿using DiskpartGUI.Interfaces;
-using System.Windows;
-
+﻿
 namespace DiskpartGUI.Views
 {
     /// <summary>
     /// Interaction logic for RenameWindow.xaml
     /// </summary>
-    public partial class RenameWindow : Window
+    public partial class RenameWindow : BaseClosableWindow
     {
-        public RenameWindow()
+        public RenameWindow(object dataContext) : base(dataContext)
         {
             InitializeComponent();
-            Loaded += (s, e) =>
-            {
-                if(DataContext is IClosable)
-                {
-                    (DataContext as IClosable).RequestClose += (_, __) => this.Close();
-                }
-            };
         }
     }
 }

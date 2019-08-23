@@ -18,7 +18,6 @@ namespace DiskpartGUI.ViewModels
         private Volume selected;
         private string selectedinfo;
         private List<Volume> volumes;
-
         private bool masterbuttonsenabled = true;
 
 
@@ -244,8 +243,7 @@ namespace DiskpartGUI.ViewModels
         public void RenameVolume()
         {
             RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selected);
-            RenameWindow window = new RenameWindow();
-            window.DataContext = rwvm;
+            RenameWindow window = new RenameWindow(rwvm);
             window.ShowDialog();
             if(rwvm.ExitStatus == ExitStatus.Applied)
                 Refresh();
@@ -294,8 +292,7 @@ namespace DiskpartGUI.ViewModels
         private void FormatVolume()
         {
             FormatWindowViewModel fwvm = new FormatWindowViewModel(ref selected);
-            FormatWindow window = new FormatWindow();
-            window.DataContext = fwvm;
+            FormatWindow window = new FormatWindow(fwvm);
             window.ShowDialog();
             if(fwvm.ExitStatus == ExitStatus.Applied)
                 Refresh();
