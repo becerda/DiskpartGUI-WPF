@@ -30,8 +30,18 @@
                 <MenuItem Header="_File">
                     <MenuItem Name="MenuItemExit" Header="_Exit" InputGestureText="{Binding CloseWindowCommand.InputGestureText}" Command="{Binding CloseWindowCommand}"/>
                 </MenuItem>
+                <MenuItem Header="_Edit">
+                    <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
+                    <MenuItem Command="{Binding RenameCommand}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
+                    <MenuItem Command="{Binding FormatCommand}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
+                    <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
+                    <Separator/>
+                    <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
+                </MenuItem>
                 <MenuItem Header="_View">
                     <MenuItem Name="MenuItemShowAllVolumes" Header="_Show All Volumes"/>
+                    <Separator/>
+                    <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Name="MenuItemAbout" Header="_About"/>
