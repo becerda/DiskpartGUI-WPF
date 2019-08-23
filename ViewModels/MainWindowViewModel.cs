@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -168,12 +169,12 @@ namespace DiskpartGUI.ViewModels
             SetClearReadOnlyButtonContent = "Set Read-Only";
             SelectedVolumeInfo = "";
 
-            ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable);
-            RefreshCommand = new RelayCommand(Refresh);
-            RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid);
-            BitLockCommand = new RelayCommand(LaunchBitLock);
-            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid);
-            FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid);
+            ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable, Key.E, ModifierKeys.Control);
+            RefreshCommand = new RelayCommand(Refresh, Key.R, ModifierKeys.Control);
+            RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid, Key.F2);
+            BitLockCommand = new RelayCommand(LaunchBitLock, Key.B, ModifierKeys.Control);
+            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid, Key.R, ModifierKeys.Control|ModifierKeys.Shift);
+            FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid, Key.F, ModifierKeys.Control);
 
             Refresh();
         }

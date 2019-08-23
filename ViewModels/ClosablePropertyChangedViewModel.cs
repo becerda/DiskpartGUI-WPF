@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -32,7 +33,7 @@ namespace DiskpartGUI.ViewModels
         public ClosablePropertyChangedViewModel()
         {
             
-            CloseWindowCommand = new RelayCommand(RequestWindowClose);
+            CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Escape);
         }
 
         /// <summary>
