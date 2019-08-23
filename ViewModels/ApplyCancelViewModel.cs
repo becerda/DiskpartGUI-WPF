@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -41,7 +42,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public ApplyCancelViewModel() : base()
         {
-            ApplyCommand = new RelayCommand(Apply, CanApply);
+            ApplyCommand = new RelayCommand(Apply, CanApply, Key.Enter);
             CancelCommand = new RelayCommand(Cancel);
             ExitStatus = ExitStatus.Closed;
         }

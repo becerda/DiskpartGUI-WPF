@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DiskpartGUI"
         mc:Ignorable="d"
         Title="Distpart GUI" 
         SizeToContent="WidthAndHeight"
@@ -12,13 +11,13 @@
 
     <!-- Window Hot Keys -->
     <Window.InputBindings>
-        <KeyBinding Command="{Binding ChangeMountStateCommand}" Gesture="CTRL+E"/>
-        <KeyBinding Command="{Binding RenameCommand}" Gesture="F2"/>
-        <KeyBinding Command="{Binding FormatCommand}" Gesture="CTRL+F"/>
-        <KeyBinding Command="{Binding ReadOnlyCommand}" Gesture="CTRL+SHIFT+R"/>
-        <KeyBinding Command="{Binding BitLockCommand}" Gesture="CTRL+B"/>
-        <KeyBinding Command="{Binding RefreshCommand}" Gesture="CTRL+R"/>
-        <KeyBinding Command="{Binding CloseWindowCommand}" Gesture="CTRL+Q"/>
+        <KeyBinding Command="{Binding ChangeMountStateCommand}" Key="{Binding ChangeMountStateCommand.KeyGesture}" Modifiers="{Binding ChangeMountStateCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding RenameCommand}" Key="{Binding RenameCommand.KeyGesture}" Modifiers="{Binding RenameCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding FormatCommand}" Key="{Binding FormatCommand.KeyGesture}" Modifiers="{Binding FormatCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding ReadOnlyCommand}" Key="{Binding ReadOnlyCommand.KeyGesture}" Modifiers="{Binding ReadOnlyCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding BitLockCommand}" Key="{Binding BitLockCommand.KeyGesture}" Modifiers="{Binding BitLockCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding RefreshCommand}" Key="{Binding RefreshCommand.KeyGesture}" Modifiers="{Binding RefreshCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding CloseWindowCommand}" Key="{Binding CloseWindowCommand.KeyGesture}" Modifiers="{Binding CloseWindowCommand.GestureModifier}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -27,7 +26,7 @@
             <!-- Window Menu Bar -->
             <Menu DockPanel.Dock="Top" VerticalAlignment="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Name="MenuItemExit" Header="_Exit" InputGestureText="CTRL+Q" Command="{Binding CloseWindowCommand}"/>
+                    <MenuItem Name="MenuItemExit" Header="_Exit" InputGestureText="{Binding CloseWindowCommand.InputGestureText}" Command="{Binding CloseWindowCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_View">
                     <MenuItem Name="MenuItemShowAllVolumes" Header="_Show All Volumes"/>
@@ -67,13 +66,13 @@
                     </ListView.Resources>
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+E"/>
-                            <MenuItem Command="{Binding RenameCommand}" Header="Rename" InputGestureText="F2"/>
-                            <MenuItem Command="{Binding FormatCommand}" Header="Format" InputGestureText="CTRL+F"/>
-                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+SHIFT+R"/>
+                            <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding RenameCommand}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding FormatCommand}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
                             <Separator/>
-                            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="CTRL+B"/>
-                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="CTRL+R"/>
+                            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.View>
