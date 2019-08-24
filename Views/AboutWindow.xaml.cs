@@ -10,10 +10,5 @@ namespace DiskpartGUI.Views
         {
             InitializeComponent();
         }
-
-        private void WebAddress_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-        }
     }
 }

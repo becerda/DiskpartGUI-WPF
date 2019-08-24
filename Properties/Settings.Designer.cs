@@ -34,5 +34,23 @@ namespace DiskpartGUI.Properties {
                 this["ShowAllVolumes"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
+        public string Version {
+            get {
+                return ((string)(this["Version"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/becerda/DiskpartGUI-WPF")]
+        public string Website {
+            get {
+                return ((string)(this["Website"]));
+            }
+        }
     }
 }
