@@ -15,6 +15,9 @@
     <Window.DataContext>
         <vm:AboutWindowViewModel/>
     </Window.DataContext>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding CancelCommand}" Key="{Binding CancelCommand.KeyGesture}" Modifiers="{Binding CancelCommand.GestureModifier}"/>
+    </Window.InputBindings>
     <DockPanel>
         <Border CornerRadius="1" BorderBrush="Black" Background="White" BorderThickness="5">
         <Grid DockPanel.Dock="Top">
