@@ -10,6 +10,10 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ApplyCommand}" Key="{Binding ApplyCommand.KeyGesture}" Modifiers="{Binding ApplyCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding CancelCommand}" Key="{Binding CancelCommand.KeyGesture}" Modifiers="{Binding CancelCommand.GestureModifier}"/>
+    </Window.InputBindings>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>

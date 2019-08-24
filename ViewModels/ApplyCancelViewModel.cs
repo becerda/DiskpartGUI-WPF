@@ -43,7 +43,7 @@ namespace DiskpartGUI.ViewModels
         public ApplyCancelViewModel() : base()
         {
             ApplyCommand = new RelayCommand(Apply, CanApply, Key.Enter);
-            CancelCommand = new RelayCommand(Cancel);
+            CancelCommand = new RelayCommand(Cancel, Key.Escape);
             ExitStatus = ExitStatus.Closed;
         }
 
