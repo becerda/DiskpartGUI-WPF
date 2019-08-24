@@ -1,11 +1,13 @@
-﻿
-using System;
+﻿using System;
 
 namespace DiskpartGUI.ViewModels
 {
     class AboutWindowViewModel : ApplyCancelViewModel
     {
 
+        /// <summary>
+        /// The name of the program
+        /// </summary>
         public string ProgramName
         {
             get
@@ -14,6 +16,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// The website this program can be found at
+        /// </summary>
         public string WebsiteAddress
         {
             get
@@ -21,7 +26,10 @@ namespace DiskpartGUI.ViewModels
                 return Properties.Settings.Default.Website;
             }
         }
-        
+
+        /// <summary>
+        /// licensing informationg
+        /// </summary>
         public string Information
         {
             get
@@ -30,6 +38,14 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance
+        /// </summary>
+        public AboutWindowViewModel() : base() { }
+
+        /// <summary>
+        /// Will check for updates
+        /// </summary>
         public override void Apply()
         {
             throw new NotImplementedException();

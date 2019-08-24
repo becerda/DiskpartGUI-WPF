@@ -5,44 +5,53 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DiskpartGUI.Views"
+        xmlns:vm="clr-namespace:DiskpartGUI.ViewModels"
         mc:Ignorable="d"
         Title="Distpart GUI" 
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Label Name="ProgramName" Content="{Binding ProgramName}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
-        
-        <Label Name="Author" Content="Author:" Margin="10,0,0,0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <Label Name="Ben" Content="Benjamin Cerda" Margin="0,0,10,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-
-        <Label Name="Website" Content="Website:" Margin="10,0,0,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <Label Name="WebAddress" Content="{Binding WebsiteAddress}" Margin="0,0,10,0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-
-        <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2">
-            <Border CornerRadius="1" BorderBrush="Gray" Background="White" BorderThickness="1"/>
-            <TextBlock Name="Info" Text="{Binding Information}" Margin="10,0,10,0"/>
-        </DockPanel>
-        <Grid Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2">
+    <Window.DataContext>
+        <vm:AboutWindowViewModel/>
+    </Window.DataContext>
+    <DockPanel>
+        <Border CornerRadius="1" BorderBrush="Black" Background="White" BorderThickness="5">
+        <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Name="Update" Content="Check For Updates" Command="{Binding ApplyCommand}" Width="110" Margin="5" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <Button Name="Close" Content="Close" Command="{Binding CancelCommand}" Width="110" Margin="5" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Name="ProgramName" Content="{Binding ProgramName}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+
+            <Label Name="Author" Content="Author:" Margin="10,0,0,0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            <Label Name="Ben" Content="Benjamin Cerda" Margin="0,0,10,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+            <Label Name="Website" Content="Website:" Margin="10,0,0,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            <Label Name="WebAddress" Content="{Binding WebsiteAddress}" Margin="0,0,10,0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+            <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2">
+                <Border CornerRadius="1" BorderBrush="Gray" Background="White" BorderThickness="1" Margin="10">
+                    <TextBlock Name="Info" Text="{Binding Information}" Margin="10,0,10,0" Width="250" DockPanel.Dock="Top" TextWrapping="Wrap"/>
+                </Border>
+            </DockPanel>
+            <Grid Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="Check For Updates" Command="{Binding ApplyCommand}" Width="110" Margin="5" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Button Content="Close" Command="{Binding CancelCommand}" Width="110" Margin="5" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
         </Grid>
-    </Grid>
+        </Border>
+    </DockPanel>
 </local:BaseClosableWindow>
