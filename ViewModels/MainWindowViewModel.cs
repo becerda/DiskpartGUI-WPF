@@ -169,6 +169,11 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand ShowAllVolumesCommand { get; private set; }
 
         /// <summary>
+        /// Shows the About window
+        /// </summary>
+        public RelayCommand AboutCommand { get; private set; }
+
+        /// <summary>
         /// Reference to a DiskpartProces
         /// </summary>
         public DiskpartProcess DiskpartProcess
@@ -197,6 +202,7 @@ namespace DiskpartGUI.ViewModels
             FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid, Key.F, ModifierKeys.Control);
             CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Q, ModifierKeys.Control);
             ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
+            AboutCommand = new RelayCommand(ShowAboutWindow, Key.F1);
 
             Refresh();
         }
@@ -345,6 +351,14 @@ namespace DiskpartGUI.ViewModels
                 if (!v.IsRemovable())
                     Volumes.Remove(v);
             }
+        }
+
+        /// <summary>
+        /// Shows the About window
+        /// </summary>
+        private void ShowAboutWindow()
+        {
+            new AboutWindow().ShowDialog();
         }
 
         /// <summary>

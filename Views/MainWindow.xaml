@@ -21,6 +21,7 @@
         <KeyBinding Command="{Binding RefreshCommand}" Key="{Binding RefreshCommand.KeyGesture}" Modifiers="{Binding RefreshCommand.GestureModifier}"/>
         <KeyBinding Command="{Binding CloseWindowCommand}" Key="{Binding CloseWindowCommand.KeyGesture}" Modifiers="{Binding CloseWindowCommand.GestureModifier}"/>
         <KeyBinding Command="{Binding ShowAllVolumesCommand}" Key="{Binding ShowAllVolumesCommand.KeyGesture}" Modifiers="{Binding ShowAllVolumesCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding AboutCommand}" Key="{Binding AboutCommand.KeyGesture}" Modifiers="{Binding AboutCommand.GestureModifier}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -45,7 +46,7 @@
                     <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
                 </MenuItem>
                 <MenuItem Header="_Help">
-                    <MenuItem Name="MenuItemAbout" Header="_About"/>
+                    <MenuItem Command="{Binding AboutCommand}" Header="_About" InputGestureText="{Binding AboutCommand.InputGestureText}"/>
                     <Separator/>
                     <MenuItem Name="MenuItemAutoCheckForUpdates" Header="Auto Check For _Updates"/>
                 </MenuItem>
