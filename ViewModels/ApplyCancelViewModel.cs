@@ -30,20 +30,20 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// The RelayCommand for Apply to be used with bindings
         /// </summary>
-        public RelayCommand ApplyCommand { get; private set; }
+        public ApplyCommand ApplyCommand { get; private set; }
 
         /// <summary>
         /// The RelayCommand for Cancel to be used with bindings
         /// </summary>
-        public RelayCommand CancelCommand { get; private set; }
+        public CancelCommand CancelCommand { get; private set; }
 
         /// <summary>
         /// Sets up Apply and Cancel Commands
         /// </summary>
         public ApplyCancelViewModel() : base()
         {
-            ApplyCommand = new RelayCommand(Apply, CanApply, Key.Enter);
-            CancelCommand = new RelayCommand(Cancel, Key.Escape);
+            ApplyCommand = new ApplyCommand(this);
+            CancelCommand = new CancelCommand(this);
             ExitStatus = ExitStatus.Closed;
         }
 
