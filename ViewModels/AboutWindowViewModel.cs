@@ -34,7 +34,7 @@ namespace DiskpartGUI.ViewModels
         {
             get
             {
-                return "This program is free software. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE";
+                return "This program is free software. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
             }
         }
 

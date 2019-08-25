@@ -8,10 +8,7 @@ namespace DiskpartGUI.Views
         /// <summary>
         /// Default Constructor
         /// </summary>
-        public BaseClosableWindow() : base()
-        {
-            Loaded += Window_Loaded;
-        }
+        public BaseClosableWindow() : this(null) { }
 
         /// <summary>
         /// Constructor to set the DataContext
@@ -36,6 +33,6 @@ namespace DiskpartGUI.Views
             }
         }
 
-        
+
     }
 }
