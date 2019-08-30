@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiskpartGUI", "DiskpartGUI.csproj", "{6336ADB9-75E1-482E-8A12-26461CDDF386}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiskpartGUI.UnitTests", "..\DiskpartGUI.UnitTests\DiskpartGUI.UnitTests.csproj", "{0B900811-8246-498B-A98A-006227FF273F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6336ADB9-75E1-482E-8A12-26461CDDF386}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6336ADB9-75E1-482E-8A12-26461CDDF386}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6336ADB9-75E1-482E-8A12-26461CDDF386}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6336ADB9-75E1-482E-8A12-26461CDDF386}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B900811-8246-498B-A98A-006227FF273F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B900811-8246-498B-A98A-006227FF273F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B900811-8246-498B-A98A-006227FF273F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B900811-8246-498B-A98A-006227FF273F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E67D8DAA-AF16-436F-A7EA-7A849B82389A}
+	EndGlobalSection
+EndGlobal
