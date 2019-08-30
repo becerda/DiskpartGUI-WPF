@@ -20,7 +20,7 @@ This README will go over the commands used to preform the background tasks of va
 6) Activate BitLock
 
 ## Listing Of Found Drive
-Diskpart command line interpreter by Java will be used to display information.
+Diskpart command line interpreter by C#-WPF.NET framework will be used to display information.
 
 ### Diskpart
 ```bash
@@ -40,15 +40,20 @@ LIST VOLUME
 	Info
 
 ### Displayed Info On GUI
-Populate JTable with volumes in main window with:
+Populate ListView with volumes in main window with:
 
 	Volume Number
 	Volume Letter
 	Label
+	File System
+	Type
 	Size
+	Status
+	Info
+	Read-Only Flag
 
 ## Quickly Change Attributes
-Diskpart command line executed by Java will be used to change attributes associated with selected volume.
+Diskpart command line executed by C# will be used to change attributes associated with selected volume.
 
 ### Diskpart
 #### Command 1:
@@ -62,10 +67,10 @@ ATTRIBUTES DISK [SET | CLEAR] [READONLY] [NOERR]
 	NOERR - Flag for setting no error output
 
 ### Returns
-Successful or error message
+Success or error message
 
 ### Displayed Info On GUI
-A pop-up window will appear upon completion showing either successful or error.
+A pop-up window will appear upon completion showing either success or error.
 
 #### Command 2:
 ```bash
@@ -78,10 +83,10 @@ ATTRIBUTES DISK
 Attribute for selected disk.
 
 ### Displayed Info On GUI
-A column in the previously mentioned JTable marked as "Yes" or "No".
+A column in the previously mentioned ListView marked as "Set" or "Cleared".
 
 ## Safely Eject Drives
-Diskpart command executed through Java, the selected drive will be unmounted and safe to remove.
+Diskpart command executed through C#, the selected drive will be unmounted and safe to remove.
 
 ### Diskpart
 ```bash
@@ -96,30 +101,35 @@ Diskpart returns a success or error message
 
 ### Displayed Info On GUI
 Button below displayed drive with "Eject" or "Mount" on it.
-A pop-up window will appear upon completion showing either successful or error.
+A pop-up window will appear upon completion showing either success or error.
 
 ## Format Removable Drives
-Diskpart command line interpreter by Java will be used to format removable drives.
+Diskpart command line interpreter by C# will be used to format removable drives.
 
 ### Diskpart
 ```bash
-FORMAT [FS=<FS>] [LABEL=<LABEL>] [UINT=<N>] [QUICK]
+FORMAT [[FS=<FS> [REVISION=<X.XX>]] | RECOMMENDED]  [LABEL=<LABEL>] [UINT=<N>] [QUICK] [COMPRESS] [OVERRIDE] [DUPLICATE]
 ```
 	FORMAT - Command to format volume
-	FS=<FS> - Sets the file system to use
-	LABEL=<LABEL> - Sets the label for the volume
-	UINT=<N> - Sets default allocation unit size
-	QUICK - Flag to set quick format
+	FS=<FS> - Specifies the type of file system. If no file system is given, the default file system displayed by the FILESYSTEMS command is used.
+	REVISION - Specifies the file system revision (if applicable).
+	RECOMMENDED - The System recommended version file system to use
+	LABEL=<LABEL> - Specifies the volume label.
+	UINT=<N> - Overrides the default allocation unit size. Default settings are strongly recommended for general use. The default allocation unit size for a particular file system is displayed by the FILESYSTEMS command.
+	QUICK - Performs a quick format.
+	COMPRESS - NTFS only: Files created on the new volume will be compressed by default
+	OVERRIDE - Forces the file system to dismount first if necessary. All open handles to the volume would no longer be valid.
+	DUPLICATE - UDF Only: This flag applies to UDF format, version 2.5 or higher. This flag instructs the format operation to duplicate the file system meta-data to a second set of sectors on the disk. The duplicate meta-data is used by applications, for example repair or recovery applications. If the primary meta-data sectors are found to be corrupted, the file system meta-data will be read from the duplicate sectors.
 
 ### Returns
-Diskpart will return either successful or error message.
+Diskpart will return either success or error message.
 
 ### Displayed Info On GUI
 Button below displayed drive with “Format” on it.
 A pop-up window will appear upon completion showing either successful or error.
 
 ## Rename Volume
-Label command line interpreter by Java will be used to rename removable drives.
+Label command line interpreted by C# will be used to rename removable drives.
 
 ### Label
 ```bash
@@ -134,10 +144,10 @@ Label does not return anything
 
 ### Displayed Info On GUI
 Button below displayed drive with “Rename” on it.
-A pop-up window will appear upon completion showing either successful or error.
+A pop-up window will appear upon completion showing either success or error.
 
 ## Activate BitLock
-Control command executed through Java to open BitLock window.
+Control command executed through C# to open BitLock window.
 
 ### Control
 ```bash
