@@ -60,13 +60,13 @@
             <CheckBox Name="CheckBoxQuick" Content="Quick Format" Margin="5" IsChecked="{Binding QuickFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left"/>
 
             <!-- Compress -->
-            <CheckBox Name="CheckBoxCompress" Content="Compress" Margin="5" IsChecked="{Binding Compress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left"/>
+            <CheckBox Name="CheckBoxCompress" Content="Compress" Margin="5" IsChecked="{Binding Compress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanCompress, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left"/>
 
             <!-- Override -->
             <CheckBox Name="CheckBoxOverride" Content="Override" Margin="5" IsChecked="{Binding Override, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left"/>
 
             <!-- Duplicate -->
-            <CheckBox Name="CheckBoxDuplicate" Content="Duplicate" Margin="5" IsChecked="{Binding Duplicate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left"/>
+            <CheckBox Name="CheckBoxDuplicate" Content="Duplicate" Margin="5" IsChecked="{Binding Duplicate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanDuplicate, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left"/>
 
         </Grid>
 
