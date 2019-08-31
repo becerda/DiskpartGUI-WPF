@@ -24,8 +24,10 @@ namespace DiskpartGUI.ViewModels
         private string revisiontext;
         private bool quick;
         private bool comp;
+        private bool cancomp;
         private bool over;
         private bool dup;
+        private bool candup;
         private bool comboboxunitsizeenabled;
         private bool textboxrevisionenabled;
         private Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
@@ -94,6 +96,16 @@ namespace DiskpartGUI.ViewModels
             set
             {
                 fs = value;
+                if (value == FileSystem.NTFS)
+                {
+                    CanCompress = true;
+                }
+                else
+                {
+                    CanCompress = false;
+                    Compress = false;
+                }
+
                 if (value == FileSystem.Default)
                 {
                     ComboBoxUnitSizeIsEnabled = false;
@@ -196,6 +208,19 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        public bool CanCompress
+        {
+            get
+            {
+                return cancomp;
+            }
+            set
+            {
+                cancomp = value;
+                OnPropertyChanged(nameof(CanCompress));
+            }
+        }
+
         /// <summary>
         /// The Override format option
         /// </summary>
@@ -225,6 +250,19 @@ namespace DiskpartGUI.ViewModels
             {
                 dup = value;
                 OnPropertyChanged(nameof(Duplicate));
+            }
+        }
+
+        public bool CanDuplicate
+        {
+            get
+            {
+                return candup;
+            }
+            set
+            {
+                candup = value;
+                OnPropertyChanged(nameof(CanDuplicate));
             }
         }
 
