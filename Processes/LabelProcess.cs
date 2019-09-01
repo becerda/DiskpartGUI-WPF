@@ -30,7 +30,7 @@ namespace DiskpartGUI.Processes
                 }
                 return ProcessExitCode.Error;
             }
-            return ProcessExitCode.ErrorInvalidVolume;
+            return ProcessExitCode.ErrorInvalidMediaType;
         }
     }
 }

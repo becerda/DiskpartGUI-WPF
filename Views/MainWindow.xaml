@@ -42,6 +42,7 @@
                 </MenuItem>
                 <MenuItem Header="_View">
                     <MenuItem Command="{Binding ShowAllVolumesCommand}" Header="_Show All Volumes" IsChecked="{Binding ShowAllVolumes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ShowAllVolumesCommand.InputGestureText}"/>
+                    <MenuItem Command="{Binding ToggleListViewCommand}" Header="{Binding ShowOpositeViewMenuItemText}" />
                     <Separator/>
                     <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
                 </MenuItem>
@@ -67,12 +68,12 @@
                 </Grid.RowDefinitions>
 
                 <!-- Selected Volume Label -->
-                <Label Content="{Binding SelectedVolumeInfo}" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+                <Label Content="{Binding SelectedItemInfo}" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
 
                 <!-- List View Of Volumes -->
                 <ListView Name="ListViewVolumes" Margin="10,5,10,10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" 
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"
-                          Height="200" ItemsSource="{Binding Volumes, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedVolume, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding VolumeListVisibility, UpdateSourceTrigger=PropertyChanged}"
+                          Height="200" ItemsSource="{Binding ListViewSource, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -80,26 +81,61 @@
                     </ListView.Resources>
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Command="{Binding ChangeMountStateCommand}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding RenameCommand}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding FormatCommand}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding ReadOnlyCommand}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ChangeMountStateCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding RenameCommand}" CommandParameter="{Binding SelectedItem}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding FormatCommand}" CommandParameter="{Binding SelectedItem}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ReadOnlyCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
                             <Separator/>
                             <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
                             <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ToggleListViewCommand}" Header="{Binding ShowOpositeViewMenuItemText}" />
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn x:Name="GridViewColumnNumber" Header="#" DisplayMemberBinding="{Binding Number}" Width="25"/>
                             <GridViewColumn x:Name="GridViewColumnLetter" Header="Letter" DisplayMemberBinding="{Binding DriveLetter}" Width="40"/>
-                            <GridViewColumn x:Name="GridViewColumnLabel" Header="Label" DisplayMemberBinding="{Binding Label}" Width="85"/>
+                            <GridViewColumn x:Name="GridViewColumnLabel" Header="Label" DisplayMemberBinding="{Binding Label}" Width="90"/>
                             <GridViewColumn x:Name="GridViewColumnFileSystem" Header="File System" DisplayMemberBinding="{Binding FileSystem}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnType" Header="Type" DisplayMemberBinding="{Binding VolumeType}" Width="80"/>
                             <GridViewColumn x:Name="GridViewColumnSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnInfo" Header="Info" DisplayMemberBinding="{Binding Info}" Width="70"/>
-                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="100"/>
+                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="70"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <!-- List View Of Disks-->
+                <ListView Name="ListViewDisks" Margin="10,5,10,10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding DiskListVisibility, UpdateSourceTrigger=PropertyChanged}"
+                          Height="200" ItemsSource="{Binding ListViewSource, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding ChangeMountStateCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding RenameCommand}" CommandParameter="{Binding SelectedItem}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding FormatCommand}" CommandParameter="{Binding SelectedItem}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ReadOnlyCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
+                            <Separator/>
+                            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
+                            <MenuItem Command="{Binding ToggleListViewCommand}" Header="{Binding ShowOpositeViewMenuItemText}" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn x:Name="GridViewColumnDiskNumber" Header="#" DisplayMemberBinding="{Binding Number}" Width="25"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskFree" Header="Free Space" DisplayMemberBinding="{Binding FullFreeSpace}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskDyn" Header="Dynamic" DisplayMemberBinding="{Binding DiskType}" Width="90"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskGUID" Header="GPT" DisplayMemberBinding="{Binding GPTType}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="70"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -119,19 +155,19 @@
 
                     <!-- Eject Button -->
                     <Button Name="ButtonEject" Content="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,5,5" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding ChangeMountStateCommand}"/>
+                        Width="100" Command="{Binding ChangeMountStateCommand}" CommandParameter="{Binding SelectedItem}"/>
 
                     <!-- Rename Button -->
                     <Button Name="ButtonRename" Content="Rename" Margin="5,0,5,5" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding RenameCommand}" CommandParameter="{Binding ElementName=ListViewVolumes, Path=SelectedItem}"/>
+                        Width="100" Command="{Binding RenameCommand}" CommandParameter="{Binding SelectedItem}"/>
 
                     <!-- Format Button -->
                     <Button Name="ButtonFormat" Content="Format" Margin="5,0,5,5" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding FormatCommand}"/>
+                        Width="100" Command="{Binding FormatCommand}" CommandParameter="{Binding SelectedItem}"/>
 
                     <!-- Read Only Button -->
                     <Button Name="ButtonReadOnly" Content="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,5" Grid.Row="0" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Width="100" Command="{Binding ReadOnlyCommand}"/>
+                        Width="100" Command="{Binding ReadOnlyCommand}" CommandParameter="{Binding SelectedItem}"/>
 
                     <!-- BitLock Button -->
                     <Button Name="ButtonBitlock" Content="BitLock" Margin="5,0,5,5" Grid.Row="0" Grid.Column="4" VerticalAlignment="Center" Command="{Binding BitLockCommand}" HorizontalAlignment="Center" Width="100"/>
