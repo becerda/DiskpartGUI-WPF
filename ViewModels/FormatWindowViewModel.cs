@@ -313,10 +313,10 @@ namespace DiskpartGUI.ViewModels
         /// Creates a new instance of FormatWindowViewModel
         /// </summary>
         /// <param name="v">The volume to preform a format on</param>
-        public FormatWindowViewModel(ref Volume v) : base()
+        public FormatWindowViewModel(ref BaseMedia b) : base()
         {
-            volume = v;
-            Title = "Format - " + v.ToString();
+            volume = (Volume)b;
+            Title = "Format - " + volume.ToString();
             filesystemlist = new List<FileSystem>();
             unitsizelist = new Dictionary<FileSystem, List<string>>();
             QuickFormat = true;

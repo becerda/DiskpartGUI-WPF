@@ -13,7 +13,7 @@ namespace DiskpartGUI.Models
         /// Method to call PropertyChanged Event
         /// </summary>
         /// <param name="property"></param>
-        protected void NotifyPropertyChanged(string property)
+        protected void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
