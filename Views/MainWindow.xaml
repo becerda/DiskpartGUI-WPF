@@ -71,8 +71,8 @@
                 <Label Content="{Binding SelectedItemInfo}" Margin="10,0,0,0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
 
                 <!-- List View Of Volumes -->
-                <ListView Name="ListViewVolumes" Margin="10,5,10,10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" 
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding VolumeListVisibility, UpdateSourceTrigger=PropertyChanged}"
+                <ListView Name="ListViewVolumes" Margin="10,5,10,10" Width="650" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"
+                          Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding VolumeListVisibility, UpdateSourceTrigger=PropertyChanged}"
                           Height="200" ItemsSource="{Binding ListViewSource, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -101,14 +101,14 @@
                             <GridViewColumn x:Name="GridViewColumnSize" Header="Size" DisplayMemberBinding="{Binding FullSize}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnInfo" Header="Info" DisplayMemberBinding="{Binding Info}" Width="70"/>
-                            <GridViewColumn x:Name="GridViewColumnReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnAttributes" Header="Attributes" DisplayMemberBinding="{Binding Attributes}" Width="100"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
 
                 <!-- List View Of Disks-->
-                <ListView Name="ListViewDisks" Margin="10,5,10,10" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding DiskListVisibility, UpdateSourceTrigger=PropertyChanged}"
+                <ListView Name="ListViewDisks" Margin="10,5,10,10" Width="650" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True"
+                          Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Visibility="{Binding DiskListVisibility, UpdateSourceTrigger=PropertyChanged}"
                           Height="200" ItemsSource="{Binding ListViewSource, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -135,7 +135,7 @@
                             <GridViewColumn x:Name="GridViewColumnDiskFree" Header="Free Space" DisplayMemberBinding="{Binding FullFreeSpace}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnDiskDyn" Header="Dynamic" DisplayMemberBinding="{Binding DiskType}" Width="90"/>
                             <GridViewColumn x:Name="GridViewColumnDiskGUID" Header="GPT" DisplayMemberBinding="{Binding GPTType}" Width="70"/>
-                            <GridViewColumn x:Name="GridViewColumnDiskReadOnly" Header="Read-Only" DisplayMemberBinding="{Binding ReadOnlyState}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskAttributes" Header="Attributes" DisplayMemberBinding="{Binding Attributes}" Width="200"/>
                         </GridView>
                     </ListView.View>
                 </ListView>

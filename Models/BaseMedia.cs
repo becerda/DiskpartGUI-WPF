@@ -178,6 +178,22 @@ namespace DiskpartGUI.Models
         Cleared
     }
 
+    [Flags]
+    public enum Attributes
+    {
+        None = 0,
+        ReadOnly = 1,
+        Hidden = 2,
+        NoDefaultDriveLetter = 4,
+        ShadowCopy = 8,
+        CurrentReadOnlyState = 16,
+        Boot = 32,
+        Pagefile = 64,
+        HibernationFile = 128,
+        Crashdump = 256,
+        Cluster = 512
+    }
+
     /// <summary>
     /// The Unit Size of a volume
     /// </summary>
@@ -279,13 +295,15 @@ namespace DiskpartGUI.Models
     public enum GPTType
     {
         Blank,
+        Set
     }
 
     static class GPTTypeExtension
     {
         private static readonly Dictionary<string, GPTType> gpt = new Dictionary<string, GPTType>
         {
-            {"", GPTType.Blank }
+            {"", GPTType.Blank },
+            {"*", GPTType.Set }
         };
 
         public static GPTType Parse(string type)
@@ -301,7 +319,7 @@ namespace DiskpartGUI.Models
         private Status status;
         private int size;
         private SizePostfix sizepostfix;
-        private ReadOnlyState read_only;
+        private Attributes attribs;
 
         /// <summary>
         /// The number a media item is assigned
@@ -370,15 +388,15 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The Read-Only flag of a media item
         /// </summary>
-        public ReadOnlyState ReadOnlyState
+        public Attributes Attributes
         {
             get
             {
-                return read_only;
+                return attribs;
             }
             set
             {
-                read_only = value;
+                attribs = value;
                 OnPropertyChanged(nameof(ReadOnlyState));
             }
         }
@@ -400,7 +418,7 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public bool IsReadOnly()
         {
-            return ReadOnlyState == ReadOnlyState.Set;
+            return Attributes.HasFlag(Attributes.ReadOnly);
         }
 
         /// <summary>

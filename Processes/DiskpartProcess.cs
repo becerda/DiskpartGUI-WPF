@@ -27,7 +27,9 @@ namespace DiskpartGUI.Processes
 
         private static readonly string Disk_Parse_RX = "Disk (?<disknum>[0-9]){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
         private static readonly string Volume_Parse_RX = "Volume (?<volnum>[0-9]){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
-        private static readonly string ReadOnly_Parse_RX = "Read-only( )+: (?<set>Yes|No)";
+
+        private static readonly string Disk_Attribute_Parse_RX = "Disk (?<disknum>[0-9]+) is now the selected disk\\.\\r\\nCurrent Read-only State : (?<croflag>Yes|No)\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nBoot Disk ( )+: (?<bdflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pfflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<cdflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustflag>Yes|No)";
+        private static readonly string Volume_Attribute_Parse_RX = "Volume (?<volnum>[0-9]+) is the selected volume\\.\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nHidden( )+: (?<hidflag>Yes|No)\\r\\nNo Default Drive Letter: (?<noddflag>Yes|No)\\r\\nShadow Copy( )+: (<shadFlagYes|No)";
 
         private static readonly string Disk_ReadOnly_Test_RX = "Disk attributes (set|cleared) successfully.";
         private static readonly string Volume_ReadOnly_Test_RX = "Volume attributes (set|cleared) successfully.";
@@ -181,9 +183,9 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="list">The Volumes to get the read-only flag</param>
         /// <returns>The process exit code</returns>
-        public ProcessExitCode GetReadOnlyState(ref List<BaseMedia> list, MediaType type)
+        public ProcessExitCode GetAttributes(ref List<BaseMedia> list, MediaType type)
         {
-            CurrentProcess = nameof(GetReadOnlyState);
+            CurrentProcess = nameof(GetAttributes);
 
             foreach (BaseMedia m in list)
             {
@@ -193,7 +195,7 @@ namespace DiskpartGUI.Processes
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
             {
-                return ParseReadOnlyState(ref list);
+                return ParseAttributes(ref list, type);
             }
             else
             {
@@ -207,19 +209,72 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="list">The List to set Read-Only state to</param>
         /// <returns>The process exit code</returns>
-        private ProcessExitCode ParseReadOnlyState(ref List<BaseMedia> list)
+        private ProcessExitCode ParseAttributes(ref List<BaseMedia> list, MediaType type)
         {
-            CurrentProcess = nameof(ParseReadOnlyState);
+            CurrentProcess = nameof(ParseAttributes);
             if (list != null)
             {
-                Regex rx = new Regex(ReadOnly_Parse_RX);
+                Regex rx;
+                switch (type)
+                {
+                    case MediaType.DISK:
+                        rx = new Regex(Disk_Attribute_Parse_RX);
+                        break;
+                    case MediaType.VOLUME:
+                        rx = new Regex(Volume_Attribute_Parse_RX);
+                        break;
+                    default:
+                        rx = new Regex(string.Empty);
+                        break;
+                }
+
                 MatchCollection matches = rx.Matches(StdOutput);
                 if (matches.Count > 0)
                 {
                     int i = 0;
                     foreach (Match match in matches)
                     {
-                        list[i++].ReadOnlyState = match.Groups["set"].Value == "Yes" ? ReadOnlyState.Set : ReadOnlyState.Cleared;
+                        GroupCollection gc = match.Groups;
+                        int medianum;
+                        switch (type)
+                        {
+                            case MediaType.DISK:
+                                medianum = Int32.Parse(gc["disknum"].Value);
+
+                                if (gc["croflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.CurrentReadOnlyState;
+                                if (gc["roflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.ReadOnly;
+                                if (gc["bdflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.Boot;
+                                if (gc["pfflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.Pagefile;
+                                if (gc["hibflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.HibernationFile;
+                                if (gc["cdflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.Crashdump;
+                                if (gc["clustflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.Cluster;
+                                break;
+                            case MediaType.VOLUME:
+                                medianum = Int32.Parse(gc["volnum"].Value);
+
+                                if (gc["roflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.ReadOnly;
+
+                                if (gc["hidflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.Hidden;
+
+                                if (gc["noddflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.NoDefaultDriveLetter;
+
+                                if (gc["shadflag"].Value == "Yes")
+                                    list[medianum].Attributes |= Attributes.ShadowCopy;
+                                break;
+                            default:
+
+                                break;
+                        }
 
                     }
                     ExitCode = ProcessExitCode.Ok;

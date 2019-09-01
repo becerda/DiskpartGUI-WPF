@@ -565,7 +565,7 @@ namespace DiskpartGUI.ViewModels
             }
             else
             {
-                task = Task.Run(() => DiskpartProcess.GetReadOnlyState(ref listviewsource, type));
+                task = Task.Run(() => DiskpartProcess.GetAttributes(ref listviewsource, type));
                 result = await task;
                 if (result != ProcessExitCode.Ok)
                 {
