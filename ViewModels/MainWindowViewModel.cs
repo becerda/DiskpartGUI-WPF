@@ -414,11 +414,19 @@ namespace DiskpartGUI.ViewModels
             Refresh();
         }
 
+        /// <summary>
+        /// Checks SelectedItem.CanToggleShowAllVolumes
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be renamed</returns>
         private bool CanToggleShowAllVolumes(object o)
         {
             return ShowVolumes;
         }
 
+        /// <summary>
+        /// Toggles between ListViewVolumes and ListViewDisks
+        /// </summary>
         private void ToggleListViews()
         {
             ShowVolumes = !ShowVolumes;

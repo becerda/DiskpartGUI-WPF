@@ -248,6 +248,11 @@ namespace DiskpartGUI.Models
         }
     }
 
+
+    /// <summary>
+    /// The DynamicType of a disk
+    /// Not Complete
+    /// </summary>
     public enum DynamicType
     {
         Blank,
@@ -267,6 +272,10 @@ namespace DiskpartGUI.Models
         }
     }
 
+    /// <summary>
+    /// The GPT type of a disk
+    /// Not Complete
+    /// </summary>
     public enum GPTType
     {
         Blank,

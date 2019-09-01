@@ -13,6 +13,9 @@ namespace DiskpartGUI.Models
         private DynamicType dynamic;
         private GPTType gpttype;
 
+        /// <summary>
+        /// The free space of a disk
+        /// </summary>
         public int FreeSpace
         {
             get
@@ -26,6 +29,9 @@ namespace DiskpartGUI.Models
             }
         }
 
+        /// <summary>
+        /// The postfix of the free space size
+        /// </summary>
         public SizePostfix FreeSpacePostfix
         {
             get
@@ -39,6 +45,9 @@ namespace DiskpartGUI.Models
             }
         }
 
+        /// <summary>
+        /// The full string of the free space
+        /// </summary>
         public string FullFreeSpace
         {
             get
@@ -46,7 +55,10 @@ namespace DiskpartGUI.Models
                 return FreeSpace + " " + (FreeSpacePostfix == SizePostfix.None ? "B" : FreeSpacePostfix + "");
             }
         }
-
+        
+        /// <summary>
+        /// ???
+        /// </summary>
         public string Dynamic
         {
             get
@@ -62,6 +74,9 @@ namespace DiskpartGUI.Models
             }
         }
 
+        /// <summary>
+        /// ???
+        /// </summary>
         public string GPTType
         {
             get
@@ -77,6 +92,10 @@ namespace DiskpartGUI.Models
             }
         }
 
+        /// <summary>
+        /// The string representation of a disk
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return "Disk " + Number;
