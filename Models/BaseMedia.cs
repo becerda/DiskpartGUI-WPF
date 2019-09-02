@@ -422,15 +422,6 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
-        /// Is the media item valid for operations?
-        /// </summary>
-        /// <returns>Whether the volume is valid</returns>
-        public virtual bool IsValid()
-        {
-            return false;
-        }
-
-        /// <summary>
         /// Can this media item be set to read only?
         /// </summary>
         /// <returns></returns>
@@ -449,10 +440,19 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
-        /// Can this medai item be ejected?
+        /// Can this media item be ejected?
         /// </summary>
         /// <returns></returns>
         public virtual bool CanBeEjected()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Can this media item be formated?
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool CanBeFormated()
         {
             return false;
         }

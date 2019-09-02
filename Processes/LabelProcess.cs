@@ -17,19 +17,16 @@ namespace DiskpartGUI.Processes
         /// <returns></returns>
         public static ProcessExitCode RenameVolume(ref Volume v, string newlabel)
         {
-            if (v.IsValid())
+            CMDProcess label = new CMDProcess("label");
+            label.AddArgument(v.DriveLetter + " " + newlabel);
+            if (label.Run() == ProcessExitCode.Ok)
             {
-                CMDProcess label = new CMDProcess("label");
-                label.AddArgument(v.DriveLetter + " " + newlabel);
-                if (label.Run() == ProcessExitCode.Ok)
-                {
-                    if (label.TestOutput(Error_Regex))
-                        return ProcessExitCode.Error;
-                    v.Label = newlabel;
-                    return ProcessExitCode.Ok;
-                }
-                return ProcessExitCode.Error;
+                if (label.TestOutput(Error_Regex))
+                    return ProcessExitCode.Error;
+                v.Label = newlabel;
+                return ProcessExitCode.Ok;
             }
+
             return ProcessExitCode.ErrorInvalidMediaType;
         }
     }

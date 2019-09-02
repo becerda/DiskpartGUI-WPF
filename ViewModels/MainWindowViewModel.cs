@@ -271,7 +271,7 @@ namespace DiskpartGUI.ViewModels
             RenameCommand = new RelayCommand(RenameVolume, CanBeRenamed, Key.F2);
             BitLockCommand = new RelayCommand(LaunchBitLock, Key.B, ModifierKeys.Control);
             ReadOnlyCommand = new RelayCommand(SetReadOnly, CanToggleReadOnlyFlag, Key.R, ModifierKeys.Control | ModifierKeys.Shift);
-            FormatCommand = new RelayCommand(FormatVolume, IsSelectedItemValid, Key.F, ModifierKeys.Control);
+            FormatCommand = new RelayCommand(FormatVolume, CanBeFormated, Key.F, ModifierKeys.Control);
             CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Q, ModifierKeys.Control);
             ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, CanToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
             ToggleListViewCommand = new RelayCommand(ToggleListViews);
@@ -471,22 +471,6 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Checks SelectedItem.IsValid
-        /// </summary>
-        /// <param name="o">The SelectedItem</param>
-        /// <returns>Whether the SelectedItem is valid</returns>
-        public bool IsSelectedItemValid(object o)
-        {
-
-            if (masterbuttonsenabled == false)
-                return false;
-
-            if (o == null)
-                return false;
-            return ((BaseMedia)o).IsValid();
-        }
-
-        /// <summary>
         /// Checks SelectedItem.CanToggleReadOnlyFlag
         /// </summary>
         /// <param name="o">The SelectedItem</param>
@@ -529,6 +513,20 @@ namespace DiskpartGUI.ViewModels
             if (o == null)
                 return false;
             return ((BaseMedia)o).CanBeEjected();
+        }
+
+        /// <summary>
+        /// Checks SelectedItem.CanBeFormated
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be formated</returns>
+        public bool CanBeFormated(object o)
+        {
+            if (masterbuttonsenabled == false)
+                return false;
+            if (o == null)
+                return false;
+            return ((BaseMedia)o).CanBeFormated();
         }
 
         /// <summary>

@@ -144,15 +144,6 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
-        /// Is the volume valid for operations?
-        /// </summary>
-        /// <returns>Whether the volume is valid</returns>
-        public override bool IsValid()
-        {
-            return IsMounted() && VolumeType == VolumeType.Removable && this != null;
-        }
-
-        /// <summary>
         /// Can a Volume be set to read only?
         /// </summary>
         /// <returns></returns>
@@ -189,6 +180,17 @@ namespace DiskpartGUI.Models
             if (VolumeType == VolumeType.Removable)
                 return true;
             return false;
+        }
+
+        public override bool CanBeFormated()
+        {
+            if (Info.Contains("Pagefile"))
+                return false;
+            if (Info.Contains("System"))
+                return false;
+            if (Info.Contains("Boot"))
+                return false;
+            return true;
         }
 
         /// <summary>

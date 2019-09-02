@@ -231,7 +231,6 @@ namespace DiskpartGUI.Processes
                 MatchCollection matches = rx.Matches(StdOutput);
                 if (matches.Count > 0)
                 {
-                    int i = 0;
                     foreach (Match match in matches)
                     {
                         GroupCollection gc = match.Groups;
@@ -299,32 +298,25 @@ namespace DiskpartGUI.Processes
         public ProcessExitCode EjectVolume(BaseMedia b)
         {
             CurrentProcess = nameof(EjectVolume);
-            if (b.GetType() == typeof(Disk))
+            if (b is Disk) // || b is Partition
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
             else
             {
-                if (b.IsValid())
+                AddScriptCommand("SELECT VOLUME " + b.Number);
+                AddScriptCommand("REMOVE ALL DISMOUNT");
+                WriteScript();
+                if (Run() == ProcessExitCode.Ok)
                 {
-                    AddScriptCommand("SELECT VOLUME " + b.Number);
-                    AddScriptCommand("REMOVE ALL DISMOUNT");
-                    WriteScript();
-                    if (Run() == ProcessExitCode.Ok)
-                    {
-                        if (TestOutput(@"DiskPart successfully dismounted and offlined the volume."))
-                            ExitCode = ProcessExitCode.Ok;
-                        else
-                        {
-                            ExitCode = ProcessExitCode.ErrorTestOutput;
-                        }
-                    }
+                    if (TestOutput(@"DiskPart successfully dismounted and offlined the volume."))
+                        ExitCode = ProcessExitCode.Ok;
                     else
                     {
-                        ExitCode = ProcessExitCode.Error;
+                        ExitCode = ProcessExitCode.ErrorTestOutput;
                     }
                 }
                 else
                 {
-                    ExitCode = ProcessExitCode.ErrorInvalidMediaType;
+                    ExitCode = ProcessExitCode.Error;
                 }
             }
             return ExitCode;
@@ -338,7 +330,7 @@ namespace DiskpartGUI.Processes
         public ProcessExitCode AssignVolumeLetter(BaseMedia b)
         {
             CurrentProcess = nameof(AssignVolumeLetter);
-            if (b.GetType() == typeof(Disk))
+            if (b is Disk) // || b is Partition
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
             else
             {
@@ -378,6 +370,8 @@ namespace DiskpartGUI.Processes
         public ProcessExitCode SetReadOnly(BaseMedia b, ReadOnlyFunction function, MediaType type)
         {
             CurrentProcess = nameof(SetReadOnly);
+
+            // Check for Partition type
 
             if (!b.CanToggleReadOnly())
             {
@@ -428,20 +422,18 @@ namespace DiskpartGUI.Processes
         public ProcessExitCode GetFileSystemInfo(Volume v, ref List<FileSystem> fs, ref Dictionary<FileSystem, List<string>> us)
         {
             CurrentProcess = nameof(GetFileSystemInfo);
-            if (!v.IsValid())
-                ExitCode = ProcessExitCode.ErrorInvalidMediaType;
-            else
+
+            // Check for Partition type
+
+            AddScriptCommand("SELECT VOLUME " + v.Number);
+            AddScriptCommand("FILESYSTEM");
+            WriteScript();
+            if (Run() == ProcessExitCode.Ok)
             {
-                AddScriptCommand("SELECT VOLUME " + v.Number);
-                AddScriptCommand("FILESYSTEM");
-                WriteScript();
-                if (Run() == ProcessExitCode.Ok)
-                {
-                    return ParseFileSystemInfo(ref fs, ref us);
-                }
-                else
-                    ExitCode = ProcessExitCode.ErrorRun;
+                return ParseFileSystemInfo(ref fs, ref us);
             }
+            else
+                ExitCode = ProcessExitCode.ErrorRun;
             return ExitCode;
         }
 
@@ -504,26 +496,26 @@ namespace DiskpartGUI.Processes
         /// <summary>
         /// Formats a Volume with given FormatArguments
         /// </summary>
-        /// <param name="v">The Volume to format</param>
+        /// <param name="b">The Volume to format</param>
         /// <param name="fa">The arguments of the format</param>
         /// <returns></returns>
-        public ProcessExitCode Format(Volume v, FormatArguments fa)
+        public ProcessExitCode Format(BaseMedia b, FormatArguments fa)
         {
             CurrentProcess = nameof(Format);
 
-            if (v == null)
+            if (b == null)
             {
                 ExitCode = ProcessExitCode.ErrorNullVolumes;
                 return ExitCode;
             }
 
-            if (!v.IsValid())
+            if (b is Disk)
             {
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
                 return ExitCode;
             }
 
-            AddScriptCommand("SELECT VOLUME " + v.Number);
+            AddScriptCommand("SELECT VOLUME " + b.Number);
             AddScriptCommand("FORMAT " + fa.GetArguments());
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
