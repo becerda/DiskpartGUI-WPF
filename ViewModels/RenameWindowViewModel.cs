@@ -72,9 +72,9 @@ namespace DiskpartGUI.ViewModels
         /// Initializes a new instance
         /// </summary>
         /// <param name="volume"></param>
-        public RenameWindowViewModel(ref Volume volume) : base()
+        public RenameWindowViewModel(ref BaseMedia media) : base()
         {
-            this.volume = volume;
+            this.volume = (Volume)media;
             Title = "Rename - " + volume.ToString();
             NewLabelText = "New label for volume " + volume.ToString();
 

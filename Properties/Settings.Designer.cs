@@ -37,7 +37,7 @@ namespace DiskpartGUI.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.02")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
@@ -50,6 +50,18 @@ namespace DiskpartGUI.Properties {
         public string Website {
             get {
                 return ((string)(this["Website"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowVolumes {
+            get {
+                return ((bool)(this["ShowVolumes"]));
+            }
+            set {
+                this["ShowVolumes"] = value;
             }
         }
     }

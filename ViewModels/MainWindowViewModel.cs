@@ -13,12 +13,20 @@ namespace DiskpartGUI.ViewModels
 {
     class MainWindowViewModel : ClosablePropertyChangedViewModel
     {
+        private enum ListViewHeaderState
+        {
+            ShowingVolumes,
+            ShowingPartitions,
+            ShowingDisks
+        }
+
         private string embstate;
         private string scrostate;
-        private Volume selected;
+        private BaseMedia selecteditem;
         private string selectedinfo;
-        private List<Volume> volumes;
+        private List<BaseMedia> listviewsource;
         private bool masterbuttonsenabled = true;
+        private ListViewHeaderState lvstate;
 
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
@@ -26,18 +34,31 @@ namespace DiskpartGUI.ViewModels
         private readonly Lazy<DiskpartProcess> ldpp = new Lazy<DiskpartProcess>(() => new DiskpartProcess());
 
         /// <summary>
-        /// The ItemSorce for the list view
+        /// The source of ListViewVolumes and ListViewDisks
         /// </summary>
-        public List<Volume> Volumes
+        public List<BaseMedia> ListViewSource
         {
             get
             {
-                return volumes;
+                return listviewsource;
             }
             set
             {
-                volumes = value;
-                OnPropertyChanged(nameof(Volumes));
+                listviewsource = value;
+                OnPropertyChanged(nameof(ListViewSource));
+            }
+        }
+
+        /// <summary>
+        /// Menu Item text to switch between ListViewVolumes and ListViewDisks
+        /// </summary>
+        public string ShowOpositeViewMenuItemText
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    return "Show Disks";
+                return "Show Volumes";
             }
         }
 
@@ -76,35 +97,38 @@ namespace DiskpartGUI.ViewModels
         /// <summary>
         /// The selected Volume in ListViewVolumes
         /// </summary>
-        public Volume SelectedVolume
+        public BaseMedia SelectedItem
         {
             get
             {
-                return selected;
+                return selecteditem;
             }
             set
             {
-                selected = value;
+                selecteditem = value;
                 if (value != null)
                 {
-                    SelectedVolumeInfo = value.ToString();
-                    if (value.IsMounted())
-                        EjectMountButtonContent = "Eject";
-                    else
-                        EjectMountButtonContent = "Mount";
+                    SelectedItemInfo = value.ToString();
+                    if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    {
+                        if (((Volume)value).IsMounted())
+                            EjectMountButtonContent = "Eject";
+                        else
+                            EjectMountButtonContent = "Mount";
+                    }
                     if (value.IsReadOnly())
                         SetClearReadOnlyButtonContent = "Clear Read-Only";
                     else
                         SetClearReadOnlyButtonContent = "Set Read-Only";
                 }
-                OnPropertyChanged(nameof(SelectedVolume));
+                OnPropertyChanged(nameof(SelectedItem));
             }
         }
 
         /// <summary>
         /// The ToString of SelectedVolume
         /// </summary>
-        public string SelectedVolumeInfo
+        public string SelectedItemInfo
         {
             get
             {
@@ -112,8 +136,14 @@ namespace DiskpartGUI.ViewModels
             }
             set
             {
-                selectedinfo = "Selected Volume: " + value;
-                OnPropertyChanged(nameof(SelectedVolumeInfo));
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    selectedinfo = "Selected Volume: " + value;
+                else if (lvstate == ListViewHeaderState.ShowingDisks)
+                    selectedinfo = "Selected Disk: " + value;
+                else
+                    selectedinfo = "Selected Partition: " + value;
+
+                OnPropertyChanged(nameof(SelectedItemInfo));
             }
         }
 
@@ -130,6 +160,45 @@ namespace DiskpartGUI.ViewModels
             {
                 Properties.Settings.Default.ShowAllVolumes = value;
                 OnPropertyChanged(nameof(ShowAllVolumes));
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Volumes
+        /// </summary>
+        public bool VolumeVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Partitions
+        /// </summary>
+        public bool PartitionVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingPartitions)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Disks
+        /// </summary>
+        public bool DiskVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingDisks)
+                    return true;
+                return false;
             }
         }
 
@@ -169,6 +238,21 @@ namespace DiskpartGUI.ViewModels
         public RelayCommand ShowAllVolumesCommand { get; private set; }
 
         /// <summary>
+        /// The Command to show the headers associated with Volumes
+        /// </summary>
+        public RelayCommand ShowVolumesListViewCommand { get; private set; }
+
+        /// <summary>
+        /// The Command to show the headers associated with Disks
+        /// </summary>
+        public RelayCommand ShowDisksListViewCommand { get; private set; }
+
+        /// <summary>
+        /// The Command to show the headers associated with Partitions
+        /// </summary>
+        public RelayCommand ShowPartitionCommand { get; private set; }
+
+        /// <summary>
         /// Shows the About window
         /// </summary>
         public RelayCommand AboutCommand { get; private set; }
@@ -191,17 +275,28 @@ namespace DiskpartGUI.ViewModels
         {
             EjectMountButtonContent = "Eject";
             SetClearReadOnlyButtonContent = "Set Read-Only";
-            SelectedVolumeInfo = "";
+            SelectedItemInfo = "";
             ShowAllVolumes = Properties.Settings.Default.ShowAllVolumes;
 
-            ChangeMountStateCommand = new RelayCommand(ChangeMountState, IsSelectedVolumeRemovable, Key.E, ModifierKeys.Control);
+            // TO-DO: Load Last ListView From Settings
+            lvstate = ListViewHeaderState.ShowingVolumes;
+
+            ListViewSource = new List<BaseMedia>();
+
+            ChangeMountStateCommand = new RelayCommand(ChangeMountState, CanBeEjected, Key.E, ModifierKeys.Control);
             RefreshCommand = new RelayCommand(Refresh, Key.R, ModifierKeys.Control);
-            RenameCommand = new RelayCommand(RenameVolume, IsSelectedVolumeValid, Key.F2);
+            RenameCommand = new RelayCommand(RenameVolume, CanBeRenamed, Key.F2);
             BitLockCommand = new RelayCommand(LaunchBitLock, Key.B, ModifierKeys.Control);
-            ReadOnlyCommand = new RelayCommand(SetReadOnly, IsSelectedVolumeValid, Key.R, ModifierKeys.Control | ModifierKeys.Shift);
-            FormatCommand = new RelayCommand(FormatVolume, IsSelectedVolumeValid, Key.F, ModifierKeys.Control);
+            ReadOnlyCommand = new RelayCommand(SetReadOnly, CanToggleReadOnlyFlag, Key.R, ModifierKeys.Control | ModifierKeys.Shift);
+            FormatCommand = new RelayCommand(FormatVolume, CanBeFormated, Key.F, ModifierKeys.Control);
             CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Q, ModifierKeys.Control);
-            ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
+
+            ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, CanToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
+
+            ShowVolumesListViewCommand = new RelayCommand(ChangeListView, CanShowVolumesListView);
+            ShowDisksListViewCommand = new RelayCommand(ChangeListView, CanShowDisksListView);
+            ShowPartitionCommand = new RelayCommand(ChangeListView, CanShowPartitionListView);
+
             AboutCommand = new RelayCommand(ShowAboutWindow, Key.F1);
 
             Refresh();
@@ -213,7 +308,7 @@ namespace DiskpartGUI.ViewModels
         public void ChangeMountState()
         {
             masterbuttonsenabled = false;
-            if (SelectedVolume.IsMounted())
+            if (SelectedItem.IsMounted())
                 EjectVolume();
             else
                 MountVolume();
@@ -225,10 +320,10 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public void EjectVolume()
         {
-            if (MessageBox.Show("Are you sure you want to eject " + SelectedVolume.ToString() + "?",
-                "Eject Volume " + SelectedVolume.DriveLetter, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Are you sure you want to eject " + SelectedItem.ToString() + "?",
+            "Eject Volume " + ((Volume)SelectedItem).DriveLetter, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                if (DiskpartProcess.EjectVolume(SelectedVolume) != ProcessExitCode.Ok)
+                if (DiskpartProcess.EjectVolume(SelectedItem) != ProcessExitCode.Ok)
                     ShowError("EjectVolume - EjectVolume");
                 else
                 {
@@ -242,7 +337,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public void MountVolume()
         {
-            if (DiskpartProcess.AssignVolumeLetter(SelectedVolume) != ProcessExitCode.Ok)
+            if (DiskpartProcess.AssignVolumeLetter(SelectedItem) != ProcessExitCode.Ok)
                 ShowError("MountVolume - AssignVolumeLetter");
             else
             {
@@ -262,11 +357,14 @@ namespace DiskpartGUI.ViewModels
             masterbuttonsenabled = true;
             window.Close();
 
-            if (!ShowAllVolumes)
-                FilterRemovableVolumes();
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
+            {
+                if (!ShowAllVolumes)
+                    FilterRemovableVolumes();
+            }
 
-            SelectedVolumeInfo = "";
-            OnPropertyChanged(nameof(Volumes));
+            SelectedItemInfo = "";
+            OnPropertyChanged(nameof(ListViewSource));
         }
 
         /// <summary>
@@ -274,7 +372,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public void RenameVolume()
         {
-            RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selected);
+            RenameWindowViewModel rwvm = new RenameWindowViewModel(ref selecteditem);
             RenameWindow window = new RenameWindow(rwvm);
             window.ShowDialog();
             if (rwvm.ExitStatus == ExitStatus.Applied)
@@ -296,23 +394,22 @@ namespace DiskpartGUI.ViewModels
         {
             masterbuttonsenabled = false;
             ReadOnlyFunction function;
-            if (SelectedVolume.IsReadOnly())
+            Processes.StorageType type;
+            if (SelectedItem.IsReadOnly())
                 function = ReadOnlyFunction.CLEAR;
             else
                 function = ReadOnlyFunction.SET;
 
-            if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedVolume.ToString() + "?") == MessageBoxResult.Yes)
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
+                type = Processes.StorageType.VOLUME;
+            else
+                type = Processes.StorageType.DISK;
+
+            if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedItem.ToString() + "?") == MessageBoxResult.Yes)
             {
-                if (function == ReadOnlyFunction.SET)
-                {
-                    if (DiskpartProcess.SetReadOnly(SelectedVolume) != ProcessExitCode.Ok)
-                        ShowError(nameof(SetReadOnly));
-                }
-                else
-                {
-                    if (DiskpartProcess.ClearReadOnly(SelectedVolume) != ProcessExitCode.Ok)
-                        ShowError(nameof(SetReadOnly));
-                }
+
+                if (DiskpartProcess.SetReadOnly(SelectedItem, function, type) != ProcessExitCode.Ok)
+                    ShowError(nameof(SetReadOnly));
                 Refresh();
             }
             masterbuttonsenabled = true;
@@ -323,7 +420,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         private void FormatVolume()
         {
-            FormatWindowViewModel fwvm = new FormatWindowViewModel(ref selected);
+            FormatWindowViewModel fwvm = new FormatWindowViewModel(ref selecteditem);
             FormatWindow window = new FormatWindow(fwvm);
             window.ShowDialog();
             if (fwvm.ExitStatus == ExitStatus.Applied)
@@ -340,16 +437,83 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
+        /// Checks SelectedItem.CanToggleShowAllVolumes
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be renamed</returns>
+        private bool CanToggleShowAllVolumes(object o)
+        {
+            return lvstate == ListViewHeaderState.ShowingVolumes;
+        }
+
+        /// <summary>
+        /// Changes the headers to the appropriate list
+        /// </summary>
+        private void ChangeListView(object o)
+        {
+            string s = (string)o;
+
+            if (s == "Volume")
+                lvstate = ListViewHeaderState.ShowingVolumes;
+            else if (s == "Disk")
+                lvstate = ListViewHeaderState.ShowingDisks;
+            else
+                lvstate = ListViewHeaderState.ShowingPartitions;
+
+            OnPropertyChanged(nameof(VolumeVisibility));
+            OnPropertyChanged(nameof(DiskVisibility));
+            OnPropertyChanged(nameof(PartitionVisibility));
+
+            Refresh();
+        }
+
+        /// <summary>
+        /// Can the Volumes headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Volume headers can be shown</returns>
+        private bool CanShowVolumesListView(object o)
+        {
+            if (VolumeVisibility)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Can the Disk headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Disk headers can be shown</returns>
+        private bool CanShowDisksListView(object o)
+        {
+            if (DiskVisibility)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Can the Partition headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Partition headers can be shown</returns>
+        private bool CanShowPartitionListView(object o)
+        {
+            if (DiskVisibility == true && SelectedItem != null)
+                return true;
+            return false;
+        }
+
+        /// <summary>
         /// Filters out the non-removable volumes
         /// </summary>
         private void FilterRemovableVolumes()
         {
-            Volume[] temp = new Volume[Volumes.Count];
-            Volumes.CopyTo(temp);
+            Volume[] temp = new Volume[ListViewSource.Count];
+            ListViewSource.CopyTo(temp);
             foreach (Volume v in temp)
             {
                 if (!v.IsRemovable())
-                    Volumes.Remove(v);
+                    ListViewSource.Remove(v);
             }
         }
 
@@ -362,33 +526,77 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Checks SelectedVolume.IsRemovalbe
+        /// Checks SelectedItem.IsRemovalbe
         /// </summary>
-        /// <param name="o"></param>
-        /// <returns></returns>
-        public bool IsSelectedVolumeRemovable(object o)
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem is removable</returns>
+        public bool IsSelectedItemRemovable(object o)
         {
             if (masterbuttonsenabled == false)
                 return false;
 
-            if (SelectedVolume == null)
+            if (o == null)
                 return false;
-            return SelectedVolume.IsRemovable();
+            return ((BaseMedia)o).IsRemovable();
         }
 
         /// <summary>
-        /// Checks SelectedVolume.IsValid
+        /// Checks SelectedItem.CanToggleReadOnlyFlag
         /// </summary>
-        /// <param name="o"></param>
-        /// <returns></returns>
-        public bool IsSelectedVolumeValid(object o)
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can toggle a read only flag</returns>
+        public bool CanToggleReadOnlyFlag(object o)
         {
             if (masterbuttonsenabled == false)
                 return false;
 
-            if (SelectedVolume == null)
+            if (o == null)
                 return false;
-            return SelectedVolume.IsValid();
+            return ((BaseMedia)o).CanToggleReadOnly();
+        }
+
+        /// <summary>
+        /// Checks SelectedItem.CanBeRenamed
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be renamed</returns>
+        public bool CanBeRenamed(object o)
+        {
+            if (masterbuttonsenabled == false)
+                return false;
+
+            if (o == null)
+                return false;
+            return ((BaseMedia)o).CanBeRenamed();
+        }
+
+        /// <summary>
+        /// Checks SelectedItem.CanBeEjected
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be ejected</returns>
+        public bool CanBeEjected(object o)
+        {
+            if (masterbuttonsenabled == false)
+                return false;
+
+            if (o == null)
+                return false;
+            return ((BaseMedia)o).CanBeEjected();
+        }
+
+        /// <summary>
+        /// Checks SelectedItem.CanBeFormated
+        /// </summary>
+        /// <param name="o">The SelectedItem</param>
+        /// <returns>Whether the SelectedItem can be formated</returns>
+        public bool CanBeFormated(object o)
+        {
+            if (masterbuttonsenabled == false)
+                return false;
+            if (o == null)
+                return false;
+            return ((BaseMedia)o).CanBeFormated();
         }
 
         /// <summary>
@@ -406,13 +614,30 @@ namespace DiskpartGUI.ViewModels
         /// <returns></returns>
         private async Task CallRefresh()
         {
-            var task = Task.Run(() => DiskpartProcess.GetVolumes(ref volumes));
+            Task<ProcessExitCode> task;
+            Processes.StorageType type;
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
+                type = Processes.StorageType.VOLUME;
+            else if (lvstate == ListViewHeaderState.ShowingDisks)
+                type = Processes.StorageType.DISK;
+            else
+                type = Processes.StorageType.PARTITION;
+
+            task = Task.Run(() => DiskpartProcess.RunListCommand(ref listviewsource, type, (SelectedItem == null ? -1 : SelectedItem.Number)));
             ProcessExitCode result = await task;
+
             if (result != ProcessExitCode.Ok)
-                ShowError("Refresh - GetVolumes");
+            {
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    ShowError("Refresh - GetVolumes");
+                else if (lvstate == ListViewHeaderState.ShowingDisks)
+                    ShowError("Refresh - GetDisks");
+                else
+                    ShowError("Refresh - GetPartitions");
+            }
             else
             {
-                task = Task.Run(() => DiskpartProcess.GetReadOnlyState(ref volumes));
+                task = Task.Run(() => DiskpartProcess.GetAttributes(ref listviewsource, type));
                 result = await task;
                 if (result != ProcessExitCode.Ok)
                 {

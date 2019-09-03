@@ -13,13 +13,14 @@ namespace DiskpartGUI.Processes
         Error,
         ErrorRun,
         ErrorVolumeNotMounted,
-        ErrorInvalidVolume,
+        ErrorInvalidMediaType,
         ErrorVolumeMounted,
         ErrorParse,
         ErrorNullVolumes,
         ErrorTestOutput,
         ErrorFileSystemNull,
-        ErrorUnitSizeNull
+        ErrorUnitSizeNull,
+        ErrorNoMatchesFound,
     }
 
     public abstract class ProcessRunner
@@ -68,7 +69,7 @@ namespace DiskpartGUI.Processes
                         case ProcessExitCode.Error:
                             err = "General Error";
                             break;
-                        case ProcessExitCode.ErrorInvalidVolume:
+                        case ProcessExitCode.ErrorInvalidMediaType:
                             err = "Invalid Volume";
                             break;
                         case ProcessExitCode.ErrorNullVolumes:
