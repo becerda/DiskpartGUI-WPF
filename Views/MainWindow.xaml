@@ -16,6 +16,22 @@
         <helper:BooleanOrConverter x:Key ="BooleanOrConverter"/>
     </Window.Resources>
 
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Command="{Binding ChangeMountStateCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
+            <MenuItem Command="{Binding RenameCommand}" CommandParameter="{Binding SelectedItem}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
+            <MenuItem Command="{Binding FormatCommand}" CommandParameter="{Binding SelectedItem}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
+            <MenuItem Command="{Binding ReadOnlyCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
+            <Separator/>
+            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
+            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
+            <Separator/>
+            <MenuItem Command="{Binding ShowVolumesListViewCommand}" CommandParameter="Volume" Header="Show Volumes"/>
+            <MenuItem Command="{Binding ShowDisksListViewCommand}" CommandParameter="Disk" Header="Show Disks"/>
+            <MenuItem Command="{Binding ShowPartitionCommand}" CommandParameter="Partition" Header="Show Partitions"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
     <!-- Window Hot Keys -->
     <Window.InputBindings>
         <KeyBinding Command="{Binding ChangeMountStateCommand}" Key="{Binding ChangeMountStateCommand.KeyGesture}" Modifiers="{Binding ChangeMountStateCommand.GestureModifier}"/>
@@ -88,21 +104,6 @@
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
                         </Style>
                     </ListView.Resources>
-                    <ListView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding ChangeMountStateCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding EjectMountButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ChangeMountStateCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding RenameCommand}" CommandParameter="{Binding SelectedItem}" Header="Rename" InputGestureText="{Binding RenameCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding FormatCommand}" CommandParameter="{Binding SelectedItem}" Header="Format" InputGestureText="{Binding FormatCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding ReadOnlyCommand}" CommandParameter="{Binding SelectedItem}" Header="{Binding SetClearReadOnlyButtonContent, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ReadOnlyCommand.InputGestureText}"/>
-                            <Separator/>
-                            <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
-                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" InputGestureText="{Binding RefreshCommand.InputGestureText}"/>
-                            <Separator/>
-                            <MenuItem Command="{Binding ShowVolumesListViewCommand}" CommandParameter="Volume" Header="Show Volumes"/>
-                            <MenuItem Command="{Binding ShowDisksListViewCommand}" CommandParameter="Disk" Header="Show Disks"/>
-                            <MenuItem Command="{Binding ShowPartitionCommand}" CommandParameter="Partition" Header="Show Partitions"/>
-                        </ContextMenu>
-                    </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn x:Name="GridViewColumnNumber" Header="#" DisplayMemberBinding="{Binding Number}" Width="25"/>
