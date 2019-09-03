@@ -13,15 +13,20 @@ namespace DiskpartGUI.ViewModels
 {
     class MainWindowViewModel : ClosablePropertyChangedViewModel
     {
+        private enum ListViewHeaderState
+        {
+            ShowingVolumes,
+            ShowingPartitions,
+            ShowingDisks
+        }
+
         private string embstate;
         private string scrostate;
         private BaseMedia selecteditem;
         private string selectedinfo;
         private List<BaseMedia> listviewsource;
-
         private bool masterbuttonsenabled = true;
-
-        private bool showvolumes;
+        private ListViewHeaderState lvstate;
 
         /// <summary>
         /// Lazy Instantiation of a DiskpartProcess
@@ -45,58 +50,13 @@ namespace DiskpartGUI.ViewModels
         }
 
         /// <summary>
-        /// Is ListViewVolumes currently showing?
-        /// </summary>
-        public bool ShowVolumes
-        {
-            get
-            {
-                return showvolumes;
-            }
-            set
-            {
-                showvolumes = value;
-                OnPropertyChanged(nameof(ShowVolumes));
-                OnPropertyChanged(nameof(VolumeListVisibility));
-                OnPropertyChanged(nameof(DiskListVisibility));
-                OnPropertyChanged(nameof(ShowOpositeViewMenuItemText));
-            }
-        }
-
-        /// <summary>
-        /// The Visibility of ListViewVolumes
-        /// </summary>
-        public Visibility VolumeListVisibility
-        {
-            get
-            {
-                if (ShowVolumes)
-                    return Visibility.Visible;
-                return Visibility.Hidden;
-            }
-        }
-
-        /// <summary>
-        /// The Visibility of ListViewDisks
-        /// </summary>
-        public Visibility DiskListVisibility
-        {
-            get
-            {
-                if (ShowVolumes)
-                    return Visibility.Hidden;
-                return Visibility.Visible;
-            }
-        }
-
-        /// <summary>
         /// Menu Item text to switch between ListViewVolumes and ListViewDisks
         /// </summary>
         public string ShowOpositeViewMenuItemText
         {
             get
             {
-                if (ShowVolumes)
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
                     return "Show Disks";
                 return "Show Volumes";
             }
@@ -149,7 +109,7 @@ namespace DiskpartGUI.ViewModels
                 if (value != null)
                 {
                     SelectedItemInfo = value.ToString();
-                    if (ShowVolumes)
+                    if (lvstate == ListViewHeaderState.ShowingVolumes)
                     {
                         if (((Volume)value).IsMounted())
                             EjectMountButtonContent = "Eject";
@@ -176,10 +136,13 @@ namespace DiskpartGUI.ViewModels
             }
             set
             {
-                if (ShowVolumes)
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
                     selectedinfo = "Selected Volume: " + value;
-                else
+                else if (lvstate == ListViewHeaderState.ShowingDisks)
                     selectedinfo = "Selected Disk: " + value;
+                else
+                    selectedinfo = "Selected Partition: " + value;
+
                 OnPropertyChanged(nameof(SelectedItemInfo));
             }
         }
@@ -197,6 +160,45 @@ namespace DiskpartGUI.ViewModels
             {
                 Properties.Settings.Default.ShowAllVolumes = value;
                 OnPropertyChanged(nameof(ShowAllVolumes));
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Volumes
+        /// </summary>
+        public bool VolumeVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Partitions
+        /// </summary>
+        public bool PartitionVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingPartitions)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The boolean to show the headers associated with Disks
+        /// </summary>
+        public bool DiskVisibility
+        {
+            get
+            {
+                if (lvstate == ListViewHeaderState.ShowingDisks)
+                    return true;
+                return false;
             }
         }
 
@@ -235,7 +237,20 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public RelayCommand ShowAllVolumesCommand { get; private set; }
 
-        public RelayCommand ToggleListViewCommand { get; private set; }
+        /// <summary>
+        /// The Command to show the headers associated with Volumes
+        /// </summary>
+        public RelayCommand ShowVolumesListViewCommand { get; private set; }
+
+        /// <summary>
+        /// The Command to show the headers associated with Disks
+        /// </summary>
+        public RelayCommand ShowDisksListViewCommand { get; private set; }
+
+        /// <summary>
+        /// The Command to show the headers associated with Partitions
+        /// </summary>
+        public RelayCommand ShowPartitionCommand { get; private set; }
 
         /// <summary>
         /// Shows the About window
@@ -262,7 +277,9 @@ namespace DiskpartGUI.ViewModels
             SetClearReadOnlyButtonContent = "Set Read-Only";
             SelectedItemInfo = "";
             ShowAllVolumes = Properties.Settings.Default.ShowAllVolumes;
-            ShowVolumes = Properties.Settings.Default.ShowVolumes;
+
+            // TO-DO: Load Last ListView From Settings
+            lvstate = ListViewHeaderState.ShowingVolumes;
 
             ListViewSource = new List<BaseMedia>();
 
@@ -273,8 +290,13 @@ namespace DiskpartGUI.ViewModels
             ReadOnlyCommand = new RelayCommand(SetReadOnly, CanToggleReadOnlyFlag, Key.R, ModifierKeys.Control | ModifierKeys.Shift);
             FormatCommand = new RelayCommand(FormatVolume, CanBeFormated, Key.F, ModifierKeys.Control);
             CloseWindowCommand = new RelayCommand(RequestWindowClose, Key.Q, ModifierKeys.Control);
+
             ShowAllVolumesCommand = new RelayCommand(ToggleShowAllVolumes, CanToggleShowAllVolumes, Key.S, ModifierKeys.Control | ModifierKeys.Shift);
-            ToggleListViewCommand = new RelayCommand(ToggleListViews);
+
+            ShowVolumesListViewCommand = new RelayCommand(ChangeListView, CanShowVolumesListView);
+            ShowDisksListViewCommand = new RelayCommand(ChangeListView, CanShowDisksListView);
+            ShowPartitionCommand = new RelayCommand(ChangeListView, CanShowPartitionListView);
+
             AboutCommand = new RelayCommand(ShowAboutWindow, Key.F1);
 
             Refresh();
@@ -335,7 +357,7 @@ namespace DiskpartGUI.ViewModels
             masterbuttonsenabled = true;
             window.Close();
 
-            if (ShowVolumes)
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
             {
                 if (!ShowAllVolumes)
                     FilterRemovableVolumes();
@@ -372,16 +394,16 @@ namespace DiskpartGUI.ViewModels
         {
             masterbuttonsenabled = false;
             ReadOnlyFunction function;
-            MediaType type;
+            Processes.StorageType type;
             if (SelectedItem.IsReadOnly())
                 function = ReadOnlyFunction.CLEAR;
             else
                 function = ReadOnlyFunction.SET;
 
-            if (ShowVolumes)
-                type = MediaType.VOLUME;
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
+                type = Processes.StorageType.VOLUME;
             else
-                type = MediaType.DISK;
+                type = Processes.StorageType.DISK;
 
             if (MessageHelper.ShowConfirm("Are you sure you want to " + function + " the read-only flag on " + SelectedItem.ToString() + "?") == MessageBoxResult.Yes)
             {
@@ -421,16 +443,64 @@ namespace DiskpartGUI.ViewModels
         /// <returns>Whether the SelectedItem can be renamed</returns>
         private bool CanToggleShowAllVolumes(object o)
         {
-            return ShowVolumes;
+            return lvstate == ListViewHeaderState.ShowingVolumes;
         }
 
         /// <summary>
-        /// Toggles between ListViewVolumes and ListViewDisks
+        /// Changes the headers to the appropriate list
         /// </summary>
-        private void ToggleListViews()
+        private void ChangeListView(object o)
         {
-            ShowVolumes = !ShowVolumes;
+            string s = (string)o;
+
+            if (s == "Volume")
+                lvstate = ListViewHeaderState.ShowingVolumes;
+            else if (s == "Disk")
+                lvstate = ListViewHeaderState.ShowingDisks;
+            else
+                lvstate = ListViewHeaderState.ShowingPartitions;
+
+            OnPropertyChanged(nameof(VolumeVisibility));
+            OnPropertyChanged(nameof(DiskVisibility));
+            OnPropertyChanged(nameof(PartitionVisibility));
+
             Refresh();
+        }
+
+        /// <summary>
+        /// Can the Volumes headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Volume headers can be shown</returns>
+        private bool CanShowVolumesListView(object o)
+        {
+            if (VolumeVisibility)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Can the Disk headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Disk headers can be shown</returns>
+        private bool CanShowDisksListView(object o)
+        {
+            if (DiskVisibility)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Can the Partition headers be shown?
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns>Whether the Partition headers can be shown</returns>
+        private bool CanShowPartitionListView(object o)
+        {
+            if (DiskVisibility == true && SelectedItem != null)
+                return true;
+            return false;
         }
 
         /// <summary>
@@ -545,21 +615,25 @@ namespace DiskpartGUI.ViewModels
         private async Task CallRefresh()
         {
             Task<ProcessExitCode> task;
-            MediaType type;
-            if (ShowVolumes)
-                type = MediaType.VOLUME;
+            Processes.StorageType type;
+            if (lvstate == ListViewHeaderState.ShowingVolumes)
+                type = Processes.StorageType.VOLUME;
+            else if (lvstate == ListViewHeaderState.ShowingDisks)
+                type = Processes.StorageType.DISK;
             else
-                type = MediaType.DISK;
+                type = Processes.StorageType.PARTITION;
 
-            task = Task.Run(() => DiskpartProcess.RunListCommand(ref listviewsource, type));
+            task = Task.Run(() => DiskpartProcess.RunListCommand(ref listviewsource, type, (SelectedItem == null ? -1 : SelectedItem.Number)));
             ProcessExitCode result = await task;
 
             if (result != ProcessExitCode.Ok)
             {
-                if (ShowVolumes)
+                if (lvstate == ListViewHeaderState.ShowingVolumes)
                     ShowError("Refresh - GetVolumes");
-                else
+                else if (lvstate == ListViewHeaderState.ShowingDisks)
                     ShowError("Refresh - GetDisks");
+                else
+                    ShowError("Refresh - GetPartitions");
             }
             else
             {

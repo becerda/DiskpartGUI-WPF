@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DiskpartGUI.Models
 {
     public class Disk : BaseMedia
@@ -57,7 +52,7 @@ namespace DiskpartGUI.Models
         }
         
         /// <summary>
-        /// ???
+        /// The Dynamic property of a disk
         /// </summary>
         public string Dynamic
         {
@@ -75,7 +70,7 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
-        /// ???
+        /// The GPT property of a disk
         /// </summary>
         public string GPTType
         {
@@ -90,6 +85,15 @@ namespace DiskpartGUI.Models
                 gpttype = GPTTypeExtension.Parse(value);
                 OnPropertyChanged(nameof(GPTType));
             }
+        }
+
+        /// <summary>
+        /// Can this media item be set to read only?
+        /// </summary>
+        /// <returns></returns>
+        public override bool CanToggleReadOnly()
+        {
+            return true;
         }
 
         /// <summary>

@@ -1,7 +1,4 @@
 ﻿
-using System.Collections;
-using System.Collections.Generic;
-
 namespace DiskpartGUI.Models
 {
     public class Volume : BaseMedia
@@ -9,12 +6,12 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The maximum number of characters a label can be
         /// </summary>
-        public static readonly int Max_Label_Char_Len = 10;
+        public const int Max_Label_Char_Len = 10;
 
         private char letter;
         private string label;
         private FileSystem filesystem;
-        private VolumeType type;
+        private MediaType type;
         private string info;
         private MountState mounted;
 
@@ -80,7 +77,7 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The type of a volume
         /// </summary>
-        public VolumeType VolumeType
+        public MediaType MediaType
         {
             get
             {
@@ -89,7 +86,7 @@ namespace DiskpartGUI.Models
             set
             {
                 type = value;
-                OnPropertyChanged(nameof(VolumeType));
+                OnPropertyChanged(nameof(MediaType));
             }
         }
 
@@ -140,7 +137,7 @@ namespace DiskpartGUI.Models
         /// <returns>Whether the volume is removable</returns>
         public override bool IsRemovable()
         {
-            return VolumeType == VolumeType.Removable;
+            return MediaType == MediaType.Removable;
         }
 
         /// <summary>
@@ -149,8 +146,6 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public override bool CanToggleReadOnly()
         {
-            if(VolumeType == VolumeType.Removable)
-                return false;
             if (Info.Contains("Pagefile"))
                 return false;
             if (Info.Contains("System"))
@@ -166,22 +161,26 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public override bool CanBeRenamed()
         {
-            if (VolumeType == VolumeType.Removable)
+            if (MediaType == MediaType.Removable)
                 return true;
             return false;
         }
 
         /// <summary>
-        /// Can this medai item be ejected?
+        /// Can this media item be ejected?
         /// </summary>
         /// <returns></returns>
         public override bool CanBeEjected()
         {
-            if (VolumeType == VolumeType.Removable)
+            if (MediaType == MediaType.Removable)
                 return true;
             return false;
         }
 
+        /// <summary>
+        /// Can this media item be formated
+        /// </summary>
+        /// <returns></returns>
         public override bool CanBeFormated()
         {
             if (Info.Contains("Pagefile"))

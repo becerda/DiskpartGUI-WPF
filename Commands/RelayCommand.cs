@@ -17,6 +17,11 @@ namespace DiskpartGUI.Commands
         readonly Action execute;
 
         /// <summary>
+        /// The action to be executed, with an object parameter
+        /// </summary>
+        readonly Action<object> oexecute;
+
+        /// <summary>
         /// The check for the action
         /// </summary>
         readonly Predicate<object> canexecute;
@@ -115,6 +120,17 @@ namespace DiskpartGUI.Commands
         }
 
         /// <summary>
+        /// Sets up a new RelayCommand with supplied Action and Predicate
+        /// </summary>
+        /// <param name="execute">The action to execute</param>
+        /// <param name="canExecute">The check for the execution</param>
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        {
+            oexecute = execute;
+            canexecute = canExecute;
+        }
+
+        /// <summary>
         /// The check for enabling Execute
         /// </summary>
         /// <param name="parameter">Parameter to pass to the predicate</param>
@@ -130,7 +146,10 @@ namespace DiskpartGUI.Commands
         /// <param name="parameter"></param>
         public virtual void Execute(object parameter)
         {
-            execute.Invoke();
+            if (oexecute != null)
+                oexecute.Invoke(parameter);
+            else
+                execute.Invoke();
         }
     }
 }
