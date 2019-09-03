@@ -61,11 +61,14 @@
     <Compile Include="Commands\ApplyCommand.cs" />
     <Compile Include="Commands\CancelCommand.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
+    <Compile Include="Helpers\BooleanOrConverter.cs" />
+    <Compile Include="Helpers\GridViewColumnVisibilityManager.cs" />
     <Compile Include="Helpers\MessageHelper.cs" />
     <Compile Include="Interfaces\IClosable.cs" />
     <Compile Include="Models\BaseMedia.cs" />
     <Compile Include="Models\Disk.cs" />
     <Compile Include="Models\FormatArguments.cs" />
+    <Compile Include="Models\Partition.cs" />
     <Compile Include="Processes\BitLockProcess.cs" />
     <Compile Include="UserControls\Spinner.xaml.cs">
       <DependentUpon>Spinner.xaml</DependentUpon>

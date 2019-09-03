@@ -20,6 +20,7 @@ namespace DiskpartGUI.Processes
         ErrorTestOutput,
         ErrorFileSystemNull,
         ErrorUnitSizeNull,
+        ErrorNoMatchesFound,
     }
 
     public abstract class ProcessRunner

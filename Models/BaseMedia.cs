@@ -49,24 +49,26 @@ namespace DiskpartGUI.Models
     /// <summary>
     /// The volume type
     /// </summary>
-    public enum VolumeType
+    public enum MediaType
     {
         None,
         Partition,
         Removable,
         DVDROM,
-        Simple
+        Simple,
+        Primary
     }
 
-    public static class VolumeTypeExtension
+    public static class MediaTypeExtension
     {
-        private static readonly Dictionary<string, VolumeType> type = new Dictionary<string, VolumeType>
+        private static readonly Dictionary<string, MediaType> type = new Dictionary<string, MediaType>
         {
-            {"None", VolumeType.None },
-            {"Partition", VolumeType.Partition },
-            {"Removable", VolumeType.Removable },
-            {"DVD-ROM", VolumeType.DVDROM },
-            {"Simple", VolumeType.Simple }
+            {"None", MediaType.None },
+            {"Partition", MediaType.Partition },
+            {"Removable", MediaType.Removable },
+            {"DVD-ROM", MediaType.DVDROM },
+            {"Simple", MediaType.Simple },
+            {"Primary", MediaType.Primary }
         };
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace DiskpartGUI.Models
         /// </summary>
         /// <param name="s">The string to parse</param>
         /// <returns>The VolumeType enum</returns>
-        public static VolumeType Parse(string s)
+        public static MediaType Parse(string s)
         {
             return type[s];
         }
@@ -91,7 +93,7 @@ namespace DiskpartGUI.Models
         GB
     }
 
-    public static class VolumeSizePostfixExtension
+    public static class SizePostfixExtension
     {
         private static readonly Dictionary<string, SizePostfix> post = new Dictionary<string, SizePostfix>
         {
@@ -264,7 +266,6 @@ namespace DiskpartGUI.Models
         }
     }
 
-
     /// <summary>
     /// The DynamicType of a disk
     /// Not Complete
@@ -427,7 +428,7 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public virtual bool CanToggleReadOnly()
         {
-            return true;
+            return false;
         }
 
         /// <summary>

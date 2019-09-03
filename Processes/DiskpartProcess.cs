@@ -16,17 +16,22 @@ namespace DiskpartGUI.Processes
         CLEAR
     }
 
-    public enum MediaType
+    /// <summary>
+    /// The storage type
+    /// </summary>
+    public enum StorageType
     {
         VOLUME,
-        DISK
+        DISK,
+        PARTITION
     }
 
     public class DiskpartProcess : CMDProcess
     {
 
-        private static readonly string Disk_Parse_RX = "Disk (?<disknum>[0-9]){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
-        private static readonly string Volume_Parse_RX = "Volume (?<volnum>[0-9]){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
+        private const string Disk_Parse_RX = "Disk (?<disknum>[0-9]+){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
+        private const string Volume_Parse_RX = "Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
+        private const string Partition_Parse_RX = "Partition (?<partnum>[0-9]+)( ){3,4}(?<parttype>Primary|)( ){11,19}(?<partsize>[0-9]+)( )(?<partsizegk>K|G|M)?B( ){2,3}(?<partoff>[0-9]+)( )(?<partoffgk>K|G|M)?B";
 
         private static readonly string Disk_Attribute_Parse_RX = "Disk (?<disknum>[0-9]+) is now the selected disk\\.\\r\\nCurrent Read-only State : (?<croflag>Yes|No)\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nBoot Disk ( )+: (?<bdflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pfflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<cdflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustflag>Yes|No)";
         private static readonly string Volume_Attribute_Parse_RX = "Volume (?<volnum>[0-9]+) is the selected volume\\.\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nHidden( )+: (?<hidflag>Yes|No)\\r\\nNo Default Drive Letter: (?<noddflag>Yes|No)\\r\\nShadow Copy( )+: (<shadFlagYes|No)";
@@ -91,9 +96,12 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="volumes">The list to set too</param>
         /// <returns>The process exit code</returns>
-        public ProcessExitCode RunListCommand(ref List<BaseMedia> list, MediaType type)
+        public ProcessExitCode RunListCommand(ref List<BaseMedia> list, StorageType type, int selectedDisk = 0)
         {
             CurrentProcess = nameof(RunListCommand);
+            if(type == StorageType.PARTITION)
+                AddScriptCommand("SELECT DISK " + selectedDisk);
+
             AddScriptCommand("LIST " + type);
             WriteScript();
             if (Run() == ProcessExitCode.Ok)
@@ -110,17 +118,20 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="volumes">The List to add to</param>
         /// <returns>The process exit code</returns>
-        private ProcessExitCode ParseListCommand(ref List<BaseMedia> list, MediaType type)
+        private ProcessExitCode ParseListCommand(ref List<BaseMedia> list, StorageType type)
         {
             CurrentProcess = nameof(ParseListCommand);
             Regex rx;
             switch (type)
             {
-                case MediaType.DISK:
+                case StorageType.DISK:
                     rx = new Regex(Disk_Parse_RX);
                     break;
-                case MediaType.VOLUME:
+                case StorageType.VOLUME:
                     rx = new Regex(Volume_Parse_RX);
+                    break;
+                case StorageType.PARTITION:
+                    rx = new Regex(Partition_Parse_RX);
                     break;
                 default:
                     rx = new Regex(string.Empty);
@@ -137,33 +148,44 @@ namespace DiskpartGUI.Processes
                     BaseMedia b;
                     switch (type)
                     {
-                        case MediaType.DISK:
+                        case StorageType.DISK:
                             b = new Disk
                             {
                                 Number = Int32.Parse(gc["disknum"].Value),
                                 Status = VolumeStatusExtension.Parse(gc["diskstat"].Value),
                                 Size = Int32.Parse(gc["disksize"].Value),
-                                SizePostfix = VolumeSizePostfixExtension.Parse(gc["diskgk"].Value),
+                                SizePostfix = SizePostfixExtension.Parse(gc["diskgk"].Value),
                                 FreeSpace = Int32.Parse(gc["diskfree"].Value),
-                                FreeSpacePostfix = VolumeSizePostfixExtension.Parse(gc["diskfreegk"].Value),
+                                FreeSpacePostfix = SizePostfixExtension.Parse(gc["diskfreegk"].Value),
                                 Dynamic = gc["diskdyn"].Value.Trim(),
                                 GPTType = gc["diskgpt"].Value.Trim()
 
                             };
                             break;
-                        case MediaType.VOLUME:
+                        case StorageType.VOLUME:
                             b = new Volume
                             {
                                 Number = Int32.Parse(gc["volnum"].Value),
                                 Letter = gc["vollet"].Value.ElementAt<char>(0),
                                 Label = gc["vollab"].Value,
                                 FileSystem = FileSystemExtension.Parse(gc["volfs"].Value),
-                                VolumeType = VolumeTypeExtension.Parse(gc["voltype"].Value),
+                                MediaType = MediaTypeExtension.Parse(gc["voltype"].Value),
                                 Size = Int32.Parse(gc["volsize"].Value),
-                                SizePostfix = VolumeSizePostfixExtension.Parse(gc["volgk"].Value),
+                                SizePostfix = SizePostfixExtension.Parse(gc["volgk"].Value),
                                 Status = VolumeStatusExtension.Parse(gc["volstat"].Value),
                                 Info = gc["volinfo"].Value,
                                 MountState = MountStateExtension.Parse(gc["volinfo"].Value)
+                            };
+                            break;
+                        case StorageType.PARTITION:
+                            b = new Partition
+                            {
+                                Number = Int32.Parse(gc["partnum"].Value),
+                                MediaType = MediaTypeExtension.Parse(gc["parttype"].Value),
+                                Size = Int32.Parse(gc["partsize"].Value),
+                                SizePostfix = SizePostfixExtension.Parse(gc["partsizegk"].Value),
+                                Offset = Int32.Parse(gc["partoff"].Value),
+                                OffsetPostfix = SizePostfixExtension.Parse(gc["partoffgk"].Value)
                             };
                             break;
                         default:
@@ -173,8 +195,9 @@ namespace DiskpartGUI.Processes
                     list.Add(b);
                 }
                 ExitCode = ProcessExitCode.Ok;
-
             }
+            else
+                ExitCode = ProcessExitCode.ErrorNoMatchesFound;
             return ExitCode;
         }
 
@@ -183,7 +206,7 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="list">The Volumes to get the read-only flag</param>
         /// <returns>The process exit code</returns>
-        public ProcessExitCode GetAttributes(ref List<BaseMedia> list, MediaType type)
+        public ProcessExitCode GetAttributes(ref List<BaseMedia> list, StorageType type)
         {
             CurrentProcess = nameof(GetAttributes);
 
@@ -209,7 +232,7 @@ namespace DiskpartGUI.Processes
         /// </summary>
         /// <param name="list">The List to set Read-Only state to</param>
         /// <returns>The process exit code</returns>
-        private ProcessExitCode ParseAttributes(ref List<BaseMedia> list, MediaType type)
+        private ProcessExitCode ParseAttributes(ref List<BaseMedia> list, StorageType type)
         {
             CurrentProcess = nameof(ParseAttributes);
             if (list != null)
@@ -217,10 +240,10 @@ namespace DiskpartGUI.Processes
                 Regex rx;
                 switch (type)
                 {
-                    case MediaType.DISK:
+                    case StorageType.DISK:
                         rx = new Regex(Disk_Attribute_Parse_RX);
                         break;
-                    case MediaType.VOLUME:
+                    case StorageType.VOLUME:
                         rx = new Regex(Volume_Attribute_Parse_RX);
                         break;
                     default:
@@ -237,7 +260,7 @@ namespace DiskpartGUI.Processes
                         int medianum;
                         switch (type)
                         {
-                            case MediaType.DISK:
+                            case StorageType.DISK:
                                 medianum = Int32.Parse(gc["disknum"].Value);
 
                                 if (gc["croflag"].Value == "Yes")
@@ -255,7 +278,7 @@ namespace DiskpartGUI.Processes
                                 if (gc["clustflag"].Value == "Yes")
                                     list[medianum].Attributes |= Attributes.Cluster;
                                 break;
-                            case MediaType.VOLUME:
+                            case StorageType.VOLUME:
                                 medianum = Int32.Parse(gc["volnum"].Value);
 
                                 if (gc["roflag"].Value == "Yes")
@@ -367,7 +390,7 @@ namespace DiskpartGUI.Processes
         /// <param name="b">The volume to adjust read-only flag</param>
         /// <param name="function">The type of adjustment</param>
         /// <returns></returns>
-        public ProcessExitCode SetReadOnly(BaseMedia b, ReadOnlyFunction function, MediaType type)
+        public ProcessExitCode SetReadOnly(BaseMedia b, ReadOnlyFunction function, StorageType type)
         {
             CurrentProcess = nameof(SetReadOnly);
 
@@ -387,10 +410,10 @@ namespace DiskpartGUI.Processes
                     string rx;
                     switch (type)
                     {
-                        case MediaType.DISK:
+                        case StorageType.DISK:
                             rx = Disk_ReadOnly_Test_RX;
                             break;
-                        case MediaType.VOLUME:
+                        case StorageType.VOLUME:
                             rx = Volume_ReadOnly_Test_RX;
                             break;
                         default:
