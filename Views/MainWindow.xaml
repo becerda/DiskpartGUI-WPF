@@ -29,7 +29,7 @@
             <Separator/>
             <MenuItem Command="{Binding ShowVolumesCommand}" CommandParameter="Volume" Header="Show Volumes"/>
             <MenuItem Command="{Binding ShowDisksCommand}" CommandParameter="Disk" Header="Show Disks"/>
-            <MenuItem Command="{Binding ShowPartitionCommand}" CommandParameter="Partition" Header="Show Partitions"/>
+            <MenuItem Command="{Binding ShowPartitionsCommand}" CommandParameter="Partition" Header="Show Partitions"/>
         </ContextMenu>
     </Window.ContextMenu>
 
