@@ -46,7 +46,7 @@
         <KeyBinding Command="{Binding AboutCommand}" Key="{Binding AboutCommand.KeyGesture}" Modifiers="{Binding AboutCommand.GestureModifier}"/>
         <KeyBinding Command="{Binding ShowVolumesCommand}" CommandParameter="Volume" Key="{Binding ShowVolumesListViewCommand.KeyGesture}" Modifiers="{Binding ShowVolumesListViewCommand.GestureModifier}"/>
         <KeyBinding Command="{Binding ShowDisksCommand}" CommandParameter="Disk" Key="{Binding ShowDisksListViewCommand.KeyGesture}" Modifiers="{Binding ShowDisksListViewCommand.GestureModifier}"/>
-        <KeyBinding Command="{Binding ShowPartitionCommand}" CommandParameter="Partition" Key="{Binding ShowPartitionCommand.KeyGesture}" Modifiers="{Binding ShowPartitionCommand.GestureModifier}"/>
+        <KeyBinding Command="{Binding ShowPartitionsCommand}" CommandParameter="Partition" Key="{Binding ShowPartitionsCommand.KeyGesture}" Modifiers="{Binding ShowPartitionsCommand.GestureModifier}"/>
     </Window.InputBindings>
 
     <Grid>
