@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace DiskpartGUI.Commands
@@ -125,9 +119,28 @@ namespace DiskpartGUI.Commands
         /// <param name="execute">The action to execute</param>
         /// <param name="canExecute">The check for the execution</param>
         public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+            : this(execute, canExecute, Key.None, ModifierKeys.None) { }
+
+        /// <summary>
+        /// Sets up a new RelayCommand with supplied Action and Predicate
+        /// </summary>
+        /// <param name="execute">The action to execute</param>
+        /// <param name="canExecute">The check for the execution</param>
+        /// /// <param name="key">The shortcut key</param>
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute, Key key)
+            : this(execute, canExecute, key, ModifierKeys.None) { }
+
+        /// <summary>
+        /// Sets up a new RelayCommand with supplied Action and Predicate
+        /// </summary>
+        /// <param name="execute">The action to execute</param>
+        /// <param name="canExecute">The check for the execution</param>
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute, Key key, ModifierKeys modifier)
         {
             oexecute = execute;
             canexecute = canExecute;
+            KeyGesture = key;
+            GestureModifier = modifier;
         }
 
         /// <summary>

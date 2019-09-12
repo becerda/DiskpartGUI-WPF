@@ -1,16 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DiskpartGUI.Models
 {
-    class Partition : BaseMedia
+    /// <summary>
+    /// The types of a partition
+    /// </summary>
+    public enum PartitionType
     {
+        Extended,
+        Simple,
+        Primary,
+        Logical
+    }
+
+    static class PartitionTypeExtension
+    {
+        private static readonly Dictionary<string, PartitionType> partition = new Dictionary<string, PartitionType>
+        {
+            {PartitionType.Extended + "", PartitionType.Extended },
+            {PartitionType.Simple + "", PartitionType.Simple },
+            {PartitionType.Primary + "", PartitionType.Primary },
+            {PartitionType.Logical + "", PartitionType.Logical }
+        };
+
+        public static PartitionType Parse(string type)
+        {
+            return partition[type];
+        }
+    }
+
+    public class Partition : BaseMedia
+    {
+        private PartitionType partitiontype;
         private int offset;
         private SizePostfix offsetpostfix;
-        private MediaType mediatype;
+        private string offsetinbytes;
+        private string type;
+
+        /// <summary>
+        /// The type of a partition
+        /// </summary>
+        public PartitionType PartitionType
+        {
+            get
+            {
+                return partitiontype;
+            }
+            set
+            {
+                partitiontype = value;
+                OnPropertyChanged(nameof(Type));
+            }
+        }
 
         /// <summary>
         /// The Offset of a partition
@@ -25,6 +66,22 @@ namespace DiskpartGUI.Models
             {
                 offset = value;
                 OnPropertyChanged(nameof(Offset));
+            }
+        }
+
+        /// <summary>
+        /// The offset in bytes of a partition
+        /// </summary>
+        public string OffsetInBytes
+        {
+            get
+            {
+                return offsetinbytes;
+            }
+            set
+            {
+                offsetinbytes = value;
+                OnPropertyChanged(nameof(OffsetInBytes));
             }
         }
 
@@ -58,19 +115,23 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The type of media a partition is
         /// </summary>
-        public MediaType MediaType
+        public string Type
         {
             get
             {
-                return mediatype;
+                return type;
             }
             set
             {
-                mediatype = value;
+                type = value;
                 OnPropertyChanged(nameof(Type));
             }
         }
 
+        /// <summary>
+        /// The string representation of a partition
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return "Partition " + Number;

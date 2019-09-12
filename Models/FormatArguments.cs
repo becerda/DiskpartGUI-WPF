@@ -1,11 +1,78 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiskpartGUI.Models
 {
+    /// <summary>
+    /// The Unit Size of a volume
+    /// </summary>
+    public enum UnitSize
+    {
+        Default,
+        _512,
+        _1024,
+        _2048,
+        _4096,
+        _8192,
+        _16K,
+        _32K,
+        _64K,
+        _128K,
+        _256K,
+        _512K,
+        _1024K,
+        _2048K,
+        _4096K,
+        _8192K,
+        _16384K,
+        _32768K
+    }
+
+    static class UnitSizeExtension
+    {
+        private static readonly Dictionary<string, UnitSize> sizes = new Dictionary<string, UnitSize>
+            {
+                {"512", UnitSize._512 },
+                { "1024", UnitSize._1024 },
+                { "2048", UnitSize._2048 },
+                { "4096", UnitSize._4096 },
+                { "8192", UnitSize._8192 },
+                { "16K", UnitSize._16K },
+                { "32K", UnitSize._32K },
+                { "64K", UnitSize._64K },
+                { "128K", UnitSize._128K },
+                { "256K", UnitSize._256K },
+                { "512K", UnitSize._512K },
+                { "1024K", UnitSize._1024K },
+                { "2048K", UnitSize._2048K },
+                { "4096K", UnitSize._4096K },
+                { "8192K", UnitSize._8192K },
+                { "16384K", UnitSize._16384K },
+                { "32768K", UnitSize._32768K },
+                { "Default", UnitSize.Default }
+            };
+
+        /// <summary>
+        /// Convert UnitSize enum to string
+        /// </summary>
+        /// <param name="size">The enum to convert</param>
+        /// <returns>The string representation</returns>
+        public static string ToString(UnitSize size)
+        {
+            return size.ToString().Substring(1);
+        }
+
+        /// <summary>
+        /// Convert string to UnitSize enum
+        /// </summary>
+        /// <param name="size">The string to convert</param>
+        /// <returns>The enum representation</returns>
+        public static UnitSize Parse(string size)
+        {
+            return sizes[size];
+        }
+    }
+
     public class FormatArguments
     {
         /// <summary>

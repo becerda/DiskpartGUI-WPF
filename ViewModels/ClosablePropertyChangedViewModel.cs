@@ -49,5 +49,15 @@ namespace DiskpartGUI.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
+        /// <summary>
+        /// Method called when the window is finished rendering
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public virtual void OnWindowLoaded(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
