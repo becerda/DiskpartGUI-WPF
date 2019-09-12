@@ -1,86 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiskpartGUI.Models
 {
-    /// <summary>
-    /// Common types of File Systems
-    /// </summary>
-    public enum FileSystem
-    {
-        Default,
-        Blank,
-        NTFS,
-        FAT32,
-        exFAT,
-        CDFS,
-        UDF
-    }
-
-    public static class FileSystemExtension
-    {
-
-        private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
-        {
-            {"Default", FileSystem.Default },
-            {"", FileSystem.Blank },
-            {"NTFS", FileSystem.NTFS },
-            {"FAT32", FileSystem.FAT32 },
-            {"exFAT", FileSystem.exFAT },
-            {"CDFS", FileSystem.CDFS },
-            {"UDF", FileSystem.UDF }
-        };
-
-        /// <summary>
-        /// Parses a string into a FileSystem enum
-        /// </summary>
-        /// <param name="s">The string to parse</param>
-        /// <returns>The FileSystem enum</returns>
-        public static FileSystem Parse(string s)
-        {
-            return fs[s];
-        }
-
-    }
-
-    /// <summary>
-    /// The volume type
-    /// </summary>
-    public enum MediaType
-    {
-        None,
-        Partition,
-        Removable,
-        DVDROM,
-        Simple,
-        Primary
-    }
-
-    public static class MediaTypeExtension
-    {
-        private static readonly Dictionary<string, MediaType> type = new Dictionary<string, MediaType>
-        {
-            {"None", MediaType.None },
-            {"Partition", MediaType.Partition },
-            {"Removable", MediaType.Removable },
-            {"DVD-ROM", MediaType.DVDROM },
-            {"Simple", MediaType.Simple },
-            {"Primary", MediaType.Primary }
-        };
-
-        /// <summary>
-        /// Parses a string into a VolumeType enum
-        /// </summary>
-        /// <param name="s">The string to parse</param>
-        /// <returns>The VolumeType enum</returns>
-        public static MediaType Parse(string s)
-        {
-            return type[s];
-        }
-    }
 
     /// <summary>
     /// The prefix of the size of a volume
@@ -126,7 +48,7 @@ namespace DiskpartGUI.Models
         Offline
     }
 
-    public static class VolumeStatusExtension
+    public static class StatusExtension
     {
         private static readonly Dictionary<string, Status> status = new Dictionary<string, Status>
         {
@@ -148,30 +70,6 @@ namespace DiskpartGUI.Models
     }
 
     /// <summary>
-    /// The mount state of a volume
-    /// </summary>
-    public enum MountState
-    {
-        Mounted,
-        Unmounted
-    }
-
-    public static class MountStateExtension
-    {
-        /// <summary>
-        /// Parses a string to a MountState enum
-        /// </summary>
-        /// <param name="s">The string to parse</param>
-        /// <returns>The MountState enum</returns>
-        public static MountState Parse(string s)
-        {
-            if (s == "Offline")
-                return MountState.Unmounted;
-            return MountState.Mounted;
-        }
-    }
-
-    /// <summary>
     /// The Read-Only flag state of a volume
     /// </summary>
     public enum ReadOnlyState
@@ -180,6 +78,9 @@ namespace DiskpartGUI.Models
         Cleared
     }
 
+    /// <summary>
+    /// Attributes that a media item can have
+    /// </summary>
     [Flags]
     public enum Attributes
     {
@@ -193,134 +94,38 @@ namespace DiskpartGUI.Models
         Pagefile = 64,
         HibernationFile = 128,
         Crashdump = 256,
-        Cluster = 512
-    }
-
-    /// <summary>
-    /// The Unit Size of a volume
-    /// </summary>
-    public enum UnitSize
-    {
-        Default,
-        _512,
-        _1024,
-        _2048,
-        _4096,
-        _8192,
-        _16K,
-        _32K,
-        _64K,
-        _128K,
-        _256K,
-        _512K,
-        _1024K,
-        _2048K,
-        _4096K,
-        _8192K,
-        _16384K,
-        _32768K
-    }
-
-    static class UnitSizeExtension
-    {
-        private static readonly Dictionary<string, UnitSize> sizes = new Dictionary<string, UnitSize>
-            {
-                {"512", UnitSize._512 },
-                { "1024", UnitSize._1024 },
-                { "2048", UnitSize._2048 },
-                { "4096", UnitSize._4096 },
-                { "8192", UnitSize._8192 },
-                { "16K", UnitSize._16K },
-                { "32K", UnitSize._32K },
-                { "64K", UnitSize._64K },
-                { "128K", UnitSize._128K },
-                { "256K", UnitSize._256K },
-                { "512K", UnitSize._512K },
-                { "1024K", UnitSize._1024K },
-                { "2048K", UnitSize._2048K },
-                { "4096K", UnitSize._4096K },
-                { "8192K", UnitSize._8192K },
-                { "16384K", UnitSize._16384K },
-                { "32768K", UnitSize._32768K },
-                { "Default", UnitSize.Default }
-            };
-
-        /// <summary>
-        /// Convert UnitSize enum to string
-        /// </summary>
-        /// <param name="size">The enum to convert</param>
-        /// <returns>The string representation</returns>
-        public static string ToString(UnitSize size)
-        {
-            return size.ToString().Substring(1);
-        }
-
-        /// <summary>
-        /// Convert string to UnitSize enum
-        /// </summary>
-        /// <param name="size">The string to convert</param>
-        /// <returns>The enum representation</returns>
-        public static UnitSize Parse(string size)
-        {
-            return sizes[size];
-        }
-    }
-
-    /// <summary>
-    /// The DynamicType of a disk
-    /// Not Complete
-    /// </summary>
-    public enum DynamicType
-    {
-        Blank,
-    }
-
-    static class DynamicTypeExtension
-    {
-        private static readonly Dictionary<string, DynamicType> dynamic = new Dictionary<string, DynamicType>
-        {
-            {"", DynamicType.Blank }
-        };
-
-
-        public static DynamicType Parse(string type)
-        {
-            return dynamic[type];
-        }
-    }
-
-    /// <summary>
-    /// The GPT type of a disk
-    /// Not Complete
-    /// </summary>
-    public enum GPTType
-    {
-        Blank,
-        Set
-    }
-
-    static class GPTTypeExtension
-    {
-        private static readonly Dictionary<string, GPTType> gpt = new Dictionary<string, GPTType>
-        {
-            {"", GPTType.Blank },
-            {"*", GPTType.Set }
-        };
-
-        public static GPTType Parse(string type)
-        {
-            return gpt[type];
-        }
+        Cluster = 512,
+        Offline = 1024,
+        BitLocker = 2048,
+        Installable = 4096,
+        Active = 8192
     }
 
     public class BaseMedia : BaseModel
     {
-
+        protected string name;
         private int number;
         private Status status;
         private int size;
         private SizePostfix sizepostfix;
         private Attributes attribs;
+        private int parent;
+
+        /// <summary>
+        /// The Name/Label of a media item
+        /// </summary>
+        public virtual string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value.ToUpper();
+                OnPropertyChanged(nameof(Name));
+            }
+        }
 
         /// <summary>
         /// The number a media item is assigned
@@ -411,6 +216,35 @@ namespace DiskpartGUI.Models
             {
                 return Size + " " + (SizePostfix == SizePostfix.None ? "B" : SizePostfix + "");
             }
+        }
+
+        /// <summary>
+        /// The number of the parent of a media item
+        /// </summary>
+        public int Parent
+        {
+            get
+            {
+                return parent;
+            }
+            set
+            {
+                parent = value;
+                OnPropertyChanged(nameof(Parent));
+            }
+        }
+
+        /// <summary>
+        /// Sets or Clears the passed in flag
+        /// </summary>
+        /// <param name="attribute">The attribute to set or clear</param>
+        /// <param name="state">Set or Clear</param>
+        public void SetFlag(Attributes attribute, bool state = true)
+        {
+            if (state)
+                Attributes |= attribute;
+            else
+                Attributes &= ~attribute;
         }
 
         /// <summary>

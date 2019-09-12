@@ -1,4 +1,6 @@
 ﻿using DiskpartGUI.Interfaces;
+using DiskpartGUI.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 
 namespace DiskpartGUI.Views
@@ -17,7 +19,24 @@ namespace DiskpartGUI.Views
         public BaseClosableWindow(object dataContext) : base()
         {
             DataContext = dataContext;
+
             Loaded += Window_Loaded;
+            if (DataContext is ClosablePropertyChangedViewModel)
+                ContentRendered += (DataContext as ClosablePropertyChangedViewModel).OnWindowLoaded;
+
+            Closing += Window_Closing;
+        }
+
+        /// <summary>
+        /// Called when window is closing. Removes attached listeners
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            Loaded -= Window_Loaded;
+            if (DataContext is ClosablePropertyChangedViewModel)
+                ContentRendered -= (DataContext as ClosablePropertyChangedViewModel).OnWindowLoaded;
         }
 
         /// <summary>
@@ -32,7 +51,6 @@ namespace DiskpartGUI.Views
                 (DataContext as IClosable).RequestClose += (_, __) => this.Close();
             }
         }
-
 
     }
 }

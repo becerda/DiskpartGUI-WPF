@@ -1,6 +1,106 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace DiskpartGUI.Models
 {
+
+    /// <summary>
+    /// The volume type
+    /// </summary>
+    public enum VolumeType
+    {
+        None,
+        Partition,
+        Removable,
+        DVDROM,
+    }
+
+    public static class VolumeTypeExtension
+    {
+        private static readonly Dictionary<string, VolumeType> type = new Dictionary<string, VolumeType>
+        {
+            {"None", VolumeType.None },
+            {"Partition", VolumeType.Partition },
+            {"Removable", VolumeType.Removable },
+            {"DVD-ROM", VolumeType.DVDROM }
+        };
+
+        /// <summary>
+        /// Parses a string into a VolumeType enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The VolumeType enum</returns>
+        public static VolumeType Parse(string s)
+        {
+            return type[s];
+        }
+    }
+
+    /// <summary>
+    /// Common types of File Systems
+    /// </summary>
+    public enum FileSystem
+    {
+        Default,
+        Blank,
+        NTFS,
+        FAT32,
+        exFAT,
+        CDFS,
+        UDF,
+        RAW
+    }
+
+    public static class FileSystemExtension
+    {
+
+        private static readonly Dictionary<string, FileSystem> fs = new Dictionary<string, FileSystem>
+        {
+            {"Default", FileSystem.Default },
+            {"", FileSystem.Blank },
+            {"NTFS", FileSystem.NTFS },
+            {"FAT32", FileSystem.FAT32 },
+            {"exFAT", FileSystem.exFAT },
+            {"CDFS", FileSystem.CDFS },
+            {"UDF", FileSystem.UDF },
+            {FileSystem.RAW + "", FileSystem.RAW }
+        };
+
+        /// <summary>
+        /// Parses a string into a FileSystem enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The FileSystem enum</returns>
+        public static FileSystem Parse(string s)
+        {
+            return fs[s];
+        }
+
+    }
+
+    /// <summary>
+    /// The mount state of a volume
+    /// </summary>
+    public enum MountState
+    {
+        Mounted,
+        Unmounted
+    }
+
+    public static class MountStateExtension
+    {
+        /// <summary>
+        /// Parses a string to a MountState enum
+        /// </summary>
+        /// <param name="s">The string to parse</param>
+        /// <returns>The MountState enum</returns>
+        public static MountState Parse(string s)
+        {
+            if (s == "Offline")
+                return MountState.Unmounted;
+            return MountState.Mounted;
+        }
+    }
+
     public class Volume : BaseMedia
     {
         /// <summary>
@@ -9,11 +109,15 @@ namespace DiskpartGUI.Models
         public const int Max_Label_Char_Len = 10;
 
         private char letter;
-        private string label;
         private FileSystem filesystem;
-        private MediaType type;
+        private VolumeType type;
         private string info;
         private MountState mounted;
+
+        private int capacity;
+        private SizePostfix capacitypostfix;
+        private int freespace;
+        private SizePostfix freespacepostfix;
 
         /// <summary>
         /// The dirve letter a volume is assigned
@@ -28,6 +132,7 @@ namespace DiskpartGUI.Models
             {
                 letter = value;
                 OnPropertyChanged(nameof(Letter));
+                OnPropertyChanged(nameof(DriveLetter));
             }
         }
 
@@ -39,22 +144,6 @@ namespace DiskpartGUI.Models
             get
             {
                 return Letter + ":";
-            }
-        }
-
-        /// <summary>
-        /// The label of the volume
-        /// </summary>
-        public string Label
-        {
-            get
-            {
-                return label;
-            }
-            set
-            {
-                label = value;
-                OnPropertyChanged(nameof(Label));
             }
         }
 
@@ -77,7 +166,7 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The type of a volume
         /// </summary>
-        public MediaType MediaType
+        public VolumeType Type
         {
             get
             {
@@ -86,7 +175,7 @@ namespace DiskpartGUI.Models
             set
             {
                 type = value;
-                OnPropertyChanged(nameof(MediaType));
+                OnPropertyChanged(nameof(Type));
             }
         }
 
@@ -123,6 +212,92 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
+        /// The capacity of a volume
+        /// </summary>
+        public int Capacity
+        {
+            get
+            {
+                return capacity;
+            }
+            set
+            {
+                capacity = value;
+                OnPropertyChanged(nameof(Capacity));
+            }
+        }
+
+        /// <summary>
+        /// The postfix of a volume's capacity
+        /// </summary>
+        public SizePostfix CapacityPostfix
+        {
+            get
+            {
+                return capacitypostfix;
+            }
+            set
+            {
+                capacitypostfix = value;
+                OnPropertyChanged(nameof(CapacityPostfix));
+            }
+        }
+
+        /// <summary>
+        /// The string representation of a volume's capacity
+        /// </summary>
+        public string FullCapacity
+        {
+            get
+            {
+                return Capacity + " " + CapacityPostfix;
+            }
+        }
+
+        /// <summary>
+        /// The free space of a volume
+        /// </summary>
+        public int FreeSpace
+        {
+            get
+            {
+                return freespace;
+            }
+            set
+            {
+                freespace = value;
+                OnPropertyChanged(nameof(FreeSpace));
+            }
+        }
+
+        /// <summary>
+        /// The postfix of a volume's free space
+        /// </summary>
+        public SizePostfix FreeSpacePostfix
+        {
+            get
+            {
+                return freespacepostfix;
+            }
+            set
+            {
+                freespacepostfix = value;
+                OnPropertyChanged(nameof(FreeSpacePostfix));
+            }
+        }
+
+        /// <summary>
+        /// The string representation of a volume's free space
+        /// </summary>
+        public string FullFreeSpace
+        {
+            get
+            {
+                return FreeSpace + " " + FreeSpacePostfix;
+            }
+        }
+
+        /// <summary>
         /// Is the volume mounted?
         /// </summary>
         /// <returns>Whether the volume is mounted</returns>
@@ -137,7 +312,7 @@ namespace DiskpartGUI.Models
         /// <returns>Whether the volume is removable</returns>
         public override bool IsRemovable()
         {
-            return MediaType == MediaType.Removable;
+            return Type == VolumeType.Removable;
         }
 
         /// <summary>
@@ -146,6 +321,8 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public override bool CanToggleReadOnly()
         {
+            if (FileSystem == FileSystem.RAW)
+                return false;
             if (Info.Contains("Pagefile"))
                 return false;
             if (Info.Contains("System"))
@@ -161,7 +338,9 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public override bool CanBeRenamed()
         {
-            if (MediaType == MediaType.Removable)
+            if (FileSystem == FileSystem.RAW)
+                return false;
+            if (Type == VolumeType.Removable)
                 return true;
             return false;
         }
@@ -172,7 +351,9 @@ namespace DiskpartGUI.Models
         /// <returns></returns>
         public override bool CanBeEjected()
         {
-            if (MediaType == MediaType.Removable)
+            if (FileSystem == FileSystem.RAW)
+                return false;
+            if (Type == VolumeType.Removable)
                 return true;
             return false;
         }
@@ -198,7 +379,7 @@ namespace DiskpartGUI.Models
         /// <returns>The DriveLetter and Label</returns>
         public override string ToString()
         {
-            return "Volume " + DriveLetter + " " + Label;
+            return "Volume " + DriveLetter + " " + Name;
         }
     }
 }

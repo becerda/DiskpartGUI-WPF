@@ -13,7 +13,7 @@
     <DockPanel>
         <Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
             <StackPanel Orientation="Vertical">
-                <Label Content="{Binding Message}" DockPanel.Dock="Top" Margin="10"/>
+                <Label Content="{Binding Action}" DockPanel.Dock="Top" Margin="10"/>
                 <local:Spinner/>
             </StackPanel>
         </Border>
