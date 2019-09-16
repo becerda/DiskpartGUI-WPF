@@ -257,6 +257,15 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
+        /// Is the volume a Hidden device?
+        /// </summary>
+        /// <returns>Whether the volume is hidden</returns>
+        public virtual bool IsHidden()
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Can this media item be set to read only?
         /// </summary>
         /// <returns></returns>

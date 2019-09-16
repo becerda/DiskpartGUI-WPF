@@ -316,6 +316,15 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
+        /// Is the volume a Hidden device?
+        /// </summary>
+        /// <returns>Whether the volume is hidden</returns>
+        public override bool IsHidden()
+        {
+            return Attributes.HasFlag(Attributes.Hidden);
+        }
+
+        /// <summary>
         /// Can a Volume be set to read only?
         /// </summary>
         /// <returns></returns>

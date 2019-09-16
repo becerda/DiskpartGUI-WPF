@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using static DiskpartGUI.Helpers.Logger;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -235,6 +236,19 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        public bool EnableLogging
+        {
+            get
+            {
+                return Properties.Settings.Default.EnableLogging;
+            }
+            set
+            {
+                Properties.Settings.Default.EnableLogging = value;
+                OnPropertyChanged(nameof(EnableLogging));
+            }
+        }
+
         /// <summary>
         /// Eject command for ButtonEject
         /// </summary>
@@ -285,6 +299,8 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public RelayCommand ShowPartitionsCommand { get; private set; }
 
+        public RelayCommand EnableLoggingCommand { get; private set; }
+
         /// <summary>
         /// Shows the About window
         /// </summary>
@@ -310,6 +326,7 @@ namespace DiskpartGUI.ViewModels
             SetClearReadOnlyButtonContent = "Set Read-Only";
             SelectedItemInfo = "";
             ShowAllVolumes = Properties.Settings.Default.ShowAllVolumes;
+            EnableLogging = Properties.Settings.Default.EnableLogging;
 
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, CanBeEjected, Key.E, ModifierKeys.Control);
             RenameCommand = new RelayCommand(RenameVolume, CanBeRenamed, Key.F2);
@@ -339,7 +356,7 @@ namespace DiskpartGUI.ViewModels
         public override void OnWindowLoaded(object sender, EventArgs e)
         {
             // TO-DO: Load last ListView from settings
-            ChangeListView(Disks_Header_Param);
+            ChangeListView(Volumes_Header_Param);
         }
 
         /// <summary>
@@ -390,6 +407,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public async void Refresh()
         {
+            Log(LoggerType.Info, "MainWindow - Refresh()", "Called");
             ListViewSource = null;
             switch (lvstate)
             {
@@ -414,6 +432,8 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public async Task Refresh(StorageType type)
         {
+            Log(LoggerType.Info, "MainWindow - Refresh(" + type + ")", "Called");
+
             masterbuttonsenabled = false;
 
             if (type == StorageType.DISK)

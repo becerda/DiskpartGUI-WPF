@@ -63,6 +63,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Helpers\BooleanOrConverter.cs" />
     <Compile Include="Helpers\GridViewColumnVisibilityManager.cs" />
+    <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Helpers\MessageHelper.cs" />
     <Compile Include="Interfaces\IClosable.cs" />
     <Compile Include="Models\BaseMedia.cs" />

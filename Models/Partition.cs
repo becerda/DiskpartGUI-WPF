@@ -129,6 +129,15 @@ namespace DiskpartGUI.Models
         }
 
         /// <summary>
+        /// Is the volume a Hidden device?
+        /// </summary>
+        /// <returns>Whether the volume is hidden</returns>
+        public override bool IsHidden()
+        {
+            return Attributes.HasFlag(Attributes.Hidden);
+        }
+
+        /// <summary>
         /// The string representation of a partition
         /// </summary>
         /// <returns></returns>

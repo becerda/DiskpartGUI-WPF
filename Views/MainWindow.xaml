@@ -68,16 +68,17 @@
                 <MenuItem Header="_View">
                     <MenuItem Command="{Binding ShowAllVolumesCommand}" Header="_Show All Volumes" IsChecked="{Binding ShowAllVolumes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="{Binding ShowAllVolumesCommand.InputGestureText}"/>
                     <Separator/>
-                    <MenuItem Command="{Binding ShowVolumesListViewCommand}" CommandParameter="Volume" Header="Show Volumes"/>
-                    <MenuItem Command="{Binding ShowDisksListViewCommand}" CommandParameter="Disk" Header="Show Disks"/>
-                    <MenuItem Command="{Binding ShowPartitionCommand}" CommandParameter="Partition" Header="Show Partitions"/>
+                    <MenuItem Command="{Binding ShowVolumesCommand}" CommandParameter="Volume" Header="Show Volumes"/>
+                    <MenuItem Command="{Binding ShowDisksCommand}" CommandParameter="Disk" Header="Show Disks"/>
+                    <MenuItem Command="{Binding ShowPartitionsCommand}" CommandParameter="Partition" Header="Show Partitions"/>
                     <Separator/>
                     <MenuItem Command="{Binding BitLockCommand}" Header="Open BitLock" InputGestureText="{Binding BitLockCommand.InputGestureText}"/>
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Command="{Binding AboutCommand}" Header="_About" InputGestureText="{Binding AboutCommand.InputGestureText}"/>
                     <Separator/>
-                    <MenuItem Name="MenuItemAutoCheckForUpdates" Header="Auto Check For _Updates"/>
+                    <MenuItem Header="Auto Check For _Updates"/>
+                    <MenuItem Header="Enable _Logging" IsCheckable="True" IsChecked="{Binding EnableLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+L"/>
                 </MenuItem>
             </Menu>
 
@@ -130,11 +131,12 @@
                             <GridViewColumn x:Name="GridViewColumnVolumeInfo" Header="Info" helper:GridViewColumnVisibilityManager.IsVisible="{Binding VolumeVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding Info}" Width="70"/>
 
                             <!-- Disk View -->
+                            <GridViewColumn x:Name="GridViewColumnDiskName" Header="Name" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding Name}" Width="175"/>
                             <GridViewColumn x:Name="GridViewColumnDiskStatus" Header="Status" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding Status}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnDiskSize" Header="Size" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding FullSize}" Width="70"/>
                             <GridViewColumn x:Name="GridViewColumnDiskFree" Header="Free Space" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding FullFreeSpace}" Width="70"/>
-                            <GridViewColumn x:Name="GridViewColumnDiskDyn" Header="Dynamic" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding DiskType}" Width="90"/>
-                            <GridViewColumn x:Name="GridViewColumnDiskGUID" Header="GPT" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding GPTType}" Width="70"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskDyn" Header="Dynamic" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding DiskType}" Width="55"/>
+                            <GridViewColumn x:Name="GridViewColumnDiskGUID" Header="GPT" helper:GridViewColumnVisibilityManager.IsVisible="{Binding DiskVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding GPTType}" Width="35"/>
 
                             <!-- Partition View -->
                             <GridViewColumn x:Name="GridViewColumnPartitionType" Header="Type" helper:GridViewColumnVisibilityManager.IsVisible="{Binding PartitionVisibility, UpdateSourceTrigger=PropertyChanged}" DisplayMemberBinding="{Binding PartitionType}"  Width="80"/>
