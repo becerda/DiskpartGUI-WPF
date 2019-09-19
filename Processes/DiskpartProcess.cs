@@ -31,11 +31,11 @@ namespace DiskpartGUI.Processes
     {
 
         //language=regex
-        private const string Disk_Parse_RX = "Disk (?<disknum>[0-9]+){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
+        private const string Disk_List_RX = "Disk (?<disknum>[0-9]+){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
         //language=regex
-        private const string Volume_Parse_RX = "Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
+        private const string Volume_List_RX = "Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
         //language=regex
-        private const string Partition_Parse_RX = "Partition (?<partnum>[0-9]+)( ){3,4}(?<parttype>Primary|Extended|Logical)( ){10,19}(?<partsize>[0-9]+)( )(?<partsizegk>K|G|M)?B( ){2,4}(?<partoff>[0-9]+)( )(?<partoffgk>K|G|M)?B";
+        private const string Partition_List_RX = "(There are no partitions on this disk to show\\.|Partition (?<partnum>[0-9]+)( ){3,4}(?<parttype>Primary|Extended|Logical)( ){10,19}(?<partsize>[0-9]+)( )(?<partsizegk>K|G|M)?B( ){2,4}(?<partoff>[0-9]+)( )(?<partoffgk>K|G|M)?B)";
 
         //language=regex
         private const string Disk_Attribute_Parse_RX = "Disk (?<disknum>[0-9]+) is now the selected disk\\.\\r\\nCurrent Read-only State : (?<croflag>Yes|No)\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nBoot Disk ( )+: (?<bdflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pfflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<cdflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustflag>Yes|No)";
@@ -50,9 +50,9 @@ namespace DiskpartGUI.Processes
         //language=regex
         private const string Disk_Detail_RX = "\\r\\n(?<diskname>[a-zA-Z0-9_ ]+)\\r\\nDisk ID: (?<diskid>[A-F0-9]+)\\r\\nType( )+: (?<disktype>USB|RAID)\\r\\nStatus : (?<diskstatus>Online|Offline)\\r\\nPath( )+: (?<diskpath>[a-zA-Z0-9]+)\\r\\nTarget : (?<disktarget>[a-zA-Z0-9]+)\\r\\nLUN ID : (?<disklunid>[a-zA-Z0-9]+)\\r\\nLocation Path : (?<disklocpath>[()#a-zA-Z0-9]+)\\r\\nCurrent Read-only State : (?<diskcurreadonly>Yes|No)\\r\\nRead-only( )+: (?<diskreadonly>Yes|No)\\r\\nBoot Disk( )+: (?<diskboot>Yes|No)\\r\\nPagefile Disk( )+: (?<diskpage>Yes|No)\\r\\nHibernation File Disk( )+: (?<diskhibernation>Yes|No)\\r\\nCrashdump Disk( )+: (?<diskcrashdump>Yes|No)\\r\\nClustered Disk( )+: (?<diskcluster>Yes|No)";
         //language=regex
-        private const string Volume_Detail_RX = "Disk (?<parentnumber>[0-9]+)( )+(Online|)?( )+([0-9]+)( )(K|G|M)?B( ){2,}([0-9]+)( )(M|G|K)?B( )+\\r\\n\\r\\nRead-only( )+: (?<volreadonly>Yes|No)\\r\\nHidden( )+: (?<volhidden>Yes|No)\\r\\nNo Default Drive Letter: (?<volnodefletter>Yes|No)\\r\\nShadow Copy( )+: (?<volshadow>Yes|No)\\r\\nOffline( )+: (?<voloffline>Yes|No)\\r\\nBitLocker Encrypted( )+: (?<volbitlock>Yes|No)\\r\\nInstallable( )+: (?<volinstall>Yes|No)\\r\\n\\r\\nVolume Capacity( )+:( )+(?<volcap>[0-9]+) (?<volcapgk>M|K|G)?B\\r\\nVolume Free Space( )+:( )+(?<volfree>[0-9]+) (?<volfreegk>M|K|G)?B";
+        private const string Volume_Detail_RX = "(There are no disks attached to this volume.|Disk (?<parentnumber>[0-9]+)( )+(Online|)?( )+([0-9]+)( )(K|G|M)?B( ){2,}([0-9]+)( )(M|G|K)?B( |\\*)+)\\r\\n\\r\\nRead-only( )+: (?<volreadonly>Yes|No)\\r\\nHidden( )+: (?<volhidden>Yes|No)\\r\\nNo Default Drive Letter: (?<volnodefletter>Yes|No)\\r\\nShadow Copy( )+: (?<volshadow>Yes|No)\\r\\nOffline( )+: (?<voloffline>Yes|No)\\r\\nBitLocker Encrypted( )+: (?<volbitlock>Yes|No)\\r\\nInstallable( )+: (?<volinstall>Yes|No)(\\r\\n\\r\\nVolume Capacity( )+:( )+(?<volcap>[0-9]+) (?<volcapgk>M|K|G)?B\\r\\nVolume Free Space( )+:( )+(?<volfree>[0-9]+) (?<volfreegk>M|K|G)?B)?";
         //language=regex
-        private const string Partition_Detail_RX = "\\r\\nPartition (?<partnumber>[0-9]+)\\r\\nType  : (?<parttype>[A-F0-9]+)\\r\\nHidden: (?<parthidden>Yes|No)\\r\\nActive: (?<partactive>Yes|No)\\r\\nOffset in Bytes: (?<partoffsetbyte>[0-9]+)\\r\\n\\r\\n  Volume ###  Ltr  Label( ){8}Fs( ){5}Type( ){8}Size( ){5}Status( ){5}Info\\r\\n  -{10}  -{3}  -{11}  -{5}  -{10}  -{7}  -{9}  -{8}\\r\\n. Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
+        private const string Partition_Detail_RX = "\\r\\nPartition (?<partnumber>[0-9]+)\\r\\nType  : (?<parttype>[A-F0-9]+)\\r\\nHidden: (?<parthidden>Yes|No)\\r\\nActive: (?<partactive>Yes|No)\\r\\nOffset in Bytes: (?<partoffsetbyte>[0-9]+)\\r\\n\\r\\n(There is no volume associated with this partition.|  Volume ###  Ltr  Label( ){8}Fs( ){5}Type( ){8}Size( ){5}Status( ){5}Info\\r\\n  -{10}  -{3}  -{11}  -{5}  -{10}  -{7}  -{9}  -{8}\\r\\n. Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?)";
 
         /// <summary>
         /// The Diskpart script lines
@@ -210,6 +210,9 @@ namespace DiskpartGUI.Processes
                     }
                 }
             }
+            else if(ExitCode == ProcessExitCode.NoPartitions){
+                ExitCode = ProcessExitCode.Ok;
+            }
             else
             {
                 Log(LoggerType.Error, "DiskpartProcess - GetPartitionInfo(" + disknumber + ", List)", "ListCommand - " + ExitCode + ": ");
@@ -263,13 +266,20 @@ namespace DiskpartGUI.Processes
             switch (type)
             {
                 case StorageType.DISK:
-                    rx = new Regex(Disk_Parse_RX);
+                    rx = new Regex(Disk_List_RX);
                     break;
                 case StorageType.VOLUME:
-                    rx = new Regex(Volume_Parse_RX);
+                    rx = new Regex(Volume_List_RX);
                     break;
                 case StorageType.PARTITION:
-                    rx = new Regex(Partition_Parse_RX);
+                    if (TestOutput("There are no partitions on this disk to show"))
+                    {
+                        Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "There are no partitions on this disk to show");
+                        ExitCode = ProcessExitCode.NoPartitions;
+                        return ExitCode;
+                    }
+
+                    rx = new Regex(Partition_List_RX);
                     break;
                 default:
                     rx = new Regex(string.Empty);
@@ -300,7 +310,7 @@ namespace DiskpartGUI.Processes
                                 Dynamic = gc["diskdyn"].Value.Trim(),
                                 GPTType = gc["diskgpt"].Value.Trim()
                             };
-                            Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Disk");
+                            Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Disk " + b.Number);
                             break;
                         case StorageType.VOLUME:
                             b = new Volume
@@ -316,19 +326,25 @@ namespace DiskpartGUI.Processes
                                 Info = gc["volinfo"].Value,
                                 MountState = MountStateExtension.Parse(gc["volinfo"].Value)
                             };
-                            Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Volume");
+                            Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Volume " + b.Number);
                             break;
                         case StorageType.PARTITION:
-                            b = new Partition
+                            b = new Partition();
+                            try
                             {
-                                Number = Int32.Parse(gc["partnum"].Value),
-                                PartitionType = PartitionTypeExtension.Parse(gc["parttype"].Value),
-                                Size = Int32.Parse(gc["partsize"].Value),
-                                SizePostfix = SizePostfixExtension.Parse(gc["partsizegk"].Value),
-                                Offset = Int32.Parse(gc["partoff"].Value),
-                                OffsetPostfix = SizePostfixExtension.Parse(gc["partoffgk"].Value)
-                            };
-                            Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Partition");
+                                b.Number = Int32.Parse(gc["partnum"].Value);
+                                ((Partition)b).PartitionType = PartitionTypeExtension.Parse(gc["parttype"].Value);
+                                b.Size = Int32.Parse(gc["partsize"].Value);
+                                b.SizePostfix = SizePostfixExtension.Parse(gc["partsizegk"].Value);
+                                ((Partition)b).Offset = Int32.Parse(gc["partoff"].Value);
+                                ((Partition)b).OffsetPostfix = SizePostfixExtension.Parse(gc["partoffgk"].Value);
+                                Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Partition " + b.Number);
+                            }
+                            catch (FormatException fe)
+                            {
+                                Log(LoggerType.Info, "DiskpartProcess - ParseListCommand(List, " + type + ")", fe.StackTrace);
+                                ExitCode = ProcessExitCode.ErrorMatchFormat;
+                            }
                             break;
                         default:
                             b = new BaseMedia();
@@ -565,7 +581,7 @@ namespace DiskpartGUI.Processes
                                 media.SetFlag(Attributes.Crashdump);
                             if (gc["diskcluster"].Value == "Yes")
                                 media.SetFlag(Attributes.Cluster);
-                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Disk");
+                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Disk " + media.Number);
                             LogDisk((Disk)media);
                             break;
                         case StorageType.PARTITION:
@@ -575,7 +591,7 @@ namespace DiskpartGUI.Processes
                             if (gc["partactive"].Value == "Yes")
                                 media.SetFlag(Attributes.Active);
                             ((Partition)media).OffsetInBytes = gc["partoffsetbyte"].Value;
-                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Partition");
+                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Partition " + media.Number);
                             LogPartition((Partition)media);
                             break;
                         case StorageType.VOLUME:
@@ -598,7 +614,7 @@ namespace DiskpartGUI.Processes
                             ((Volume)media).CapacityPostfix = SizePostfixExtension.Parse(gc["volcapgk"].Value);
                             ((Volume)media).FreeSpace = Int32.Parse(gc["volfree"].Value);
                             ((Volume)media).FreeSpacePostfix = SizePostfixExtension.Parse(gc["volfreegk"].Value);
-                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Volume");
+                            Log(LoggerType.Info, "DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Volume " + media.Number);
                             LogVolume((Volume)media);
                             break;
                         default:
@@ -927,7 +943,7 @@ namespace DiskpartGUI.Processes
             else
             {
                 ExitCode = ProcessExitCode.ErrorRun;
-                Log(LoggerType.Error, "DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Run - " + ExitCode + ": " );
+                Log(LoggerType.Error, "DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Run - " + ExitCode + ": ");
                 LogAppend(StdOutput, true);
             }
 
