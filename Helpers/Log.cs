@@ -18,6 +18,12 @@ namespace DiskpartGUI.Helpers
         private const string filename = @"\DiskpartLogger.txt";
         private const string Method_Called = "Called";
 
+        /// <summary>
+        /// Writes contents to the log file
+        /// </summary>
+        /// <param name="type">The type of log information</param>
+        /// <param name="callingfrom">Where this log is called from</param>
+        /// <param name="info">The information to be logged</param>
         private static void Write(LoggerType type, string callingfrom, string info)
         {
             if (Properties.Settings.Default.EnableLogging)
@@ -27,26 +33,50 @@ namespace DiskpartGUI.Helpers
             }
         }
 
+        /// <summary>
+        /// Called for method specific info
+        /// </summary>
+        /// <param name="method">The method this log was called from</param>
+        /// <param name="info">The information to be logged</param>
         public static void Method(string method, string info)
         {
             Write(LoggerType.Method, method, info);
         }
 
+        /// <summary>
+        /// Method specific call for when a method is called
+        /// </summary>
+        /// <param name="method">The method this log was called from</param>
         public static void MethodCall(string method)
         {
             Method(method, Method_Called);
         }
 
+        /// <summary>
+        /// Called for general info
+        /// </summary>
+        /// <param name="method">The method this log was called from</param>
+        /// <param name="info">The information to be logged</param>
         public static void Info(string method, string info)
         {
             Write(LoggerType.Info, method, info);
         }
 
+        /// <summary>
+        /// Called for logging errors
+        /// </summary>
+        /// <param name="method">The method this log was called from</param>
+        /// <param name="info">The information to be logged</param>
         public static void Error(string method, string info)
         {
             Write(LoggerType.Error, method, info);
         }
 
+        /// <summary>
+        /// Called to append additional information not in original log call
+        /// </summary>
+        /// <param name="info">The information to be logged</param>
+        /// <param name="split">Whether the information needs to be split by line</param>
         public static void Append(string info, bool split = false)
         {
             if (Properties.Settings.Default.EnableAdvancedLogging)
@@ -69,6 +99,10 @@ namespace DiskpartGUI.Helpers
             }
         }
 
+        /// <summary>
+        /// Called to append additional information about a Disk
+        /// </summary>
+        /// <param name="disk">The Disk to append to the log file</param>
         public static void Append(Disk disk)
         {
             Append("<Volume>\r\n" +
@@ -95,6 +129,10 @@ namespace DiskpartGUI.Helpers
                $"<Clustered Disk>:\"{disk.Attributes.HasFlag(Attributes.Cluster)}\"", true);
         }
 
+        /// <summary>
+        /// Called to append additional information about a Volume
+        /// </summary>
+        /// <param name="disk">The Volume to append to the log file</param>
         public static void Append(Volume volume)
         {
             Append("<Volume>\r\n" +
@@ -119,6 +157,10 @@ namespace DiskpartGUI.Helpers
                 $"<Parent>:\"{volume.Parent}\"", true);
         }
 
+        /// <summary>
+        /// Called to append additional information about a Partition
+        /// </summary>
+        /// <param name="disk">The Partition to append to the log file</param>
         public static void Append(Partition part)
         {
             Append("<Partition>\r\n" +
@@ -132,7 +174,6 @@ namespace DiskpartGUI.Helpers
                 $"<Offset In Bytes>:\"{part.OffsetInBytes}\"\r\n" +
                 $"<Parent>:\"{part.Parent}\"", true);
         }
-
 
     }
 }

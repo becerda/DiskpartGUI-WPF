@@ -235,6 +235,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// The setting to enable or disable Logging
+        /// </summary>
         public bool EnableLogging
         {
             get
@@ -248,6 +251,9 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// The setting to enable or disable Advanced Logging
+        /// </summary>
         public bool EnableAdvancedLogging
         {
             get
@@ -310,8 +316,6 @@ namespace DiskpartGUI.ViewModels
         /// The Command to show the headers associated with Partitions
         /// </summary>
         public RelayCommand ShowPartitionsCommand { get; private set; }
-
-        public RelayCommand EnableLoggingCommand { get; private set; }
 
         /// <summary>
         /// Shows the About window
