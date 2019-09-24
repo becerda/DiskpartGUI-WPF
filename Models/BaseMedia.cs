@@ -45,17 +45,19 @@ namespace DiskpartGUI.Models
         Healthy,
         NoMedia,
         Online,
-        Offline
+        Offline,
+        Unusable
     }
 
     public static class StatusExtension
     {
         private static readonly Dictionary<string, Status> status = new Dictionary<string, Status>
         {
-            {"Blank", Status.Blank },
+            {"", Status.Blank },
             {"Healthy", Status.Healthy },
             {"No Media", Status.NoMedia },
-            {"Online", Status.Online }
+            {"Online", Status.Online },
+            {"Unusable", Status.Unusable }
         };
 
         /// <summary>
@@ -109,7 +111,7 @@ namespace DiskpartGUI.Models
         private int size;
         private SizePostfix sizepostfix;
         private Attributes attribs;
-        private int parent;
+        private string parent;
 
         /// <summary>
         /// The Name/Label of a media item
@@ -221,7 +223,7 @@ namespace DiskpartGUI.Models
         /// <summary>
         /// The number of the parent of a media item
         /// </summary>
-        public int Parent
+        public string Parent
         {
             get
             {

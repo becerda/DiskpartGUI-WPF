@@ -76,5 +76,17 @@ namespace DiskpartGUI.Properties {
                 this["EnableLogging"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableAdvancedLogging {
+            get {
+                return ((bool)(this["EnableAdvancedLogging"]));
+            }
+            set {
+                this["EnableAdvancedLogging"] = value;
+            }
+        }
     }
 }

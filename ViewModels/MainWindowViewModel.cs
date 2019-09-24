@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using static DiskpartGUI.Helpers.Logger;
 
 namespace DiskpartGUI.ViewModels
 {
@@ -249,6 +248,19 @@ namespace DiskpartGUI.ViewModels
             }
         }
 
+        public bool EnableAdvancedLogging
+        {
+            get
+            {
+                return Properties.Settings.Default.EnableAdvancedLogging;
+            }
+            set
+            {
+                Properties.Settings.Default.EnableAdvancedLogging = value;
+                OnPropertyChanged(nameof(EnableAdvancedLogging));
+            }
+        }
+
         /// <summary>
         /// Eject command for ButtonEject
         /// </summary>
@@ -327,6 +339,7 @@ namespace DiskpartGUI.ViewModels
             SelectedItemInfo = "";
             ShowAllVolumes = Properties.Settings.Default.ShowAllVolumes;
             EnableLogging = Properties.Settings.Default.EnableLogging;
+            EnableAdvancedLogging = Properties.Settings.Default.EnableAdvancedLogging;
 
             ChangeMountStateCommand = new RelayCommand(ChangeMountState, CanBeEjected, Key.E, ModifierKeys.Control);
             RenameCommand = new RelayCommand(RenameVolume, CanBeRenamed, Key.F2);
@@ -407,7 +420,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public async void Refresh()
         {
-            Log(LoggerType.Info, "MainWindow - Refresh()", "Called");
+            Log.MethodCall("MainWindow - Refresh()");
             ListViewSource = null;
             switch (lvstate)
             {
@@ -432,7 +445,7 @@ namespace DiskpartGUI.ViewModels
         /// </summary>
         public async Task Refresh(StorageType type)
         {
-            Log(LoggerType.Info, "MainWindow - Refresh(" + type + ")", "Called");
+            Log.MethodCall("MainWindow - Refresh(" + type + ")");
 
             masterbuttonsenabled = false;
 

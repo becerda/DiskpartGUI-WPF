@@ -76,9 +76,10 @@
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Command="{Binding AboutCommand}" Header="_About" InputGestureText="{Binding AboutCommand.InputGestureText}"/>
-                    <Separator/>
                     <MenuItem Header="Auto Check For _Updates"/>
+                    <Separator/>
                     <MenuItem Header="Enable _Logging" IsCheckable="True" IsChecked="{Binding EnableLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputGestureText="CTRL+L"/>
+                    <MenuItem Header="Enable Advanced Logging" IsCheckable="True" IsChecked="{Binding EnableAdvancedLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </MenuItem>
             </Menu>
 
