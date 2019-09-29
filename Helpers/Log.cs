@@ -100,6 +100,20 @@ namespace DiskpartGUI.Helpers
         }
 
         /// <summary>
+        /// Called to append additional information about a Media Item
+        /// </summary>
+        /// <param name="disk">The Media Item to append to the log file</param>
+        public static void Append(BaseMedia media)
+        {
+            if (media is Disk)
+                Append((Disk)media);
+            else if (media is Volume)
+                Append((Volume)media);
+            else if (media is Partition)
+                Append((Partition)media);
+        }
+
+        /// <summary>
         /// Called to append additional information about a Disk
         /// </summary>
         /// <param name="disk">The Disk to append to the log file</param>

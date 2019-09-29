@@ -29,32 +29,127 @@ namespace DiskpartGUI.Processes
 
     public class DiskpartProcess : CMDProcess
     {
+        // Diskpart Script File Name
+        private const string Diskpart_Script_Filename = "diskpart_script.txt";
+        // Diskpart Command Line Arguments
+        private const string Diskpart_Script_Command_Arg = "/s";
+
+        // Diskpart Script Command Lines
+        private const string Script_Line_Select = "SELECT ";
+        private const string Script_Line_Select_Disk = Script_Line_Select + "DISK ";
+        private const string Script_Line_Select_Volume = Script_Line_Select + "VOLUME ";
+        private const string Script_Line_Remove_All_Dismount = "REMOVE ALL DISMOUNT";
+        private const string Script_Line_List = "LIST ";
+        private const string Script_Line_Attribute = "ATTRIBUTE ";
+        private const string Script_Line_ReadOnly = " READONLY";
+        private const string Script_Line_Detail = "DETAIL ";
+        private const string Script_Line_Assign = "ASSIGN";
+        private const string Script_Line_FileSystem = "FILESYSTEM";
+        private const string Script_Line_Format = "FORMAT ";
+
+        // BaseMedia Regex Identifiers
+        private const string RX_BaseMedia_Name = "basemedianame";
+        private const string RX_BaseMedia_Number = "basemedianumber";
+        private const string RX_BaseMedia_Status = "basemediastatus";
+        private const string RX_BaseMedia_Size = "basemediasize";
+        private const string RX_BaseMedia_SizePostfix = "basemediapostfix";
+
+        // Multi Media Regex Identifiers
+        private const string RX_Media_FreeSpace = "mediafreespace";
+        private const string RX_Media_FreeSpacePostfix = "mediafreespacepostfix";
+        private const string RX_Media_Hidden = "hiddenflag";
+        private const string RX_Media_ReadOnly = "readonlyflag";
+        private const string RX_Media_ParentNumber = "parentnumber";
+
+        // Disk Regex Identifiers
+        private const string RX_Disk_BootDisk = "bootdiskflag";
+        private const string RX_Disk_ClusteredDisk = "clustereddiskflag";
+        private const string RX_Disk_CrashDumpDisk = "crashdumpdiskflag";
+        private const string RX_Disk_CurrentReadOnly = "currentreadonlyflag";
+        private const string RX_Disk_Dynamic = "diskdyn";
+        private const string RX_Disk_GPT = "diskgpt";
+        private const string RX_Disk_HibernationFileDisk = "hibernationfilediskflag";
+        private const string RX_Disk_DiskID = "diskid";
+        private const string RX_Disk_PagefileDisk = "pagefilediskflag";
+        private const string RX_Disk_Type = "disktype";
+        private const string RX_Disk_Path = "diskpath";
+        private const string RX_Disk_Target = "disktarget";
+        private const string RX_Disk_LunID = "disklunid";
+        private const string RX_Disk_LocationPath = "disklocationpath";
+
+        // Volume Regex Identifiers
+        private const string RX_Volume_BitLocker = "volumebitlocker";
+        private const string RX_Volume_Letter = "volumeletter";
+        private const string RX_Volume_FileSystem = "volumefilesystem";
+        private const string RX_Volume_Type = "volumetype";
+        private const string RX_Volume_Info = "volumeinfo";
+        private const string RX_Volume_Installable = "volumeinstallable";
+        private const string RX_Volume_Offline = "volumeoffline";
+        private const string RX_Volume_NoDefaultDriveLetter = "nodefaultdriveletterflag";
+        private const string RX_Volume_ShadowCopy = "shadowcopyflag";
+
+        // Partition Regex Identifiers
+        private const string RX_Partition_Type = "partitiontype";
+        private const string RX_Partition_Offset = "partitionoffset";
+        private const string RX_Partition_OffsetInBytes = "partitionoffsetinbytes";
+        private const string RX_Partition_OffsetPostfix = "partitionoffsetpostfix";
+        private const string RX_Partition_Active = "partitionoactiveflag";
+
+
+        //Parsing Regex
+        //language=regex
+        private const string RX_Disk_List = "Disk (?<basemedianumber>[0-9]+){1,2}( ){3,4}(?<basemediastatus>Online| )?( ){0,15}(?<basemediasize>[0-9]{1,4})?( )(?<basemediapostfix>K|G|M)?B( ){2,6}(?<mediafreespace>[0-9]{1,4})?( )(?<mediafreespacepostfix>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
+        //language=regex
+        private const string RX_Volume_List = "Volume (?<basemedianumber>[0-9]+){1,2}( ){4,5}(?<volumeletter>[A-Z ])( ){0,3}(?<basemedianame>[a-zA-Z0-9_ ]{0,11})( ){2,3}(?<volumefilesystem>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<volumetype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<basemediasize>[0-9]{1,4})?( )(?<basemediapostfix>K|G|M)?B( ){2}(?<basemediastatus>Healthy|No Media)?( ){0,11}(?<volumeinfo>[a-zA-Z]+)?";
+        //language=regex
+        private const string RX_Partition_List = "(There are no partitions on this disk to show\\.|Partition (?<basemedianumber>[0-9]+)( ){3,4}(?<partitiontype>Primary|Extended|Logical)( ){10,19}(?<basemediasize>[0-9]+)( )(?<basemediapostfix>K|G|M)?B( ){2,4}(?<partitionoffset>[0-9]+)( )(?<partitionoffsetpostfix>K|G|M)?B)";
 
         //language=regex
-        private const string Disk_List_RX = "Disk (?<disknum>[0-9]+){1,2}( ){3,4}(?<diskstat>Online| )?( ){0,15}(?<disksize>[0-9]{1,4})?( )(?<diskgk>K|G|M)?B( ){2,6}(?<diskfree>[0-9]{1,4})?( )(?<diskfreegk>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
+        private const string Disk_Attribute_Parse_RX = "Disk (?<basemedianumber>[0-9]+) is now the selected disk\\.\\r\\nCurrent Read-only State : (?<currentreadonlyflag>Yes|No)\\r\\nRead-only( )+: (?<readonlyflag>Yes|No)\\r\\nBoot Disk ( )+: (?<bootdiskflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pagefilediskflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibernationfilediskflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<crashdumpdiskflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustereddiskflag>Yes|No)";
         //language=regex
-        private const string Volume_List_RX = "Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?";
-        //language=regex
-        private const string Partition_List_RX = "(There are no partitions on this disk to show\\.|Partition (?<partnum>[0-9]+)( ){3,4}(?<parttype>Primary|Extended|Logical)( ){10,19}(?<partsize>[0-9]+)( )(?<partsizegk>K|G|M)?B( ){2,4}(?<partoff>[0-9]+)( )(?<partoffgk>K|G|M)?B)";
-        //language=regex
-        private const string Partition_List_TestOuptu = "There are no partitions on this disk to show";
+        private const string RX_Volume_Attribute_Parse = "Volume (?<basemedianumber>[0-9]+) is the selected volume\\.\\r\\nRead-only( )+: (?<readonlyflag>Yes|No)\\r\\nHidden( )+: (?<hiddenflag>Yes|No)\\r\\nNo Default Drive Letter: (?<nodefaultdriveletterflag>Yes|No)\\r\\nShadow Copy( )+: (?<shadowcopyflag>Yes|No)";
 
         //language=regex
-        private const string Disk_Attribute_Parse_RX = "Disk (?<disknum>[0-9]+) is now the selected disk\\.\\r\\nCurrent Read-only State : (?<croflag>Yes|No)\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nBoot Disk ( )+: (?<bdflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pfflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<cdflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustflag>Yes|No)";
+        private const string RX_Disk_Detail = "\\r\\n(?<basemedianame>[a-zA-Z0-9_ ]+)\\r\\nDisk ID: (?<diskid>[A-F0-9]+)\\r\\nType( )+: (?<disktype>USB|RAID)\\r\\nStatus : (?<basemediastatus>Online|Offline)\\r\\nPath( )+: (?<diskpath>[a-zA-Z0-9]+)\\r\\nTarget : (?<disktarget>[a-zA-Z0-9]+)\\r\\nLUN ID : (?<disklunid>[a-zA-Z0-9]+)\\r\\nLocation Path : (?<disklocationpath>[()#a-zA-Z0-9]+)\\r\\nCurrent Read-only State : (?<currentreadonlyflag>Yes|No)\\r\\nRead-only( )+: (?<readonlyflag>Yes|No)\\r\\nBoot Disk( )+: (?<bootdiskflag>Yes|No)\\r\\nPagefile Disk( )+: (?<pagefilediskflag>Yes|No)\\r\\nHibernation File Disk( )+: (?<hibernationfilediskflag>Yes|No)\\r\\nCrashdump Disk( )+: (?<crashdumpdiskflag>Yes|No)\\r\\nClustered Disk( )+: (?<clustereddiskflag>Yes|No)";
         //language=regex
-        private const string Volume_Attribute_Parse_RX = "Volume (?<volnum>[0-9]+) is the selected volume\\.\\r\\nRead-only( )+: (?<roflag>Yes|No)\\r\\nHidden( )+: (?<hidflag>Yes|No)\\r\\nNo Default Drive Letter: (?<noddflag>Yes|No)\\r\\nShadow Copy( )+: (<shadFlagYes|No)";
+        private const string RX_Volume_Detail = "(There are no disks attached to this volume.|Disk (?<parentnumber>[0-9]+)( )+(Online|)?( )+([0-9]+)( )(K|G|M)?B( ){2,}([0-9]+)( )(M|G|K)?B( |\\*)+)(\\r\\n\\r\\n)?(Read-only( )+: (?<readonlyflag>Yes|No)\\r\\n)?(Hidden( )+: (?<hiddenflag>Yes|No)\\r\\n)?(No Default Drive Letter: (?<nodefaultdriveletterflag>Yes|No)\\r\\n)?(Shadow Copy( )+: (?<shadowcopyflag>Yes|No)\\r\\n)?(Offline( )+: (?<volumeoffline>Yes|No)\\r\\n)?(BitLocker Encrypted( )+: (?<volumebitlocker>Yes|No)\\r\\n)?(Installable( )+: (?<volumeinstallable>Yes|No)(\\r\\n\\r\\n)?(Volume Capacity( )+:( )+(?<basemediasize>[0-9]+) (?<basemediapostfix>M|K|G)?B\\r\\nVolume Free Space( )+:( )+(?<mediafreespace>[0-9]+) (?<mediafreespacepostfix>M|K|G)?B)?)?";
+        //language=regex
+        private const string RX_Partition_Detail = "\\r\\nPartition (?<basemedianumber>[0-9]+)\\r\\nType  : (?<partitiontype>[A-F0-9]+)\\r\\nHidden: (?<hiddenflag>Yes|No)\\r\\nActive: (?<partitionoactiveflag>Yes|No)\\r\\nOffset in Bytes: (?<partitionoffsetinbytes>[0-9]+)\\r\\n\\r\\n(There is no volume associated with this partition.|  Volume ###  Ltr  Label( ){8}Fs( ){5}Type( ){8}Size( ){5}Status( ){5}Info\\r\\n  -{10}  -{3}  -{11}  -{5}  -{10}  -{7}  -{9}  -{8}\\r\\n. Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?)";
 
+        // Log Method Names
+        private const string Nameof_DiskpartProcess = nameof(DiskpartProcess);
+        private const string WriteScript_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(WriteScript);
+        private const string GetDiskInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetDiskInfo) + "(List)";
+        private const string GetVolumeInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetVolumeInfo) + "(List)";
+        private const string GetInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetInfo);
+        private const string GetPartitionInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetPartitionInfo);
+        private const string ListCommand_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(ListCommand);
+        private const string ParseListCommand_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(ParseListCommand);
+        private const string GetAttributes_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetAttributes);
+        private const string ParseAttributes_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(ParseAttributes);
+        private const string DetailCommand_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(DetailCommand);
+        private const string EjectVolume_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(EjectVolume);
+        private const string AssignVolumeLetter_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(AssignVolumeLetter);
+        private const string SetReadOnly_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(SetReadOnly);
+        private const string GetFileSystemInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(GetFileSystemInfo);
+        private const string ParseFileSystemInfo_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(ParseFileSystemInfo) + "(List, List)";
+        private const string Format_Log_MethodName = Nameof_DiskpartProcess + " - " + nameof(Format);
+
+        // Other Log Strings
+        private const string ParseListCommand_Log_ListDetailsAdded = "List Details Added To ";
+        private const string DetailCommand_Log_DetailsAdded = "Details Added To ";
+
+        // Test Output Regex
         //language=regex
         private const string Disk_ReadOnly_Test_RX = "Disk attributes (set|cleared) successfully.";
         //language=regex
         private const string Volume_ReadOnly_Test_RX = "Volume attributes (set|cleared) successfully.";
+        private const string EjectVolume_TestOutput = "DiskPart successfully dismounted and offlined the volume.";
+        private const string AssignVolumeLetter_TestOutput = "DiskPart successfully assigned the drive letter or mount point.";
+        private const string Format_TestOutput = "DiskPart successfully formatted the volume";
+        private const string Partition_List_TestOuput = "There are no partitions on this disk to show";
+        private const string FLAG_ENABLED = "Yes";
 
-        //language=regex
-        private const string Disk_Detail_RX = "\\r\\n(?<diskname>[a-zA-Z0-9_ ]+)\\r\\nDisk ID: (?<diskid>[A-F0-9]+)\\r\\nType( )+: (?<disktype>USB|RAID)\\r\\nStatus : (?<diskstatus>Online|Offline)\\r\\nPath( )+: (?<diskpath>[a-zA-Z0-9]+)\\r\\nTarget : (?<disktarget>[a-zA-Z0-9]+)\\r\\nLUN ID : (?<disklunid>[a-zA-Z0-9]+)\\r\\nLocation Path : (?<disklocpath>[()#a-zA-Z0-9]+)\\r\\nCurrent Read-only State : (?<diskcurreadonly>Yes|No)\\r\\nRead-only( )+: (?<diskreadonly>Yes|No)\\r\\nBoot Disk( )+: (?<diskboot>Yes|No)\\r\\nPagefile Disk( )+: (?<diskpage>Yes|No)\\r\\nHibernation File Disk( )+: (?<diskhibernation>Yes|No)\\r\\nCrashdump Disk( )+: (?<diskcrashdump>Yes|No)\\r\\nClustered Disk( )+: (?<diskcluster>Yes|No)";
-        //language=regex
-        private const string Volume_Detail_RX = "(There are no disks attached to this volume.|Disk (?<parentnumber>[0-9]+)( )+(Online|)?( )+([0-9]+)( )(K|G|M)?B( ){2,}([0-9]+)( )(M|G|K)?B( |\\*)+)\\r\\n\\r\\nRead-only( )+: (?<volreadonly>Yes|No)\\r\\nHidden( )+: (?<volhidden>Yes|No)\\r\\nNo Default Drive Letter: (?<volnodefletter>Yes|No)\\r\\nShadow Copy( )+: (?<volshadow>Yes|No)\\r\\nOffline( )+: (?<voloffline>Yes|No)\\r\\nBitLocker Encrypted( )+: (?<volbitlock>Yes|No)\\r\\nInstallable( )+: (?<volinstall>Yes|No)(\\r\\n\\r\\nVolume Capacity( )+:( )+(?<volcap>[0-9]+) (?<volcapgk>M|K|G)?B\\r\\nVolume Free Space( )+:( )+(?<volfree>[0-9]+) (?<volfreegk>M|K|G)?B)?";
-        //language=regex
-        private const string Partition_Detail_RX = "\\r\\nPartition (?<partnumber>[0-9]+)\\r\\nType  : (?<parttype>[A-F0-9]+)\\r\\nHidden: (?<parthidden>Yes|No)\\r\\nActive: (?<partactive>Yes|No)\\r\\nOffset in Bytes: (?<partoffsetbyte>[0-9]+)\\r\\n\\r\\n(There is no volume associated with this partition.|  Volume ###  Ltr  Label( ){8}Fs( ){5}Type( ){8}Size( ){5}Status( ){5}Info\\r\\n  -{10}  -{3}  -{11}  -{5}  -{10}  -{7}  -{9}  -{8}\\r\\n. Volume (?<volnum>[0-9]+){1,2}( ){4,5}(?<vollet>[A-Z ])( ){0,3}(?<vollab>[a-zA-Z0-9 ]{0,11})( ){2,3}(?<volfs>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<voltype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<volsize>[0-9]{1,4})?( )(?<volgk>K|G|M)?B( ){2}(?<volstat>Healthy|No Media)?( ){0,11}(?<volinfo>[a-zA-Z]+)?)";
 
         /// <summary>
         /// The Diskpart script lines
@@ -89,23 +184,23 @@ namespace DiskpartGUI.Processes
         /// </summary>
         private void WriteScript()
         {
-            Log.MethodCall("DiskpartProcess - WriteScript()");
+            Log.MethodCall(WriteScript_Log_MethodName);
             try
             {
                 if (!File.Exists(file))
                 {
-                    file = Path.GetTempPath() + "diskpart_script.txt";
+                    file = Path.GetTempPath() + Diskpart_Script_Filename;
                 }
 
                 File.WriteAllLines(file, script);
 
-                AddArgument("/s");
+                AddArgument(Diskpart_Script_Command_Arg);
                 AddArgument(file);
                 script.Clear();
             }
             catch (IOException e)
             {
-                Log.Error("DiskpartProcess - WriteScript()", StdError);
+                Log.Error(WriteScript_Log_MethodName, StdError);
                 StdError = e.StackTrace;
             }
         }
@@ -117,7 +212,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetDiskInfo(ref List<BaseMedia> disks)
         {
-            Log.MethodCall("DiskpartProcess - GetDiskInfo(List)");
+            Log.MethodCall(GetDiskInfo_Log_MethodName);
             return GetInfo(ref disks, StorageType.DISK);
         }
 
@@ -128,7 +223,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetVolumeInfo(ref List<BaseMedia> volumes)
         {
-            Log.MethodCall("DiskpartProcess - GetVolumeInfo(List)");
+            Log.MethodCall(GetVolumeInfo_Log_MethodName);
             return GetInfo(ref volumes, StorageType.VOLUME);
         }
 
@@ -140,7 +235,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode GetInfo(ref List<BaseMedia> medias, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - GetInfo(List, " + type + ")");
+            Log.MethodCall(GetInfo_Log_MethodName + "(List, " + type + ")");
             CurrentProcess = nameof(GetInfo) + type;
 
             if (medias != null)
@@ -163,7 +258,7 @@ namespace DiskpartGUI.Processes
                     ExitCode = DetailCommand(ref media, type);
                     if (ExitCode != ProcessExitCode.Ok)
                     {
-                        Log.Error("DiskpartProcess - GetInfo(List, " + type + ")", "ListCommand - " + ExitCode + ": ");
+                        Log.Error(GetInfo_Log_MethodName + "(List, " + type + ")", nameof(ListCommand) + " - " + ExitCode + ": ");
                         Log.Append(StdOutput, true);
                         break;
                     }
@@ -171,7 +266,7 @@ namespace DiskpartGUI.Processes
             }
             else
             {
-                Log.Error("DiskpartProcess - GetInfo(List, " + type + ")", "DetailCommand - " + ExitCode + ": ");
+                Log.Error(GetInfo_Log_MethodName + "(List, " + type + ")", nameof(DetailCommand) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
@@ -187,7 +282,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetPartitionInfo(int disknumber, ref List<BaseMedia> partitions)
         {
-            Log.MethodCall("DiskpartProcess - GetPartitionInfo(" + disknumber + ", List)");
+            Log.MethodCall(GetPartitionInfo_Log_MethodName + "(" + disknumber + ", List)");
             CurrentProcess = nameof(GetPartitionInfo);
 
             if (partitions != null)
@@ -206,18 +301,19 @@ namespace DiskpartGUI.Processes
                         partition.Parent = disknumber + "";
                     else
                     {
-                        Log.Error("DiskpartProcess - GetPartitionInfo(" + disknumber + ", List)", "DetailCommand - " + ExitCode + ": ");
+                        Log.Error(GetPartitionInfo_Log_MethodName + "(" + disknumber + ", List)", nameof(DetailCommand) + " - " + ExitCode + ": ");
                         Log.Append(StdOutput, true);
                         break;
                     }
                 }
             }
-            else if(ExitCode == ProcessExitCode.NoPartitions){
+            else if (ExitCode == ProcessExitCode.NoPartitions)
+            {
                 ExitCode = ProcessExitCode.Ok;
             }
             else
             {
-                Log.Error("DiskpartProcess - GetPartitionInfo(" + disknumber + ", List)", "ListCommand - " + ExitCode + ": ");
+                Log.Error(GetPartitionInfo_Log_MethodName + "(" + disknumber + ", List)", nameof(ListCommand) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
@@ -232,24 +328,24 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode ListCommand(ref List<BaseMedia> list, StorageType type, int selectedDisk = -1)
         {
-            Log.MethodCall("DiskpartProcess - ListCommand(List, " + type + ", " + selectedDisk + ")");
+            Log.MethodCall(ListCommand_Log_MethodName + "(List, " + type + ", " + selectedDisk + ")");
             CurrentProcess = nameof(ListCommand);
             if (type == StorageType.PARTITION)
-                AddScriptCommand("SELECT DISK " + selectedDisk);
+                AddScriptCommand(Script_Line_Select_Disk + selectedDisk);
 
-            AddScriptCommand("LIST " + type);
+            AddScriptCommand(Script_Line_List + type);
             WriteScript();
             ExitCode = Run();
             if (ExitCode == ProcessExitCode.Ok)
             {
 
-                Log.Info("DiskpartProcess - ListCommand(List, " + type + ", " + selectedDisk + ")", "StdOutput: ");
+                Log.Info(ListCommand_Log_MethodName + "(List, " + type + ", " + selectedDisk + ")", nameof(StdOutput) + ": ");
                 Log.Append(StdOutput, true);
                 return ParseListCommand(ref list, type);
             }
             else
             {
-                Log.Error("DiskpartProcess - ListCommand(List, " + type + ", " + selectedDisk + ")", "Run - " + ExitCode + ": ");
+                Log.Error(ListCommand_Log_MethodName + "(List, " + type + ", " + selectedDisk + ")", nameof(Run) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
             return ExitCode;
@@ -262,25 +358,25 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseListCommand(ref List<BaseMedia> list, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - ParseListCommand(List, " + type + ")");
+            Log.MethodCall(ParseListCommand_Log_MethodName + "(List, " + type + ")");
             CurrentProcess = nameof(ParseListCommand);
             Regex rx;
             switch (type)
             {
                 case StorageType.DISK:
-                    rx = new Regex(Disk_List_RX);
+                    rx = new Regex(RX_Disk_List);
                     break;
                 case StorageType.VOLUME:
-                    rx = new Regex(Volume_List_RX);
+                    rx = new Regex(RX_Volume_List);
                     break;
                 case StorageType.PARTITION:
-                    if (TestOutput(Partition_List_TestOuptu))
+                    if (TestOutput(Partition_List_TestOuput))
                     {
-                        Log.Info("DiskpartProcess - ParseListCommand(List, " + type + ")", Partition_List_TestOuptu);
+                        Log.Info(ParseListCommand_Log_MethodName + "(List, " + type + ")", Partition_List_TestOuput);
                         ExitCode = ProcessExitCode.NoPartitions;
                         return ExitCode;
                     }
-                    rx = new Regex(Partition_List_RX);
+                    rx = new Regex(RX_Partition_List);
                     break;
                 default:
                     rx = new Regex(string.Empty);
@@ -300,50 +396,69 @@ namespace DiskpartGUI.Processes
                     switch (type)
                     {
                         case StorageType.DISK:
-                            b = new Disk
-                            {
-                                Number = Int32.Parse(gc["disknum"].Value),
-                                Status = StatusExtension.Parse(gc["diskstat"].Value),
-                                Size = Int32.Parse(gc["disksize"].Value),
-                                SizePostfix = SizePostfixExtension.Parse(gc["diskgk"].Value),
-                                FreeSpace = Int32.Parse(gc["diskfree"].Value),
-                                FreeSpacePostfix = SizePostfixExtension.Parse(gc["diskfreegk"].Value),
-                                Dynamic = gc["diskdyn"].Value.Trim(),
-                                GPTType = gc["diskgpt"].Value.Trim()
-                            };
-                            Log.Info("DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Disk " + b.Number);
+                            b = new Disk();
+                            if (gc[RX_BaseMedia_Number].Success)
+                                b.Number = Int32.Parse(gc[RX_BaseMedia_Number].Value);
+                            if (gc[RX_BaseMedia_Status].Success)
+                                b.Status = StatusExtension.Parse(gc[RX_BaseMedia_Status].Value);
+                            if (gc[RX_BaseMedia_Size].Success)
+                                b.Size = Int32.Parse(gc[RX_BaseMedia_Size].Value);
+                            if (gc[RX_BaseMedia_SizePostfix].Success)
+                                b.SizePostfix = SizePostfixExtension.Parse(gc[RX_BaseMedia_SizePostfix].Value);
+                            if (gc[RX_BaseMedia_Number].Success)
+                                ((Disk)b).FreeSpace = Int32.Parse(gc[RX_Media_FreeSpace].Value);
+                            if (gc[RX_BaseMedia_Number].Success)
+                                ((Disk)b).FreeSpacePostfix = SizePostfixExtension.Parse(gc[RX_Media_FreeSpacePostfix].Value);
+                            if (gc[RX_BaseMedia_Number].Success)
+                                ((Disk)b).Dynamic = gc[RX_Disk_Dynamic].Value.Trim();
+                            if (gc[RX_BaseMedia_Number].Success)
+                                ((Disk)b).GPTType = gc[RX_Disk_GPT].Value.Trim();
                             break;
                         case StorageType.VOLUME:
-                            b = new Volume
+                            b = new Volume();
+                            if (gc[RX_BaseMedia_Name].Success)
+                                b.Name = gc[RX_BaseMedia_Name].Value;
+                            if (gc[RX_BaseMedia_Number].Success)
+                                b.Number = Int32.Parse(gc[RX_BaseMedia_Number].Value);
+                            if (gc[RX_BaseMedia_Size].Success)
+                                b.Size = Int32.Parse(gc[RX_BaseMedia_Size].Value);
+                            if (gc[RX_BaseMedia_SizePostfix].Success)
+                                b.SizePostfix = SizePostfixExtension.Parse(gc[RX_BaseMedia_SizePostfix].Value);
+                            if (gc[RX_BaseMedia_Status].Success)
+                                b.Status = StatusExtension.Parse(gc[RX_BaseMedia_Status].Value);
+                            if (gc[RX_Volume_Letter].Success)
+                                ((Volume)b).Letter = gc[RX_Volume_Letter].Value.ElementAt<char>(0);
+                            if (gc[RX_Volume_FileSystem].Success)
+                                ((Volume)b).FileSystem = FileSystemExtension.Parse(gc[RX_Volume_FileSystem].Value);
+                            if (gc[RX_Volume_Type].Success)
+                                ((Volume)b).Type = VolumeTypeExtension.Parse(gc[RX_Volume_Type].Value);
+                            if (gc[RX_Volume_Info].Success)
                             {
-                                Number = Int32.Parse(gc["volnum"].Value),
-                                Letter = gc["vollet"].Value.ElementAt<char>(0),
-                                Name = gc["vollab"].Value,
-                                FileSystem = FileSystemExtension.Parse(gc["volfs"].Value),
-                                Type = VolumeTypeExtension.Parse(gc["voltype"].Value),
-                                Size = Int32.Parse(gc["volsize"].Value),
-                                SizePostfix = SizePostfixExtension.Parse(gc["volgk"].Value),
-                                Status = StatusExtension.Parse(gc["volstat"].Value),
-                                Info = gc["volinfo"].Value,
-                                MountState = MountStateExtension.Parse(gc["volinfo"].Value)
-                            };
-                            Log.Info("DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Volume " + b.Number);
+                                ((Volume)b).Info = gc[RX_Volume_Info].Value;
+                                ((Volume)b).MountState = MountStateExtension.Parse(gc[RX_Volume_Info].Value);
+                            }
                             break;
                         case StorageType.PARTITION:
                             b = new Partition();
                             try
                             {
-                                b.Number = Int32.Parse(gc["partnum"].Value);
-                                ((Partition)b).PartitionType = PartitionTypeExtension.Parse(gc["parttype"].Value);
-                                b.Size = Int32.Parse(gc["partsize"].Value);
-                                b.SizePostfix = SizePostfixExtension.Parse(gc["partsizegk"].Value);
-                                ((Partition)b).Offset = Int32.Parse(gc["partoff"].Value);
-                                ((Partition)b).OffsetPostfix = SizePostfixExtension.Parse(gc["partoffgk"].Value);
-                                Log.Info("DiskpartProcess - ParseListCommand(List, " + type + ")", "List Details Added To Partition " + b.Number);
+                                if (gc[RX_BaseMedia_Number].Success)
+                                    b.Number = Int32.Parse(gc[RX_BaseMedia_Number].Value);
+                                if (gc[RX_BaseMedia_Size].Success)
+                                    b.Size = Int32.Parse(gc[RX_BaseMedia_Size].Value);
+                                if (gc[RX_BaseMedia_SizePostfix].Success)
+                                    b.SizePostfix = SizePostfixExtension.Parse(gc[RX_BaseMedia_SizePostfix].Value);
+                                if (gc[RX_Partition_Type].Success)
+                                    ((Partition)b).PartitionType = PartitionTypeExtension.Parse(gc[RX_Partition_Type].Value);
+                                if (gc[RX_Partition_Offset].Success)
+                                    ((Partition)b).Offset = Int32.Parse(gc[RX_Partition_Offset].Value);
+                                if (gc[RX_Partition_OffsetPostfix].Success)
+                                    ((Partition)b).OffsetPostfix = SizePostfixExtension.Parse(gc[RX_Partition_OffsetPostfix].Value);
+
                             }
                             catch (FormatException fe)
                             {
-                                Log.Error("DiskpartProcess - ParseListCommand(List, " + type + ")", fe.StackTrace);
+                                Log.Error(ParseListCommand_Log_MethodName + "(List, " + type + ")", fe.StackTrace);
                                 ExitCode = ProcessExitCode.ErrorMatchFormat;
                             }
                             break;
@@ -351,6 +466,7 @@ namespace DiskpartGUI.Processes
                             b = new BaseMedia();
                             break;
                     }
+                    Log.Info(ParseListCommand_Log_MethodName + "(List, " + type + ")", ParseListCommand_Log_ListDetailsAdded + type + " " + b.Number);
                     list.Add(b);
                 }
                 ExitCode = ProcessExitCode.Ok;
@@ -358,7 +474,7 @@ namespace DiskpartGUI.Processes
             else
             {
                 ExitCode = ProcessExitCode.ErrorNoMatchesFound;
-                Log.Error("DiskpartProcess - ParseListCommand(List, " + type + ")", "No Matches - " + ExitCode + ": ");
+                Log.Error(ParseListCommand_Log_MethodName + "(List, " + type + ")", "No Matches - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
             return ExitCode;
@@ -371,26 +487,26 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetAttributes(ref List<BaseMedia> list, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - GetAttributes(List, " + type + ")");
+            Log.MethodCall(GetAttributes_Log_MethodName + "(List, " + type + ")");
             CurrentProcess = nameof(GetAttributes);
 
             foreach (BaseMedia m in list)
             {
-                AddScriptCommand("SELECT " + type + " " + m.Number);
-                AddScriptCommand("ATTRIBUTE " + type);
+                AddScriptCommand(Script_Line_Select + type + " " + m.Number);
+                AddScriptCommand(Script_Line_Attribute + type);
             }
             WriteScript();
             ExitCode = Run();
             if (ExitCode == ProcessExitCode.Ok)
             {
-                Log.Info("DiskpartProcess - GetAttributes(List, " + type + ")", "StdOutput: ");
+                Log.Info(GetAttributes_Log_MethodName + "(List, " + type + ")", nameof(StdOutput) + ": ");
                 Log.Append(StdOutput, true);
                 return ParseAttributes(ref list, type);
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorRun;
-                Log.Error("DiskpartProcess - GetAttributes(List, " + type + ")", "Run - " + ExitCode + ": ");
+                Log.Error(GetAttributes_Log_MethodName + "(List, " + type + ")", nameof(Run) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
             return ExitCode;
@@ -403,7 +519,7 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseAttributes(ref List<BaseMedia> list, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - ParseAttributes(List, " + type + ")");
+            Log.MethodCall(ParseAttributes_Log_MethodName + "(List, " + type + ")");
             CurrentProcess = nameof(ParseAttributes);
             if (list != null)
             {
@@ -414,7 +530,7 @@ namespace DiskpartGUI.Processes
                         rx = new Regex(Disk_Attribute_Parse_RX);
                         break;
                     case StorageType.VOLUME:
-                        rx = new Regex(Volume_Attribute_Parse_RX);
+                        rx = new Regex(RX_Volume_Attribute_Parse);
                         break;
                     default:
                         rx = new Regex(string.Empty);
@@ -431,37 +547,45 @@ namespace DiskpartGUI.Processes
                         switch (type)
                         {
                             case StorageType.DISK:
-                                medianum = Int32.Parse(gc["disknum"].Value);
+                                medianum = Int32.Parse(gc[RX_BaseMedia_Number].Value);
 
-                                if (gc["croflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.CurrentReadOnlyState;
-                                if (gc["roflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.ReadOnly;
-                                if (gc["bdflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.Boot;
-                                if (gc["pfflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.Pagefile;
-                                if (gc["hibflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.HibernationFile;
-                                if (gc["cdflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.Crashdump;
-                                if (gc["clustflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.Cluster;
+                                if (gc[RX_Disk_CurrentReadOnly].Success)
+                                    if (gc[RX_Disk_CurrentReadOnly].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.CurrentReadOnlyState;
+                                if (gc[RX_Media_ReadOnly].Success)
+                                    if (gc[RX_Media_ReadOnly].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.ReadOnly;
+                                if (gc[RX_Disk_BootDisk].Success)
+                                    if (gc[RX_Disk_BootDisk].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.Boot;
+                                if (gc[RX_Disk_PagefileDisk].Success)
+                                    if (gc[RX_Disk_PagefileDisk].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.Pagefile;
+                                if (gc[RX_Disk_HibernationFileDisk].Success)
+                                    if (gc[RX_Disk_HibernationFileDisk].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.HibernationFile;
+                                if (gc[RX_Disk_CrashDumpDisk].Success)
+                                    if (gc[RX_Disk_CrashDumpDisk].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.Crashdump;
+                                if (gc[RX_Disk_ClusteredDisk].Success)
+                                    if (gc[RX_Disk_ClusteredDisk].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.Cluster;
                                 break;
                             case StorageType.VOLUME:
-                                medianum = Int32.Parse(gc["volnum"].Value);
+                                medianum = Int32.Parse(gc[RX_BaseMedia_Number].Value);
 
-                                if (gc["roflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.ReadOnly;
-
-                                if (gc["hidflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.Hidden;
-
-                                if (gc["noddflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.NoDefaultDriveLetter;
-
-                                if (gc["shadflag"].Value == "Yes")
-                                    list[medianum].Attributes |= Attributes.ShadowCopy;
+                                if (gc[RX_Media_ReadOnly].Success)
+                                    if (gc[RX_Media_ReadOnly].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.ReadOnly;
+                                if (gc[RX_Media_Hidden].Success)
+                                    if (gc[RX_Media_Hidden].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.Hidden;
+                                if (gc[RX_Volume_NoDefaultDriveLetter].Success)
+                                    if (gc[RX_Volume_NoDefaultDriveLetter].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.NoDefaultDriveLetter;
+                                if (gc[RX_Volume_ShadowCopy].Success)
+                                    if (gc[RX_Volume_ShadowCopy].Value == FLAG_ENABLED)
+                                        list[medianum].Attributes |= Attributes.ShadowCopy;
                                 break;
                             default:
 
@@ -474,14 +598,14 @@ namespace DiskpartGUI.Processes
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorNoMatchesFound;
-                    Log.Error("DiskpartProcess - ParseAttributes(List, " + type + ")", "No Matches - " + ExitCode + ": ");
+                    Log.Error(ParseAttributes_Log_MethodName + "(List, " + type + ")", "No Matches - " + ExitCode + ": ");
                     Log.Append(StdOutput, true);
                 }
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorNullVolumes;
-                Log.Error("DiskpartProcess - ParseAttributes(List, " + type + ")", "Null List - " + ExitCode + ": ");
+                Log.Error(ParseAttributes_Log_MethodName + "(List, " + type + ")", "Null List - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
             return ExitCode;
@@ -496,26 +620,26 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode DetailCommand(ref BaseMedia media, StorageType type, int selectedDisk = -1)
         {
-            Log.MethodCall("DiskpartProcess - DetailCommand(" + media.Number + ", " + type + ", " + selectedDisk + ")");
+            Log.MethodCall(DetailCommand_Log_MethodName + "(" + media.Number + ", " + type + ", " + selectedDisk + ")");
             CurrentProcess = nameof(DetailCommand);
 
             if (type == StorageType.PARTITION)
-                AddScriptCommand("SELECT DISK " + selectedDisk);
+                AddScriptCommand(Script_Line_Select_Disk + selectedDisk);
 
-            AddScriptCommand("SELECT " + type + " " + media.Number);
-            AddScriptCommand("DETAIL " + type);
+            AddScriptCommand(Script_Line_Select + type + " " + media.Number);
+            AddScriptCommand(Script_Line_Detail + type);
             WriteScript();
             ExitCode = Run();
             if (ExitCode == ProcessExitCode.Ok)
             {
-                Log.Info("DiskpartProcess - DetailCommand(" + media.Name + ", " + type + ", " + selectedDisk + ")", "StdOutput: ");
+                Log.Info(DetailCommand_Log_MethodName + "(" + media.Name + ", " + type + ", " + selectedDisk + ")", nameof(StdOutput) + ": ");
                 Log.Append(StdOutput, true);
                 return ParseDetailCommand(ref media, type);
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorRun;
-                Log.Error("DiskpartProcess - DetailCommand(" + media.Name + ", " + type + ", " + selectedDisk + ")", "Run - " + ExitCode + ": ");
+                Log.Error(DetailCommand_Log_MethodName + "(" + media.Name + ", " + type + ", " + selectedDisk + ")", nameof(Run) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
@@ -530,20 +654,20 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode ParseDetailCommand(ref BaseMedia media, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")");
+            Log.MethodCall(DetailCommand_Log_MethodName + "(" + media.Number + ", " + type + ")");
             CurrentProcess = nameof(ParseDetailCommand);
 
             Regex rx;
             switch (type)
             {
                 case StorageType.DISK:
-                    rx = new Regex(Disk_Detail_RX);
+                    rx = new Regex(RX_Disk_Detail);
                     break;
                 case StorageType.PARTITION:
-                    rx = new Regex(Partition_Detail_RX);
+                    rx = new Regex(RX_Partition_Detail);
                     break;
                 case StorageType.VOLUME:
-                    rx = new Regex(Volume_Detail_RX);
+                    rx = new Regex(RX_Volume_Detail);
                     break;
                 default:
                     rx = new Regex(string.Empty);
@@ -557,86 +681,103 @@ namespace DiskpartGUI.Processes
                 foreach (Match m in matches)
                 {
                     GroupCollection gc = m.Groups;
+
+                    if (gc[RX_Media_ReadOnly].Success)
+                        if (gc[RX_Media_ReadOnly].Value == FLAG_ENABLED)
+                            media.SetFlag(Attributes.ReadOnly);
+                    if (gc[RX_Media_Hidden].Success)
+                        if (gc[RX_Media_Hidden].Value == FLAG_ENABLED)
+                            media.SetFlag(Attributes.Hidden);
+
                     switch (type)
                     {
                         case StorageType.DISK:
-                            media.Name = gc["diskname"].Value.Trim();
-                            ((Disk)media).DiskID = gc["diskid"].Value;
-                            ((Disk)media).Type = DiskTypeExtension.Parse(gc["disktype"].Value);
-                            media.Status = StatusExtension.Parse(gc["diskstatus"].Value);
-                            ((Disk)media).Path = gc["diskpath"].Value;
-                            ((Disk)media).Target = gc["disktarget"].Value;
-                            ((Disk)media).LunID = gc["disklunid"].Value;
-                            ((Disk)media).LocationPath = gc["disklocpath"].Value;
-                            if (gc["diskcurreadonly"].Value == "Yes")
-                                media.SetFlag(Attributes.CurrentReadOnlyState);
-                            if (gc["diskreadonly"].Value == "Yes")
-                                media.SetFlag(Attributes.ReadOnly);
-                            if (gc["diskboot"].Value == "Yes")
-                                media.SetFlag(Attributes.Boot);
-                            if (gc["diskpage"].Value == "Yes")
-                                media.SetFlag(Attributes.Pagefile);
-                            if (gc["diskhibernation"].Value == "Yes")
-                                media.SetFlag(Attributes.HibernationFile);
-                            if (gc["diskcrashdump"].Value == "Yes")
-                                media.SetFlag(Attributes.Crashdump);
-                            if (gc["diskcluster"].Value == "Yes")
-                                media.SetFlag(Attributes.Cluster);
-                            Log.Info("DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Disk " + media.Number);
-                            Log.Append((Disk)media);
+                            if (gc[RX_BaseMedia_Name].Success)
+                                media.Name = gc[RX_BaseMedia_Name].Value.Trim();
+                            if (gc[RX_Disk_DiskID].Success)
+                                ((Disk)media).DiskID = gc[RX_Disk_DiskID].Value;
+                            if (gc[RX_Disk_Type].Success)
+                                ((Disk)media).Type = DiskTypeExtension.Parse(gc[RX_Disk_Type].Value);
+                            if (gc[RX_BaseMedia_Status].Success)
+                                media.Status = StatusExtension.Parse(gc[RX_BaseMedia_Status].Value);
+                            if (gc[RX_Disk_Path].Success)
+                                ((Disk)media).Path = gc[RX_Disk_Path].Value;
+                            if (gc[RX_Disk_Target].Success)
+                                ((Disk)media).Target = gc[RX_Disk_Target].Value;
+                            if (gc[RX_Disk_LunID].Success)
+                                ((Disk)media).LunID = gc[RX_Disk_LunID].Value;
+                            if (gc[RX_Disk_LocationPath].Success)
+                                ((Disk)media).LocationPath = gc[RX_Disk_LocationPath].Value;
+                            if (gc[RX_Disk_CurrentReadOnly].Success)
+                                if (gc[RX_Disk_CurrentReadOnly].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.CurrentReadOnlyState);
+                            if (gc[RX_Disk_BootDisk].Success)
+                                if (gc[RX_Disk_BootDisk].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Boot);
+                            if (gc[RX_Disk_PagefileDisk].Success)
+                                if (gc[RX_Disk_PagefileDisk].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Pagefile);
+                            if (gc[RX_Disk_HibernationFileDisk].Success)
+                                if (gc[RX_Disk_HibernationFileDisk].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.HibernationFile);
+                            if (gc[RX_Disk_CrashDumpDisk].Success)
+                                if (gc[RX_Disk_CrashDumpDisk].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Crashdump);
+                            if (gc[RX_Disk_ClusteredDisk].Success)
+                                if (gc[RX_Disk_ClusteredDisk].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Cluster);
                             break;
-                        case StorageType.PARTITION:
-                            ((Partition)media).Type = gc["parttype"].Value;
-                            if (gc["parthidden"].Value == "Yes")
-                                media.SetFlag(Attributes.Hidden);
-                            if (gc["partactive"].Value == "Yes")
-                                media.SetFlag(Attributes.Active);
-                            ((Partition)media).OffsetInBytes = gc["partoffsetbyte"].Value;
-                            Log.Info("DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Partition " + media.Number);
-                            Log.Append((Partition)media);
-                            break;
-                        case StorageType.VOLUME:
-                            if (gc["volreadonly"].Value == "Yes")
-                                media.SetFlag(Attributes.ReadOnly);
-                            if (gc["volhidden"].Value == "Yes")
-                                media.SetFlag(Attributes.Hidden);
-                            if (gc["volnodefletter"].Value == "Yes")
-                                media.SetFlag(Attributes.NoDefaultDriveLetter);
-                            if (gc["volshadow"].Value == "Yes")
-                                media.SetFlag(Attributes.ShadowCopy);
-                            if (gc["voloffline"].Value == "Yes")
-                                media.SetFlag(Attributes.Offline);
-                            if (gc["volbitlock"].Value == "Yes")
-                                media.SetFlag(Attributes.BitLocker);
-                            if (gc["volinstall"].Value == "Yes")
-                                media.SetFlag(Attributes.Installable);
 
-                            if (gc["parentnumber"].Success)
-                                media.Parent = gc["parentnumber"].Value;
+                        case StorageType.PARTITION:
+                            if (gc[RX_Partition_Type].Success)
+                                ((Partition)media).Type = gc[RX_Partition_Type].Value;
+                            if (gc[RX_Partition_Active].Success)
+                                if (gc[RX_Partition_Active].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Active);
+                            if (gc[RX_Partition_OffsetInBytes].Success)
+                                ((Partition)media).OffsetInBytes = gc[RX_Partition_OffsetInBytes].Value;
+                            break;
+
+                        case StorageType.VOLUME:
+                            if (gc[RX_Volume_NoDefaultDriveLetter].Success)
+                                if (gc[RX_Volume_NoDefaultDriveLetter].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.NoDefaultDriveLetter);
+                            if (gc[RX_Volume_ShadowCopy].Success)
+                                if (gc[RX_Volume_ShadowCopy].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.ShadowCopy);
+                            if (gc[RX_Volume_Offline].Success)
+                                if (gc[RX_Volume_Offline].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Offline);
+                            if (gc[RX_Volume_BitLocker].Success)
+                                if (gc[RX_Volume_BitLocker].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.BitLocker);
+                            if (gc[RX_Volume_Installable].Success)
+                                if (gc[RX_Volume_Installable].Value == FLAG_ENABLED)
+                                    media.SetFlag(Attributes.Installable);
+                            if (gc[RX_Media_ParentNumber].Success)
+                                media.Parent = gc[RX_Media_ParentNumber].Value;
                             else
                                 media.Parent = string.Empty;
-
-                            if(gc["volcap"].Success)
-                                ((Volume)media).Capacity = Int32.Parse(gc["volcap"].Value);
-                            if(gc["volcapgk"].Success)
-                                ((Volume)media).CapacityPostfix = SizePostfixExtension.Parse(gc["volcapgk"].Value);
-                            if (gc["volfree"].Success)
-                                ((Volume)media).FreeSpace = Int32.Parse(gc["volfree"].Value);
-                            if (gc["volfreegk"].Success)
-                                ((Volume)media).FreeSpacePostfix = SizePostfixExtension.Parse(gc["volfreegk"].Value);
-
-                            Log.Info("DiskpartProcess - ParseDetailCommand(" + media.Number + ", " + type + ")", "Details Added To Volume " + media.Number);
-                            Log.Append((Volume)media);
+                            if (gc[RX_BaseMedia_Size].Success)
+                                ((Volume)media).Capacity = Int32.Parse(gc[RX_BaseMedia_Size].Value);
+                            if (gc[RX_BaseMedia_SizePostfix].Success)
+                                ((Volume)media).CapacityPostfix = SizePostfixExtension.Parse(gc[RX_BaseMedia_SizePostfix].Value);
+                            if (gc[RX_Media_FreeSpace].Success)
+                                ((Volume)media).FreeSpace = Int32.Parse(gc[RX_Media_FreeSpace].Value);
+                            if (gc[RX_Media_FreeSpacePostfix].Success)
+                                ((Volume)media).FreeSpacePostfix = SizePostfixExtension.Parse(gc[RX_Media_FreeSpacePostfix].Value);
                             break;
                         default:
                             break;
                     }
+                    Log.Info(DetailCommand_Log_MethodName + "(" + media.Number + ", " + type + ")", DetailCommand_Log_DetailsAdded + type + " " + media.Number);
+                    Log.Append(media);
                 }
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorNoMatchesFound;
-                Log.Error("DiskpartProcess - ParseDetailCommand(" + media.Name + ", " + type + ")", "No Matches - " + ExitCode + ": ");
+                Log.Error(DetailCommand_Log_MethodName + "(" + media.Name + ", " + type + ")", "No Matches - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
@@ -650,40 +791,40 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode EjectVolume(BaseMedia b)
         {
-            Log.MethodCall("DiskpartProcess - EjectVolume(" + b.Name + ")");
+            Log.MethodCall(EjectVolume_Log_MethodName + "(" + b.Name + ")");
             CurrentProcess = nameof(EjectVolume);
             if (b is Disk)
             { // || b is Partition
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
-                Log.Error("DiskpartProcess - EjectVolume(" + b.Name + ")", "Invalid Media - " + ExitCode);
+                Log.Error(EjectVolume_Log_MethodName + "(" + b.Name + ")", "Invalid Media - " + ExitCode);
             }
             else
             {
-                AddScriptCommand("SELECT VOLUME " + b.Number);
-                AddScriptCommand("REMOVE ALL DISMOUNT");
+                AddScriptCommand(Script_Line_Select_Volume + b.Number);
+                AddScriptCommand(Script_Line_Remove_All_Dismount);
                 WriteScript();
                 ExitCode = Run();
                 if (ExitCode == ProcessExitCode.Ok)
                 {
-                    Log.Info("DiskpartProcess - EjectVolume(" + b.Name + ")", "StdOutput: ");
+                    Log.Info(EjectVolume_Log_MethodName + "(" + b.Name + ")", nameof(StdOutput) + ": ");
                     Log.Append(StdOutput, true);
-                    if (TestOutput(@"DiskPart successfully dismounted and offlined the volume."))
+                    if (TestOutput(EjectVolume_TestOutput))
                     {
-                        Log.Info("DiskpartProcess - EjectVolume(" + b.Name + ")", "TestOutput - StdOutput: ");
+                        Log.Info(EjectVolume_Log_MethodName + "(" + b.Name + ")", nameof(TestOutput) + " - " + nameof(StdOutput) + ": ");
                         Log.Append(StdOutput, true);
                         ExitCode = ProcessExitCode.Ok;
                     }
                     else
                     {
                         ExitCode = ProcessExitCode.ErrorTestOutput;
-                        Log.Error("DiskpartProcess - EjectVolume(" + b.Name + ")", "TestOutput - " + ExitCode + ": ");
+                        Log.Error(EjectVolume_Log_MethodName + "(" + b.Name + ")", nameof(TestOutput) + " - " + ExitCode + ": ");
                         Log.Append(StdOutput, true);
                     }
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorRun;
-                    Log.Error("DiskpartProcess - EjectVolume(" + b.Name + ")", "Run - " + ExitCode + ": ");
+                    Log.Error(EjectVolume_Log_MethodName + "(" + b.Name + ")", nameof(Run) + " - " + ExitCode + ": ");
                     Log.Append(StdOutput, true);
                 }
             }
@@ -697,49 +838,49 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode AssignVolumeLetter(BaseMedia b)
         {
-            Log.MethodCall("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")");
+            Log.MethodCall(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")");
             CurrentProcess = nameof(AssignVolumeLetter);
             if (b is Disk) // || b is Partition
             {
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
-                Log.Error("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "Invalid Media - " + ExitCode);
+                Log.Error(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", "Invalid Media - " + ExitCode);
             }
             else
             {
                 if (!b.IsMounted())
                 {
-                    AddScriptCommand("SELECT VOLUME " + b.Number);
-                    AddScriptCommand("ASSIGN");
+                    AddScriptCommand(Script_Line_Select_Volume + b.Number);
+                    AddScriptCommand(Script_Line_Assign);
                     WriteScript();
                     ExitCode = Run();
                     if (ExitCode == ProcessExitCode.Ok)
                     {
-                        Log.Info("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "StdOutput: ");
+                        Log.Info(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", nameof(StdOutput) + ": ");
                         Log.Append(StdOutput, true);
-                        if (TestOutput("DiskPart successfully assigned the drive letter or mount point."))
+                        if (TestOutput(AssignVolumeLetter_TestOutput))
                         {
                             ExitCode = ProcessExitCode.Ok;
-                            Log.Info("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "TestOutput - StdOutput: ");
+                            Log.Info(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", nameof(TestOutput) + " - " + nameof(StdOutput) + ": ");
                             Log.Append(StdOutput, true);
                         }
                         else
                         {
                             ExitCode = ProcessExitCode.ErrorTestOutput;
-                            Log.Error("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "TestOutput - " + ExitCode + ": ");
+                            Log.Error(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", nameof(TestOutput) + " - " + ExitCode + ": ");
                             Log.Append(StdOutput, true);
                         }
                     }
                     else
                     {
                         ExitCode = ProcessExitCode.ErrorRun;
-                        Log.Error("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "Run - " + ExitCode + ": ");
+                        Log.Error(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", nameof(Run) + " - " + ExitCode + ": ");
                         Log.Append(StdOutput, true);
                     }
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorVolumeNotMounted;
-                    Log.Error("DiskpartProcess - AssignVolumeLetter(" + b.Name + ")", "Volume Not Mounted - " + ExitCode);
+                    Log.Error(AssignVolumeLetter_Log_MethodName + "(" + b.Name + ")", "Volume Not Mounted - " + ExitCode);
                 }
             }
             return ExitCode;
@@ -753,7 +894,7 @@ namespace DiskpartGUI.Processes
         /// <returns></returns>
         public ProcessExitCode SetReadOnly(BaseMedia b, ReadOnlyFunction function, StorageType type)
         {
-            Log.MethodCall("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")");
+            Log.MethodCall(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")");
             CurrentProcess = nameof(SetReadOnly);
 
             // Check for Partition type
@@ -761,17 +902,17 @@ namespace DiskpartGUI.Processes
             if (!b.CanToggleReadOnly())
             {
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
-                Log.Error("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")", "Invalid Media Type - " + ExitCode);
+                Log.Error(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")", "Invalid Media Type - " + ExitCode);
             }
             else
             {
-                AddScriptCommand("SELECT " + type + " " + b.Number);
-                AddScriptCommand("ATTRIBUTE " + type + " " + function + " READONLY");
+                AddScriptCommand(Script_Line_Select + type + " " + b.Number);
+                AddScriptCommand(Script_Line_Attribute + type + " " + function + Script_Line_ReadOnly);
                 WriteScript();
                 ExitCode = Run();
                 if (ExitCode == ProcessExitCode.Ok)
                 {
-                    Log.Info("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")", "StdOutput: ");
+                    Log.Info(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")", nameof(StdOutput) + ": ");
                     Log.Append(StdOutput, true);
                     string rx;
                     switch (type)
@@ -789,20 +930,20 @@ namespace DiskpartGUI.Processes
                     if (TestOutput(rx))
                     {
                         ExitCode = ProcessExitCode.Ok;
-                        Log.Info("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")", "TestOutput - StdOutput: ");
+                        Log.Info(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")", nameof(TestOutput) + " - " + nameof(StdOutput) + ": ");
                         Log.Append(StdOutput, true);
                     }
                     else
                     {
                         ExitCode = ProcessExitCode.ErrorTestOutput;
-                        Log.Error("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")", "TestOutput - " + ExitCode + ": ");
+                        Log.Error(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")", nameof(TestOutput) + " - " + ExitCode + ": ");
                         Log.Append(StdOutput, true);
                     }
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorRun;
-                    Log.Error("DiskpartProcess - SetReadOnly(" + b.Name + ", " + function + ", " + type + ")", "Run - " + ExitCode + ": ");
+                    Log.Error(SetReadOnly_Log_MethodName + "(" + b.Name + ", " + function + ", " + type + ")", nameof(Run) + " - " + ExitCode + ": ");
                     Log.Append(StdOutput, true);
                 }
             }
@@ -818,25 +959,25 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         public ProcessExitCode GetFileSystemInfo(Volume v, ref List<FileSystem> fs, ref Dictionary<FileSystem, List<string>> us)
         {
-            Log.MethodCall("DiskpartProcess - GetFileSystemInfo(" + v.Name + ", List, List)");
+            Log.MethodCall(GetFileSystemInfo_Log_MethodName + "(" + v.Name + ", List, List)");
             CurrentProcess = nameof(GetFileSystemInfo);
 
             // Check for Partition type
 
-            AddScriptCommand("SELECT VOLUME " + v.Number);
-            AddScriptCommand("FILESYSTEM");
+            AddScriptCommand(Script_Line_Select_Volume + v.Number);
+            AddScriptCommand(Script_Line_FileSystem);
             WriteScript();
             ExitCode = Run();
             if (ExitCode == ProcessExitCode.Ok)
             {
-                Log.Info("DiskpartProcess - GetFileSystemInfo(" + v.Name + ", List, List)", "StdOutput: ");
+                Log.Info(GetFileSystemInfo_Log_MethodName + "(" + v.Name + ", List, List)", nameof(StdOutput) + ": ");
                 Log.Append(StdOutput, true);
                 return ParseFileSystemInfo(ref fs, ref us);
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorRun;
-                Log.Error("DiskpartProcess - GetFileSystemInfo(" + v.Name + ", List, List)", "Run - " + ExitCode + ": ");
+                Log.Error(GetFileSystemInfo_Log_MethodName + "(" + v.Name + ", List, List)", nameof(Run) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
             return ExitCode;
@@ -850,20 +991,20 @@ namespace DiskpartGUI.Processes
         /// <returns>The process exit code</returns>
         private ProcessExitCode ParseFileSystemInfo(ref List<FileSystem> fs, ref Dictionary<FileSystem, List<string>> us)
         {
-            Log.MethodCall("DiskpartProcess - ParseFileSystemInfo(List, List)");
+            Log.MethodCall(ParseFileSystemInfo_Log_MethodName);
             CurrentProcess = nameof(ParseFileSystemInfo);
 
             if (fs == null)
             {
                 ExitCode = ProcessExitCode.ErrorFileSystemNull;
-                Log.Error("DiskpartProcess - ParseFileSystemInfo(List, List)", "File System List Null - " + ExitCode);
+                Log.Error(ParseFileSystemInfo_Log_MethodName, "File System List Null - " + ExitCode);
                 return ExitCode;
             }
 
             if (us == null)
             {
                 ExitCode = ProcessExitCode.ErrorUnitSizeNull;
-                Log.Error("DiskpartProcess - ParseFileSystemInfo(List, List)", "Unit Size List Null - " + ExitCode);
+                Log.Error(ParseFileSystemInfo_Log_MethodName, "Unit Size List Null - " + ExitCode);
                 return ExitCode;
             }
 
@@ -897,7 +1038,7 @@ namespace DiskpartGUI.Processes
             else
             {
                 ExitCode = ProcessExitCode.ErrorNoMatchesFound;
-                Log.Error("DiskpartProcess - ParseFileSystemInfo(List, List)", "No Matches Found - " + ExitCode + ": ");
+                Log.Error(ParseFileSystemInfo_Log_MethodName, "No Matches Found - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
@@ -913,48 +1054,48 @@ namespace DiskpartGUI.Processes
         /// <returns></returns>
         public ProcessExitCode Format(BaseMedia b, FormatArguments fa)
         {
-            Log.MethodCall("DiskpartProcess - Format(" + b.Name + ", FormatArguments)");
+            Log.MethodCall(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)");
             CurrentProcess = nameof(Format);
 
             if (b == null)
             {
                 ExitCode = ProcessExitCode.ErrorNullVolumes;
-                Log.Error("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Invalid Volumes - " + ExitCode);
+                Log.Error(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", "Invalid Volumes - " + ExitCode);
                 return ExitCode;
             }
 
             if (b is Disk)
             {
                 ExitCode = ProcessExitCode.ErrorInvalidMediaType;
-                Log.Error("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Invalid Media Type - " + ExitCode);
+                Log.Error(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", "Invalid Media Type - " + ExitCode);
                 return ExitCode;
             }
 
-            AddScriptCommand("SELECT VOLUME " + b.Number);
-            AddScriptCommand("FORMAT " + fa.GetArguments());
+            AddScriptCommand(Script_Line_Select_Volume + b.Number);
+            AddScriptCommand(Script_Line_Format + fa.GetArguments());
             WriteScript();
             ExitCode = Run();
             if (ExitCode == ProcessExitCode.Ok)
             {
-                Log.Info("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "StdOutput: ");
+                Log.Info(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", nameof(StdOutput) + ": ");
                 Log.Append(StdOutput, true);
-                if (TestOutput("DiskPart successfully formatted the volume"))
+                if (TestOutput(Format_TestOutput))
                 {
                     ExitCode = ProcessExitCode.Ok;
-                    Log.Info("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "TestOutput - StdOutput: ");
+                    Log.Info(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", nameof(TestOutput) + " - " + nameof(StdOutput) + ": ");
                     Log.Append(StdOutput, true);
                 }
                 else
                 {
                     ExitCode = ProcessExitCode.ErrorTestOutput;
-                    Log.Error("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Testoutput - " + ExitCode + ": ");
+                    Log.Error(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", nameof(TestOutput) + " - " + ExitCode + ": ");
                     Log.Append(StdOutput, true);
                 }
             }
             else
             {
                 ExitCode = ProcessExitCode.ErrorRun;
-                Log.Error("DiskpartProcess - Format(" + b.Name + ", FormatArguments)", "Run - " + ExitCode + ": ");
+                Log.Error(Format_Log_MethodName + "(" + b.Name + ", FormatArguments)", nameof(Run) + " - " + ExitCode + ": ");
                 Log.Append(StdOutput, true);
             }
 
