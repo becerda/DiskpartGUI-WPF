@@ -100,7 +100,7 @@ namespace DiskpartGUI.Processes
         //language=regex
         private const string RX_Disk_List = "Disk (?<basemedianumber>[0-9]+){1,2}( ){3,4}(?<basemediastatus>Online| )?( ){0,15}(?<basemediasize>[0-9]{1,4})?( )(?<basemediapostfix>K|G|M)?B( ){2,6}(?<mediafreespace>[0-9]{1,4})?( )(?<mediafreespacepostfix>K|G|M)?B( ){2}( ){2}(?<diskdyn>[ a-zA-Z]{3})?( ){2}(?<diskgpt>[ *a-zA-Z]{3})?";
         //language=regex
-        private const string RX_Volume_List = "Volume (?<basemedianumber>[0-9]+){1,2}( ){4,5}(?<volumeletter>[A-Z ])( ){0,3}(?<basemedianame>[a-zA-Z0-9_ ]{0,11})( ){2,3}(?<volumefilesystem>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<volumetype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<basemediasize>[0-9]{1,4})?( )(?<basemediapostfix>K|G|M)?B( ){2}(?<basemediastatus>Healthy|No Media)?( ){0,11}(?<volumeinfo>[a-zA-Z]+)?";
+        private const string RX_Volume_List = "Volume (?<basemedianumber>[0-9]+){1,2}( ){4,5}(?<volumeletter>[A-Z ])( ){0,3}(?<basemedianame>[a-zA-Z0-9_ ]{0,11})( ){2,3}(?<volumefilesystem>NTFS|FAT32|exFAT|CDFS|UDF|RAW)?( ){2,7}(?<volumetype>Partition|Removable|DVD-ROM|Simple)?( ){3,14}(?<basemediasize>[0-9]{1,4})?( )(?<basemediapostfix>K|G|M)?B( ){2}(?<basemediastatus>Healthy|No Media)?( ){0,11}(?<volumeinfo>[a-zA-Z ]+)?";
         //language=regex
         private const string RX_Partition_List = "(There are no partitions on this disk to show\\.|Partition (?<basemedianumber>[0-9]+)( ){3,4}(?<partitiontype>Primary|Extended|Logical)( ){10,19}(?<basemediasize>[0-9]+)( )(?<basemediapostfix>K|G|M)?B( ){2,4}(?<partitionoffset>[0-9]+)( )(?<partitionoffsetpostfix>K|G|M)?B)";
 
